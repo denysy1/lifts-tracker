@@ -112,7 +112,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
               if (isDeloadWeek) {
                   document.getElementById("deloadNotice").textContent = "Deload Week: Reduced volume for recovery";
-                  consecutiveLowAMRAP[currentExercise] = 0; // Reset counter after deload
+                  //consecutiveLowAMRAP[currentExercise] = 0; // Reset counter after deload
               } else {
                   document.getElementById("deloadNotice").textContent = "";
                   if (week === 3) {
