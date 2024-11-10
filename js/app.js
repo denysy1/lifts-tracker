@@ -2,44 +2,105 @@ const request = indexedDB.open("GymTrackerDB", 1);
 
 request.onupgradeneeded = (event) => {
   const db = event.target.result;
-  db.createObjectStore("lifts", { keyPath: "id", autoIncrement: true });
+  const store = db.createObjectStore("lifts", { keyPath: "id", autoIncrement: true });
+  store.createIndex("exercise", "exercise", { unique: false });
 };
 
 request.onsuccess = (event) => {
   const db = event.target.result;
-  let trainingMax = 100;  // Default initial training max, can be updated
-
-  const setPercentages = {
-    1: [0.65, 0.75, 0.85],
-    2: [0.70, 0.80, 0.90],
-    3: [0.75, 0.85, 0.95]
-  };
-  
-  const setReps = {
-    1: [5, 5, 5],
-    2: [3, 3, 3],
-    3: [5, 3, 1]
-  };
 
   let currentCycle = 1;
   let currentWeek = 1;
+  let trainingMax = {};
+  const setPercentages = { 1: [0.65, 0.75, 0.85], 2: [0.70, 0.80, 0.90], 3: [0.75, 0.85, 0.95] };
+  const setReps = { 1: [5, 5, 5], 2: [3, 3, 3], 3: [5, 3, 1] };
 
-  const exerciseSelect = document.getElementById("exercise");
-  const trainingMaxInput = document.getElementById("trainingMax");
-  const prescribedSetsDiv = document.getElementById("prescribedSets");
-  const amrapInput = document.getElementById("amrap");
+  document.getElementById("initialize").onclick = initializeTrainingMax;
+  document.getElementById("exercise").onchange = displayCurrentWorkout;
+  document.getElementById("save").onclick = saveProgress;
+  document.getElementById("amrap-plus").onclick = () => adjustAmrapReps(1);
+  document.getElementById("amrap-minus").onclick = () => adjustAmrapReps(-1);
 
-  // Load Training Max from DB or set default
-  loadTrainingMax();
+  loadTrainingData();
 
-  document.getElementById("calculate").onclick = () => {
-    trainingMax = parseInt(trainingMaxInput.value) || trainingMax;
-    displayPrescribedSets(currentWeek);
-  };
+  function initializeTrainingMax() {
+    const oneRepMaxes = {
+      "Overhead Press": parseInt(document.getElementById("overheadPressMax").value),
+      "Bench Press": parseInt(document.getElementById("benchPressMax").value),
+      "Squat": parseInt(document.getElementById("squatMax").value),
+      "Deadlift": parseInt(document.getElementById("deadliftMax").value)
+    };
 
-  document.getElementById("save").onclick = () => {
-    const exercise = exerciseSelect.value;
-    const amrapReps = parseInt(amrapInput.value);
+    for (const exercise in oneRepMaxes) {
+      trainingMax[exercise] = Math.floor(oneRepMaxes[exercise] * 0.9); // 90% of 1RM
+    }
+
+    saveTrainingData();
+    document.getElementById("setup").style.display = "none";
+    document.getElementById("tracker").style.display = "block";
+    displayCurrentWorkout();
+  }
+
+  function loadTrainingData() {
+    const transaction = db.transaction(["lifts"], "readonly");
+    const store = transaction.objectStore("lifts");
+    const request = store.openCursor(null, 'prev');
+
+    request.onsuccess = (event) => {
+      const cursor = event.target.result;
+      if (cursor) {
+        const data = cursor.value;
+        trainingMax[data.exercise] = data.trainingMax;
+        currentCycle = data.cycle;
+        currentWeek = data.week;
+        document.getElementById("setup").style.display = "none";
+        document.getElementById("tracker").style.display = "block";
+        displayCurrentWorkout();
+      }
+    };
+  }
+
+  function saveTrainingData() {
+    const transaction = db.transaction(["lifts"], "readwrite");
+    const store = transaction.objectStore("lifts");
+
+    for (const exercise in trainingMax) {
+      store.put({
+        exercise,
+        cycle: currentCycle,
+        week: currentWeek,
+        trainingMax: trainingMax[exercise],
+        date: new Date().toLocaleString()
+      });
+    }
+  }
+
+  function displayCurrentWorkout() {
+    const exercise = document.getElementById("exercise").value;
+    const weightPercents = setPercentages[currentWeek];
+    const reps = setReps[currentWeek];
+    const weights = weightPercents.map(percent => Math.round(trainingMax[exercise] * percent));
+
+    document.getElementById("cycleNumber").textContent = currentCycle;
+    document.getElementById("weekNumber").textContent = currentWeek;
+
+    let setsHtml = "<h3>Prescribed Sets</h3>";
+    weights.forEach((weight, i) => {
+      setsHtml += `<p>Set ${i + 1}: ${weight} lbs x ${reps[i]} reps</p>`;
+    });
+    document.getElementById("prescribedSets").innerHTML = setsHtml;
+
+    document.getElementById("amrap").value = reps[2]; // Default AMRAP reps to set 3 target
+  }
+
+  function adjustAmrapReps(change) {
+    const amrapInput = document.getElementById("amrap");
+    amrapInput.value = parseInt(amrapInput.value) + change;
+  }
+
+  function saveProgress() {
+    const exercise = document.getElementById("exercise").value;
+    const amrapReps = parseInt(document.getElementById("amrap").value);
 
     const transaction = db.transaction(["lifts"], "readwrite");
     const store = transaction.objectStore("lifts");
@@ -48,65 +109,21 @@ request.onsuccess = (event) => {
       exercise,
       cycle: currentCycle,
       week: currentWeek,
-      trainingMax,
+      trainingMax: trainingMax[exercise],
       amrapReps,
       date: new Date().toLocaleString()
     });
 
-    adjustTrainingMax(amrapReps);
-
-    alert("Progress saved!");
-    currentWeek = (currentWeek % 3) + 1;
-    if (currentWeek === 1) currentCycle++;
-    loadTrainingMax();
-  };
-
-  function loadTrainingMax() {
-    const transaction = db.transaction(["lifts"], "readonly");
-    const store = transaction.objectStore("lifts");
-
-    const request = store.openCursor(null, 'prev');
-    request.onsuccess = (event) => {
-      const cursor = event.target.result;
-      if (cursor) {
-        trainingMax = cursor.value.trainingMax;
-        trainingMaxInput.value = trainingMax;
-        currentCycle = cursor.value.cycle;
-        currentWeek = cursor.value.week;
-      }
-    };
-  }
-
-  function displayPrescribedSets(week) {
-    const weights = setPercentages[week].map(percentage => Math.round(trainingMax * percentage));
-    const reps = setReps[week];
-    prescribedSetsDiv.innerHTML = `<h3>Prescribed Sets for ${exerciseSelect.value}</h3>`;
-    weights.forEach((weight, index) => {
-      prescribedSetsDiv.innerHTML += `<p>Set ${index + 1}: ${weight} lbs x ${reps[index]} reps</p>`;
-    });
-  }
-
-  function adjustTrainingMax(amrapReps) {
     if (currentWeek === 3) {
-      trainingMax += (amrapReps >= 1 ? 5 : -5);
-      trainingMaxInput.value = trainingMax;
+      trainingMax[exercise] += (amrapReps >= 1 ? 5 : -5); // Adjust training max at cycle end
+      currentWeek = 1;
+      currentCycle++;
+    } else {
+      currentWeek++;
     }
+
+    saveTrainingData();
+    alert("Progress saved!");
+    displayCurrentWorkout();
   }
-
-  document.getElementById("view-history").onclick = () => {
-    const transaction = db.transaction(["lifts"], "readonly");
-    const store = transaction.objectStore("lifts");
-
-    const historyDiv = document.getElementById("history");
-    historyDiv.innerHTML = "<h2>History</h2>";
-
-    store.openCursor().onsuccess = (event) => {
-      const cursor = event.target.result;
-      if (cursor) {
-        const { exercise, cycle, week, trainingMax, amrapReps, date } = cursor.value;
-        historyDiv.innerHTML += `<p>${date}: ${exercise}, Cycle ${cycle}, Week ${week} - Training Max: ${trainingMax} lbs, AMRAP Reps: ${amrapReps}</p>`;
-        cursor.continue();
-      }
-    };
-  };
 };
