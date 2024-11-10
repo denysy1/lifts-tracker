@@ -161,118 +161,68 @@ document.addEventListener("DOMContentLoaded", () => {
         
         request.onsuccess = (event) => {
             const records = event.target.result;
-        
-            // Verify retrieved records with debugging output
-            console.log("Retrieved records from IndexedDB:", records);
-        
-            const lastEntry = records[records.length - 1];
-            let cycle = lastEntry.cycle;
-            let lastWeek = lastEntry.week;
-            let trainingMax = lastEntry.trainingMax;
-        
-            console.log(`Starting saveProgress - Initial State: Cycle: ${cycle}, Week: ${lastWeek}, Training Max: ${trainingMax}, AMRAP Reps: ${lastEntry.amrapReps}`);
-        
-            // Additional debugging to observe the current AMRAP value in `lastEntry`
-            console.log(`Confirming retrieved AMRAP Reps for Cycle ${cycle}, Week ${lastWeek}:`, lastEntry.amrapReps);
-      
-          // Continue with existing logic for incrementing/decrementing
-      
-    
-            // Debug initial state
-            console.log(`Entered AMRAP Reps: ${amrapReps}`);
-    
-            if (lastEntry.amrapReps !== null) {
-                if (lastWeek === 2) {
-                    console.log("Processing Week 3 - Checking AMRAP Performance");
-    
-                    if (amrapReps > 0) {
-                        trainingMax += increment; // Base increment
-                        console.log(`Incremented by baseline: New Training Max = ${trainingMax}`);
-                        console.log(`recorded amrapReps = ${amrapReps}`)
-    
-                        // Additional increments based on AMRAP performance
-                        if (amrapReps >= 10) {
-                            trainingMax += 5;
-                            console.log("AMRAP >= 10: Adding additional 5 lbs");
-                        }
-                        if (amrapReps >= 15) {
-                            trainingMax += 5;
-                            console.log("AMRAP >= 15: Adding additional 5 lbs");
-                        }
-                        if (amrapReps >= 20) {
-                            trainingMax += 5;
-                            console.log("AMRAP >= 20: Adding additional 5 lbs");
-                        }
-                        if (amrapReps >= 25) {
-                            trainingMax += 5;
-                            console.log("AMRAP >= 25: Adding additional 5 lbs");
-                        }
-                        if (amrapReps >= 30) {
-                            trainingMax += 5;
-                            console.log("AMRAP >= 30: Adding additional 5 lbs");
-                        }
-    
-                        consecutiveLowAMRAP[currentExercise] = 0; // Reset on good performance
-                    } else {
-                        // Decrement for 0 AMRAP reps
-                        trainingMax -= increment;
-                        consecutiveLowAMRAP[currentExercise] += 1;
-                        console.log(`AMRAP = 0: Decrementing Training Max by ${increment}. New Training Max = ${trainingMax}`);
-                    }
-
-                } else if (lastWeek === 3) {
-                    lastWeek = 1;
-                    cycle += 1;
-                    console.log(`Advancing to next cycle: Cycle ${cycle}, Week ${lastWeek}`);
-
-                } else {
-                    lastWeek += 1;
-                    console.log(`Advancing to next week: Week ${lastWeek}`);
-                }
-    
-                // Construct new entry and add to store
-                const newEntry = {
-                    exercise: currentExercise,
-                    cycle,
-                    week: lastWeek,
-                    trainingMax,
-                    amrapReps,
-                    date: new Date().toLocaleString(),
-                    consecutiveLowAMRAP: consecutiveLowAMRAP[currentExercise]
-                };
-    
-                // Add and confirm new entry
-                const addRequest = store.add(newEntry);
-                addRequest.onsuccess = () => {
-                    alert("Progress saved!");
-                    displayCurrentWorkout(newEntry);
-                };
-                addRequest.onerror = (err) => {
-                    console.error("Error adding new entry:", err);
-                };
+            
+            let cycle, week, trainingMax;
+            let isFirstSave = records.length === 1 && records[0].week === 0; // Check if this is the initial save
+            
+            if (isFirstSave) {
+                // First save: start from week 1, cycle 1
+                cycle = 1;
+                week = 1;
+                trainingMax = records[0].trainingMax;
             } else {
-                // Handle first-time save logic
-                lastWeek += 1;
-                console.log(`First time save: Cycle ${cycle}, Week ${lastWeek}, amrapReps = ${amrapReps}`);
-                lastEntry.amrapReps = amrapReps;
-                lastEntry.week = lastWeek;
-                lastEntry.date = new Date().toLocaleString();
-                lastEntry.consecutiveLowAMRAP = consecutiveLowAMRAP[currentExercise];
+                const lastEntry = records[records.length - 1];
+                cycle = lastEntry.cycle;
+                week = lastEntry.week;
+                trainingMax = lastEntry.trainingMax;
     
-                const putRequest = store.put(lastEntry);
-                putRequest.onsuccess = () => {
-                    alert("Progress saved!");
-                    displayCurrentWorkout(lastEntry);
-                };
-                putRequest.onerror = (err) => {
-                    console.error("Error updating entry:", err);
-                };
+                // Regular week and cycle progression
+                if (week === 3) {
+                    week = 1;
+                    cycle++;
+                } else {
+                    week++;
+                }
             }
+    
+            // Handle AMRAP adjustments for non-initial weeks
+            if (!isFirstSave && week === 3 && amrapReps >= 0) {
+                if (amrapReps === 0) {
+                    trainingMax -= increment;
+                    consecutiveLowAMRAP[currentExercise]++;
+                } else {
+                    trainingMax += increment;
+                    if (amrapReps >= 10) trainingMax += 5;
+                    if (amrapReps >= 15) trainingMax += 5;
+                    if (amrapReps >= 20) trainingMax += 5;
+                    consecutiveLowAMRAP[currentExercise] = 0;
+                }
+            }
+    
+            const newEntry = {
+                exercise: currentExercise,
+                cycle,
+                week,
+                trainingMax,
+                amrapReps,
+                date: new Date().toLocaleString(),
+                consecutiveLowAMRAP: consecutiveLowAMRAP[currentExercise]
+            };
+    
+            const addRequest = store.add(newEntry);
+            addRequest.onsuccess = () => {
+                alert("Progress saved!");
+                displayCurrentWorkout(newEntry);
+            };
+            addRequest.onerror = (err) => {
+                console.error("Error adding new entry:", err);
+            };
         };
         request.onerror = (err) => {
             console.error("Error retrieving last entry:", err);
         };
-      }
+    }
+    
     
     
     
