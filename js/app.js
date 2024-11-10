@@ -76,32 +76,44 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
 
-    function displayCurrentWorkout() {
+    function displayCurrentWorkout(initialData) {
       const transaction = db.transaction(["lifts"], "readonly");
       const store = transaction.objectStore("lifts");
       const index = store.index("exercise");
       const request = index.getAll(currentExercise);
-
+    
       request.onsuccess = (event) => {
         const records = event.target.result;
-        const data = records[records.length - 1];
-        trainingMax[currentExercise] = data.trainingMax;
-
-        let cycle = data.cycle;
-        let week = data.week;
+        // Use initialData if provided, otherwise use the last record
+        const lastWorkout = initialData || records[records.length - 1];
+        trainingMax[currentExercise] = lastWorkout.trainingMax;
+    
+        // Calculate next workout's cycle and week
+        let cycle = lastWorkout.cycle;
+        let week = lastWorkout.week;
+        
+        // Increment week/cycle for the next workout
+        if (week === 3) {
+          week = 1;
+          cycle++;
+        } else {
+          week++;
+        }
+    
         document.getElementById("cycleNumber").textContent = cycle;
         document.getElementById("weekNumber").textContent = week;
-
+    
+        // Get the correct percentages and reps for the NEXT week
         const weightPercents = setPercentages[week];
         const reps = setReps[week];
         const weights = weightPercents.map(percent => Math.round(trainingMax[currentExercise] * percent));
-
+    
         let setsHtml = "<h3>Prescribed Sets</h3>";
         weights.forEach((weight, i) => {
           setsHtml += `<p>Set ${i + 1}: ${weight} lbs x ${reps[i]} reps</p>`;
         });
         document.getElementById("prescribedSets").innerHTML = setsHtml;
-
+    
         document.getElementById("amrap").value = reps[2]; // Default AMRAP reps to set 3 target
       };
     }
