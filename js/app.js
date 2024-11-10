@@ -168,6 +168,7 @@ document.addEventListener("DOMContentLoaded", () => {
           // Update the initialization entry
           week += 1;
           lastEntry.amrapReps = amrapReps;
+          lastEntry.week = week;
           lastEntry.date = new Date().toLocaleString();
           const putRequest = store.put(lastEntry);
           putRequest.onsuccess = () => {
