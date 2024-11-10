@@ -252,6 +252,7 @@ document.addEventListener("DOMContentLoaded", () => {
             } else {
                 // Handle first-time save logic
                 week += 1;
+                console.log(`First time save: Cycle ${cycle}, Week ${week}, amrapReps = ${amrapReps}`);
                 lastEntry.amrapReps = amrapReps;
                 lastEntry.week = week;
                 lastEntry.date = new Date().toLocaleString();
