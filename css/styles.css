@@ -1,0 +1,28 @@
+body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+}
+
+.tracker {
+  margin: 20px;
+}
+
+label, select, input, button {
+  display: block;
+  margin: 10px auto;
+}
+
+#prescribedSets, #history {
+  margin-top: 20px;
+  text-align: left;
+}
+
+#export-history, #import-history {
+  display: inline-block;
+  margin: 10px auto;
+}
+
+#import-history {
+  display: inline-block;
+  margin-top: 10px;
+}
