@@ -4,37 +4,33 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lifts Tracker</title>
-  <link rel="canonical" href="https://denysy1.github.io/lifts-tracker/" />
-  <link rel="manifest" href="/lifts-tracker/manifest.webmanifest">
-  <link rel="stylesheet" href="/lifts-tracker/css/styles.css">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
   <div class="container">
     <h1>Lifts Tracker</h1>
 
-    <div id="setup">
-      <h2>Initialize Training Max</h2>
-      <label for="overheadPressMax">Overhead Press 1RM:</label>
-      <input type="number" id="overheadPressMax">
-      <label for="benchPressMax">Bench Press 1RM:</label>
-      <input type="number" id="benchPressMax">
-      <label for="squatMax">Squat 1RM:</label>
-      <input type="number" id="squatMax">
-      <label for="deadliftMax">Deadlift 1RM:</label>
-      <input type="number" id="deadliftMax">
-      <button id="initialize">Initialize</button>
+    <!-- Exercise Selection Buttons -->
+    <div id="exercise-buttons">
+      <button id="overhead-press-btn">Overhead Press</button>
+      <button id="bench-press-btn">Bench Press</button>
+      <button id="squat-btn">Squat</button>
+      <button id="deadlift-btn">Deadlift</button>
     </div>
 
-    <div id="tracker" style="display: none;">
-      <label for="exercise">Exercise:</label>
-      <select id="exercise">
-        <option value="Overhead Press">Overhead Press</option>
-        <option value="Bench Press">Bench Press</option>
-        <option value="Squat">Squat</option>
-        <option value="Deadlift">Deadlift</option>
-      </select>
+    <!-- Initialization for each exercise -->
+    <div id="initialization" style="display: none;">
+      <h2>Initialize Training Max</h2>
+      <label for="trainingMaxInput">Enter 1RM:</label>
+      <input type="number" id="trainingMaxInput" placeholder="Enter 1RM">
+      <button id="initializeExercise">Initialize</button>
+    </div>
 
-      <h3>Cycle: <span id="cycleNumber"></span>, Week: <span id="weekNumber"></span></h3>
+    <!-- Prescribed Sets and AMRAP Reps -->
+    <div id="tracker" style="display: none;">
+      <h3 id="exerciseName"></h3>
+      <h4>Cycle: <span id="cycleNumber"></span>, Week: <span id="weekNumber"></span></h4>
 
       <div id="prescribedSets"></div>
 
@@ -46,21 +42,19 @@
       </div>
 
       <button id="save">Save Progress</button>
+      <button id="clear-last-entry">Clear Last Entry</button>
       <button id="view-history">View History</button>
-      <button id="reset-history">Reset History</button>
     </div>
 
+    <!-- History Section -->
     <div id="history" class="history-container"></div>
   </div>
 
   <script>
     if (navigator.serviceWorker) {
-      navigator.serviceWorker.register(
-        '/lifts-tracker/sw.js',
-        { scope: '/lifts-tracker/' }
-      );
+      navigator.serviceWorker.register('sw.js');
     }
   </script>
-  <script src="/lifts-tracker/js/app.js"></script>
+  <script src="js/app.js"></script>
 </body>
 </html>
