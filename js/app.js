@@ -28,6 +28,10 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("amrap-plus").onclick = () => adjustAmrapReps(1);
     document.getElementById("amrap-minus").onclick = () => adjustAmrapReps(-1);
 
+    // Export and Import buttons
+    document.getElementById("export-history").onclick = exportHistory;
+    document.getElementById("import-history").onchange = importHistory;
+
     function selectExercise(exercise) {
       currentExercise = exercise;
       document.getElementById("exerciseName").textContent = exercise;
@@ -107,66 +111,60 @@ document.addEventListener("DOMContentLoaded", () => {
       amrapInput.value = parseInt(amrapInput.value) + change;
     }
 
-function saveProgress() {
-  const amrapReps = parseInt(document.getElementById("amrap").value);
+    function saveProgress() {
+      const amrapReps = parseInt(document.getElementById("amrap").value);
 
-  const transaction = db.transaction(["lifts"], "readwrite");
-  const store = transaction.objectStore("lifts");
+      const transaction = db.transaction(["lifts"], "readwrite");
+      const store = transaction.objectStore("lifts");
 
-  const request = store.index("exercise").getAll(currentExercise);
+      const request = store.index("exercise").getAll(currentExercise);
 
-  request.onsuccess = (event) => {
-    const records = event.target.result;
+      request.onsuccess = (event) => {
+        const records = event.target.result;
 
-    let cycle, week, trainingMax;
+        let cycle, week, trainingMax;
 
-    if (records.length === 1) {
-      // First workout entry after initialization; overwrite the initial record
-      const initialRecord = records[0];
-      cycle = initialRecord.cycle;
-      week = initialRecord.week;
-      trainingMax = initialRecord.trainingMax;
+        if (records.length === 1) {
+          const initialRecord = records[0];
+          cycle = initialRecord.cycle;
+          week = initialRecord.week;
+          trainingMax = initialRecord.trainingMax;
 
-      // Update the initial record with AMRAP reps and date
-      initialRecord.amrapReps = amrapReps;
-      initialRecord.date = new Date().toLocaleString();
+          initialRecord.amrapReps = amrapReps;
+          initialRecord.date = new Date().toLocaleString();
 
-      // Update the entry in IndexedDB
-      const updateRequest = store.put(initialRecord);
-      updateRequest.onsuccess = () => {
-        alert("First workout progress saved!");
-        displayCurrentWorkout();
+          const updateRequest = store.put(initialRecord);
+          updateRequest.onsuccess = () => {
+            alert("First workout progress saved!");
+            displayCurrentWorkout();
+          };
+
+        } else {
+          const lastEntry = records[records.length - 1];
+          ({ cycle, week, trainingMax } = lastEntry);
+
+          if (week === 3) {
+            trainingMax += amrapReps >= 1 ? 5 : -5;
+            week = 1;
+            cycle += 1;
+          } else {
+            week += 1;
+          }
+
+          store.add({
+            exercise: currentExercise,
+            cycle,
+            week,
+            trainingMax,
+            amrapReps,
+            date: new Date().toLocaleString()
+          });
+
+          alert("Progress saved!");
+          displayCurrentWorkout();
+        }
       };
-
-    } else {
-      // Continue from the last saved entry if there are prior workout records
-      const lastEntry = records[records.length - 1];
-      ({ cycle, week, trainingMax } = lastEntry);
-
-      // Determine next week and cycle
-      if (week === 3) {
-        trainingMax += amrapReps >= 1 ? 5 : -5;
-        week = 1;
-        cycle += 1;
-      } else {
-        week += 1;
-      }
-
-      store.add({
-        exercise: currentExercise,
-        cycle,
-        week,
-        trainingMax,
-        amrapReps,
-        date: new Date().toLocaleString()
-      });
-
-      alert("Progress saved!");
-      displayCurrentWorkout();
     }
-  };
-}
-
 
     function clearLastEntry() {
       const transaction = db.transaction(["lifts"], "readwrite");
@@ -205,6 +203,51 @@ function saveProgress() {
 
         document.getElementById("history").innerHTML = historyHtml;
       };
+    }
+
+    function exportHistory() {
+      const transaction = db.transaction(["lifts"], "readonly");
+      const store = transaction.objectStore("lifts");
+      const request = store.getAll();
+
+      request.onsuccess = (event) => {
+        const data = event.target.result;
+        const jsonString = JSON.stringify(data, null, 2);
+        const blob = new Blob([jsonString], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "workout_history.json";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      };
+    }
+
+    function importHistory(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const data = JSON.parse(e.target.result);
+
+          if (Array.isArray(data) && data.every(record => record.exercise && record.cycle && record.week && record.trainingMax)) {
+            const transaction = db.transaction(["lifts"], "readwrite");
+            const store = transaction.objectStore("lifts");
+
+            data.forEach(record => store.add(record));
+            alert("History imported successfully!");
+          } else {
+            alert("Invalid file format.");
+          }
+        } catch (error) {
+          alert("Error reading file. Please check the file format.");
+        }
+      };
+      reader.readAsText(file);
     }
   };
 });
