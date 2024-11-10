@@ -125,14 +125,18 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
           }
     
-          // Normal progression logic
-          if (week === 3) {
+          // Ensure correct progression for each week
+          if (week === 1) {
+            week = 2;
+          } else if (week === 2) {
+            week = 3;
+          } else if (week === 3) {
+            // End of cycle: adjust trainingMax, reset to Week 1, increment cycle
             trainingMax += amrapReps >= 1 ? 5 : -5; // Adjust training max based on AMRAP performance
             week = 1;
             cycle += 1;
-          } else {
-            week += 1;
           }
+    
         } else {
           // First-time entry, initialize values
           cycle = 1;
@@ -153,7 +157,7 @@ document.addEventListener("DOMContentLoaded", () => {
           return;
         }
     
-        // Add a new entry for subsequent progress
+        // Add a new entry for each subsequent progress
         store.add({
           exercise: currentExercise,
           cycle,
