@@ -167,22 +167,22 @@ document.addEventListener("DOMContentLoaded", () => {
         
             const lastEntry = records[records.length - 1];
             let cycle = lastEntry.cycle;
-            let week = lastEntry.week;
+            let lastWeek = lastEntry.week;
             let trainingMax = lastEntry.trainingMax;
         
-            console.log(`Starting saveProgress - Initial State: Cycle: ${cycle}, Week: ${week}, Training Max: ${trainingMax}, AMRAP Reps: ${lastEntry.amrapReps}`);
+            console.log(`Starting saveProgress - Initial State: Cycle: ${cycle}, Week: ${lastWeek}, Training Max: ${trainingMax}, AMRAP Reps: ${lastEntry.amrapReps}`);
         
             // Additional debugging to observe the current AMRAP value in `lastEntry`
-            console.log(`Confirming retrieved AMRAP Reps for Cycle ${cycle}, Week ${week}:`, lastEntry.amrapReps);
+            console.log(`Confirming retrieved AMRAP Reps for Cycle ${cycle}, Week ${lastWeek}:`, lastEntry.amrapReps);
       
           // Continue with existing logic for incrementing/decrementing
       
     
             // Debug initial state
-            console.log(`Starting saveProgress - Initial State: Cycle: ${cycle}, Week: ${week}, Training Max: ${trainingMax}, AMRAP Reps: ${amrapReps}`);
+            console.log(`Entered AMRAP Reps: ${amrapReps}`);
     
             if (lastEntry.amrapReps !== null) {
-                if (week === 3) {
+                if (lastWeek === 2) {
                     console.log("Processing Week 3 - Checking AMRAP Performance");
     
                     if (amrapReps > 0) {
@@ -221,19 +221,19 @@ document.addEventListener("DOMContentLoaded", () => {
                     }
     
                     // Move to next cycle
-                    week = 1;
+                    lastWeek = 1;
                     cycle += 1;
-                    console.log(`Advancing to next cycle: Cycle ${cycle}, Week ${week}`);
+                    console.log(`Advancing to next cycle: Cycle ${cycle}, Week ${lastWeek}`);
                 } else {
-                    week += 1;
-                    console.log(`Advancing to next week: Week ${week}`);
+                    lastWeek += 1;
+                    console.log(`Advancing to next week: Week ${lastWeek}`);
                 }
     
                 // Construct new entry and add to store
                 const newEntry = {
                     exercise: currentExercise,
                     cycle,
-                    week,
+                    week: lastWeek,
                     trainingMax,
                     amrapReps,
                     date: new Date().toLocaleString(),
@@ -251,10 +251,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 };
             } else {
                 // Handle first-time save logic
-                week += 1;
-                console.log(`First time save: Cycle ${cycle}, Week ${week}, amrapReps = ${amrapReps}`);
+                lastWeek += 1;
+                console.log(`First time save: Cycle ${cycle}, Week ${lastWeek}, amrapReps = ${amrapReps}`);
                 lastEntry.amrapReps = amrapReps;
-                lastEntry.week = week;
+                lastEntry.week = lastWeek;
                 lastEntry.date = new Date().toLocaleString();
                 lastEntry.consecutiveLowAMRAP = consecutiveLowAMRAP[currentExercise];
     
