@@ -166,7 +166,6 @@ document.addEventListener("DOMContentLoaded", () => {
           };
         } else {
           // Update the initialization entry
-          week = 2;
           lastEntry.amrapReps = amrapReps;
           lastEntry.date = new Date().toLocaleString();
           const putRequest = store.put(lastEntry);
