@@ -120,6 +120,8 @@ document.addEventListener("DOMContentLoaded", () => {
               amrapReps,
               date: new Date().toLocaleString()
             });
+            // After updating first entry, increment week for next workout
+            week += 1;
           } else {
             // Normal progression logic
             if (week === 3) {
@@ -154,6 +156,8 @@ document.addEventListener("DOMContentLoaded", () => {
             amrapReps,
             date: new Date().toLocaleString()
           });
+          // After first entry, increment week for next workout
+          week += 1;
         }
 
         alert("Progress saved!");
