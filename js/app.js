@@ -164,7 +164,15 @@ document.addEventListener("DOMContentLoaded", () => {
             
             let cycle, week, trainingMax;
             let isFirstSave = records.length === 1 && records[0].week === 0; // Check if this is the initial save
-            
+            let isDeloadWeek = consecutiveLowAMRAP[currentExercise] >= 2;
+    
+            if (isDeloadWeek) {
+                // Skip saving progress and reset consecutiveLowAMRAP after deload week
+                alert("Deload Week: Rest and recovery. No progress saved.");
+                consecutiveLowAMRAP[currentExercise] = 0;
+                return; // Exit the function without saving
+            }
+    
             if (isFirstSave) {
                 // First save: start from week 1, cycle 1
                 cycle = 1;
@@ -189,6 +197,8 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!isFirstSave && week === 3 && amrapReps >= 0) {
                 if (amrapReps === 0) {
                     trainingMax -= increment;
+                    consecutiveLowAMRAP[currentExercise]++;
+                } else if (amrapReps < 5) {
                     consecutiveLowAMRAP[currentExercise]++;
                 } else {
                     trainingMax += increment;
@@ -221,7 +231,8 @@ document.addEventListener("DOMContentLoaded", () => {
         request.onerror = (err) => {
             console.error("Error retrieving last entry:", err);
         };
-    }
+      }
+    
     
     
     
