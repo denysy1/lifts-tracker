@@ -5,6 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const db = event.target.result;
     const store = db.createObjectStore("lifts", { keyPath: "id", autoIncrement: true });
     store.createIndex("exercise", "exercise", { unique: false });
+    store.createIndex("consecutiveLowAMRAP", "consecutiveLowAMRAP", { unique: false }); // Add index for consecutiveLowAMRAP
   };
 
   request.onsuccess = (event) => {
@@ -14,6 +15,14 @@ document.addEventListener("DOMContentLoaded", () => {
     let trainingMax = {};
     const setPercentages = { 1: [0.65, 0.75, 0.85], 2: [0.70, 0.80, 0.90], 3: [0.75, 0.85, 0.95] };
     const setReps = { 1: [5, 5, 5], 2: [3, 3, 3], 3: [5, 3, 1] };
+
+    // Increment values for each exercise
+    const incrementValues = {
+      "Overhead Press": 5, // Upper body
+      "Bench Press": 5,    // Upper body
+      "Squat": 10,         // Lower body
+      "Deadlift": 10       // Lower body
+    };    
 
     // Exercise buttons
     document.getElementById("overhead-press-btn").onclick = () => selectExercise("Overhead Press");
@@ -31,23 +40,25 @@ document.addEventListener("DOMContentLoaded", () => {
     function selectExercise(exercise) {
       currentExercise = exercise;
       document.getElementById("exerciseName").textContent = exercise;
-
+  
       const transaction = db.transaction(["lifts"], "readonly");
       const store = transaction.objectStore("lifts");
       const index = store.index("exercise");
       const request = index.getAll(exercise);
-
+  
       request.onsuccess = (event) => {
-        const records = event.target.result;
-
-        if (records.length === 0) {
-          document.getElementById("initialization").style.display = "block";
-          document.getElementById("tracker").style.display = "none";
-        } else {
-          document.getElementById("initialization").style.display = "none";
-          document.getElementById("tracker").style.display = "block";
-          displayCurrentWorkout(records[records.length - 1]);
-        }
+          const records = event.target.result;
+  
+          if (records.length === 0) {
+              document.getElementById("initialization").style.display = "block";
+              document.getElementById("tracker").style.display = "none";
+          } else {
+              document.getElementById("initialization").style.display = "none";
+              document.getElementById("tracker").style.display = "block";
+              const lastEntry = records[records.length - 1];
+              consecutiveLowAMRAP[currentExercise] = lastEntry.consecutiveLowAMRAP || 0; // Load saved value
+              displayCurrentWorkout(lastEntry);
+          }
       };
     }
 
@@ -64,7 +75,8 @@ document.addEventListener("DOMContentLoaded", () => {
         week: 0,
         trainingMax: trainingMax[currentExercise],
         amrapReps: null,
-        date: new Date().toLocaleString()
+        date: new Date().toLocaleString(),
+        consecutiveLowAMRAP: 0
       });
 
       document.getElementById("initialization").style.display = "none";
@@ -81,42 +93,53 @@ document.addEventListener("DOMContentLoaded", () => {
       const store = transaction.objectStore("lifts");
       const index = store.index("exercise");
       const request = index.getAll(currentExercise);
-    
+  
       request.onsuccess = (event) => {
-        const records = event.target.result;
-        // Use initialData if provided, otherwise use the last record
-        const lastWorkout = initialData || records[records.length - 1];
-        trainingMax[currentExercise] = lastWorkout.trainingMax;
-    
-        // Calculate next workout's cycle and week
-        let cycle = lastWorkout.cycle;
-        let week = lastWorkout.week;
+          const records = event.target.result;
+          const lastWorkout = initialData || records[records.length - 1];
+          trainingMax[currentExercise] = lastWorkout.trainingMax;
+  
+          let cycle = lastWorkout.cycle;
+          let week = lastWorkout.week;
+  
+          // Check if this is a deload week based on consecutive low AMRAP counts
+          let isDeloadWeek = consecutiveLowAMRAP[currentExercise] >= 2;
+  
+          if (isDeloadWeek) {
+              // Display deload notification and adjust the reps
+              document.getElementById("deloadNotice").textContent = "Deload Week: Reduced volume for recovery";
+              consecutiveLowAMRAP[currentExercise] = 0; // Reset counter after deload
+          } else {
+              document.getElementById("deloadNotice").textContent = ""; // Clear deload message
+              if (week === 3) {
+                  week = 1;
+                  cycle++;
+              } else {
+                  week++;
+              }
+          }
         
-        // Increment week/cycle for the next workout
-        if (week === 3) {
-          week = 1;
-          cycle++;
-        } else {
-          week++;
-        }
-    
-        document.getElementById("cycleNumber").textContent = cycle;
-        document.getElementById("weekNumber").textContent = week;
-    
-        // Get the correct percentages and reps for the NEXT week
-        const weightPercents = setPercentages[week];
-        const reps = setReps[week];
-        const weights = weightPercents.map(percent => Math.round(trainingMax[currentExercise] * percent));
-    
-        let setsHtml = "<h3>Prescribed Sets</h3>";
-        weights.forEach((weight, i) => {
-          setsHtml += `<p>Set ${i + 1}: ${weight} lbs x ${reps[i]} reps</p>`;
-        });
-        document.getElementById("prescribedSets").innerHTML = setsHtml;
-    
-        document.getElementById("amrap").value = reps[2]; // Default AMRAP reps to set 3 target
+  
+          document.getElementById("cycleNumber").textContent = cycle;
+          document.getElementById("weekNumber").textContent = week;
+  
+          const weightPercents = setPercentages[week];
+          let reps = setReps[week];
+  
+          if (isDeloadWeek) {
+              reps = reps.map(r => Math.ceil(r * 0.7)); // Reduce reps by 30%
+          }
+  
+          const weights = weightPercents.map(percent => Math.round(trainingMax[currentExercise] * percent));
+          let setsHtml = "<h3>Prescribed Sets</h3>";
+          weights.forEach((weight, i) => {
+              setsHtml += `<p>Set ${i + 1}: ${weight} lbs x ${reps[i]} reps</p>`;
+          });
+          document.getElementById("prescribedSets").innerHTML = setsHtml;
+          document.getElementById("amrap").value = reps[2];
       };
-    }
+  }
+  
 
     function adjustAmrapReps(change) {
       const amrapInput = document.getElementById("amrap");
@@ -125,59 +148,54 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function saveProgress() {
       const amrapReps = parseInt(document.getElementById("amrap").value);
-    
+      const increment = incrementValues[currentExercise];
+      
       const transaction = db.transaction(["lifts"], "readwrite");
       const store = transaction.objectStore("lifts");
-    
+      
       const request = store.index("exercise").getAll(currentExercise);
-    
+      
       request.onsuccess = (event) => {
-        const records = event.target.result;
-        const lastEntry = records[records.length - 1];
-        let cycle = lastEntry.cycle;
-        let week = lastEntry.week;
-        let trainingMax = lastEntry.trainingMax;
-    
-        // Calculate next entry's values
-        if (lastEntry.amrapReps !== null) {
-          if (week === 3) {
-            trainingMax += amrapReps >= 1 ? 5 : -5;
-            week = 1;
-            cycle += 1;
+          const records = event.target.result;
+          const lastEntry = records[records.length - 1];
+          let cycle = lastEntry.cycle;
+          let week = lastEntry.week;
+          let trainingMax = lastEntry.trainingMax;
+  
+          if (amrapReps >= 1) {
+              trainingMax += increment;
+              if (amrapReps >= 10) trainingMax += 5;
+              if (amrapReps >= 15) trainingMax += 5;
+              if (amrapReps >= 20) trainingMax += 5;
+              if (amrapReps >= 25) trainingMax += 5;
+              if (amrapReps >= 30) trainingMax += 5;
+              consecutiveLowAMRAP[currentExercise] = 0; // Reset on good performance
           } else {
-            week += 1;
+              trainingMax -= increment;
+              if (week === 3 && amrapReps < 5) {
+                  consecutiveLowAMRAP[currentExercise] += 1;
+              }
           }
-    
+          
           const newEntry = {
-            exercise: currentExercise,
-            cycle,
-            week,
-            trainingMax,
-            amrapReps,
-            date: new Date().toLocaleString()
+              exercise: currentExercise,
+              cycle,
+              week,
+              trainingMax,
+              amrapReps,
+              date: new Date().toLocaleString(),
+              consecutiveLowAMRAP: consecutiveLowAMRAP[currentExercise] // Save updated value
           };
-    
-          // Add new entry and wait for it to complete
+          
           const addRequest = store.add(newEntry);
           addRequest.onsuccess = () => {
-            alert("Progress saved!");
-            // Pass the new entry data directly to displayCurrentWorkout
-            displayCurrentWorkout(newEntry);
+              alert("Progress saved!");
+              displayCurrentWorkout(newEntry);
           };
-        } else {
-          // Update the initialization entry
-          week += 1;
-          lastEntry.amrapReps = amrapReps;
-          lastEntry.week = week;
-          lastEntry.date = new Date().toLocaleString();
-          const putRequest = store.put(lastEntry);
-          putRequest.onsuccess = () => {
-            alert("Progress saved!");
-            displayCurrentWorkout(lastEntry);
-          };
-        }
       };
     }
+  
+  
 
 
     function clearLastEntry() {

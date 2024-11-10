@@ -73,3 +73,11 @@ button:hover {
 #amrap-plus:hover, #amrap-minus:hover, #initializeExercise:hover, #import-history:hover {
   background-color: #23272b;
 }
+
+/* Deload Notification Styling */
+#deloadNotice {
+  color: #ff4500;
+  font-weight: bold;
+  font-size: 1.1rem;
+  margin-bottom: 10px;
+}
