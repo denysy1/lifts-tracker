@@ -1,0 +1,37 @@
+# Node modules folder if you use npm for local development
+node_modules/
+
+# Logs
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Local environment files (optional)
+.env
+.env.local
+
+# IDE configuration files (optional)
+.vscode/
+.idea/
+
+# Temporary files and backups
+*.tmp
+*.bak
+*.swp
+*.swo
+
+# MacOS-specific files
+.DS_Store
+
+# Backup files
+*.bak
+*.old
+*~
+
+# Coverage files (if you add testing in the future)
+coverage/
+
+# GitHub Actions if you use CI/CD workflows
+.github/
