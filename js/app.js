@@ -61,7 +61,7 @@ document.addEventListener("DOMContentLoaded", () => {
       store.add({
         exercise: currentExercise,
         cycle: 1,
-        week: 1,
+        week: 0,
         trainingMax: trainingMax[currentExercise],
         amrapReps: null,
         date: new Date().toLocaleString()
@@ -71,7 +71,7 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("tracker").style.display = "block";
       displayCurrentWorkout({
         cycle: 1,
-        week: 1,
+        week: 0,
         trainingMax: trainingMax[currentExercise]
       });
     }
