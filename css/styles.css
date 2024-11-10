@@ -62,4 +62,14 @@ button:hover {
 }
 
 #clear-last-entry:hover {
-  background-color:
+  background-color: #c82333;
+}
+
+/* Plus, Minus, Initialize and Import History Buttons */
+.plus-btn, .minus-btn, #initialize-btn, #import-history {
+  background-color: #343a40;
+}
+
+.plus-btn:hover, .minus-btn:hover, #initialize-btn:hover, #import-history:hover {
+  background-color: #23272b;
+}
