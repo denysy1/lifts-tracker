@@ -221,7 +221,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     }
     
                     // Move to next cycle
-                    lastWeek = 1;
+                    lastWeek = 0;
                     cycle += 1;
                     console.log(`Advancing to next cycle: Cycle ${cycle}, Week ${lastWeek}`);
                 } else {
