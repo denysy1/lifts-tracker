@@ -98,21 +98,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function saveProgress() {
       const amrapReps = parseInt(document.getElementById("amrap").value);
-
+    
       const transaction = db.transaction(["lifts"], "readwrite");
       const store = transaction.objectStore("lifts");
-
       const request = store.index("exercise").getAll(currentExercise);
-
+    
       request.onsuccess = (event) => {
         const records = event.target.result;
-
         let cycle, week, trainingMax;
-
+    
         if (records.length > 0) {
           const lastEntry = records[records.length - 1];
           ({ cycle, week, trainingMax } = lastEntry);
-
+    
           // If this is the first entry and it has null amrapReps, update it instead of creating new
           if (records.length === 1 && lastEntry.amrapReps === null) {
             store.put({
@@ -120,34 +118,43 @@ document.addEventListener("DOMContentLoaded", () => {
               amrapReps,
               date: new Date().toLocaleString()
             });
-            // After updating first entry, increment week for next workout
-            week += 1;
+            displayCurrentWorkout({ cycle, week: week + 1, trainingMax });
           } else {
             // Normal progression logic
             if (week === 3) {
-              trainingMax += amrapReps >= 1 ? 5 : -5;
+              // Only adjust training max at end of cycle (week 3)
+              const newTrainingMax = trainingMax + (amrapReps >= 1 ? 5 : -5);
               week = 1;
               cycle += 1;
+    
+              store.add({
+                exercise: currentExercise,
+                cycle,
+                week,
+                trainingMax: newTrainingMax,
+                amrapReps,
+                date: new Date().toLocaleString()
+              });
+              displayCurrentWorkout({ cycle, week, trainingMax: newTrainingMax });
             } else {
-              week += 1;
+              // For weeks 1 and 2, just increment the week
+              store.add({
+                exercise: currentExercise,
+                cycle,
+                week: week + 1,
+                trainingMax,
+                amrapReps,
+                date: new Date().toLocaleString()
+              });
+              displayCurrentWorkout({ cycle, week: week + 1, trainingMax });
             }
-
-            store.add({
-              exercise: currentExercise,
-              cycle,
-              week,
-              trainingMax,
-              amrapReps,
-              date: new Date().toLocaleString()
-            });
           }
-
         } else {
-          // First-time entry, initialize values
+          // First-time entry case
           cycle = 1;
           week = 1;
           trainingMax = trainingMax[currentExercise];
-
+    
           store.add({
             exercise: currentExercise,
             cycle,
@@ -156,12 +163,10 @@ document.addEventListener("DOMContentLoaded", () => {
             amrapReps,
             date: new Date().toLocaleString()
           });
-          // After first entry, increment week for next workout
-          week += 1;
+          displayCurrentWorkout({ cycle, week: week + 1, trainingMax });
         }
-
+    
         alert("Progress saved!");
-        displayCurrentWorkout({ cycle, week, trainingMax });
       };
     }
 
