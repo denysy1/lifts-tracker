@@ -77,17 +77,17 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function displayCurrentWorkout(data) {
-      let { cycle, week, trainingMax } = data;
-      trainingMax[currentExercise] = trainingMax;
+      let { cycle, week, trainingMax: currentTrainingMax } = data;
+      trainingMax[currentExercise] = currentTrainingMax;
       document.getElementById("cycleNumber").textContent = cycle;
       document.getElementById("weekNumber").textContent = week;
-
-      const weights = setPercentages[week].map((percent) => Math.round(trainingMax * percent));
+    
+      const weights = setPercentages[week].map((percent) => Math.round(currentTrainingMax * percent));
       const reps = setReps[week];
       document.getElementById("prescribedSets").innerHTML = weights
         .map((weight, i) => `<p>Set ${i + 1}: ${weight} lbs x ${reps[i]} reps</p>`)
         .join("");
-
+    
       document.getElementById("amrap").value = reps[2];
     }
 
@@ -98,77 +98,65 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function saveProgress() {
       const amrapReps = parseInt(document.getElementById("amrap").value);
+    
       const transaction = db.transaction(["lifts"], "readwrite");
       const store = transaction.objectStore("lifts");
     
-      // Get all records for the current exercise
       const request = store.index("exercise").getAll(currentExercise);
     
       request.onsuccess = (event) => {
         const records = event.target.result;
     
-        let cycle, week, trainingMax;
+        let cycle, week, currentTrainingMax;
     
         if (records.length > 0) {
           const lastEntry = records[records.length - 1];
-          ({ cycle, week, trainingMax } = lastEntry);
+          ({ cycle, week, trainingMax: currentTrainingMax } = lastEntry);
     
-          // Handle the first entry update if it's uncompleted
           if (records.length === 1 && lastEntry.amrapReps === null) {
             store.put({
               ...lastEntry,
               amrapReps,
               date: new Date().toLocaleString()
             });
-            alert("First workout saved!");
-            displayCurrentWorkout({ cycle, week: week + 1, trainingMax });
-            return;
-          }
+            week += 1;
+          } else {
+            if (week === 3) {
+              currentTrainingMax += amrapReps >= 1 ? 5 : -5;
+              week = 1;
+              cycle += 1;
+            } else {
+              week += 1;
+            }
     
-          // Ensure correct progression for each week
-          if (week === 1) {
-            week = 2;
-          } else if (week === 2) {
-            week = 3;
-          } else if (week === 3) {
-            // End of cycle: adjust trainingMax, reset to Week 1, increment cycle
-            trainingMax += amrapReps >= 1 ? 5 : -5; // Adjust training max based on AMRAP performance
-            week = 1;
-            cycle += 1;
+            store.add({
+              exercise: currentExercise,
+              cycle,
+              week,
+              trainingMax: currentTrainingMax,
+              amrapReps,
+              date: new Date().toLocaleString()
+            });
           }
     
         } else {
-          // First-time entry, initialize values
           cycle = 1;
           week = 1;
-          trainingMax = trainingMax[currentExercise];
+          currentTrainingMax = trainingMax[currentExercise];
     
-          // Add the first entry
           store.add({
             exercise: currentExercise,
             cycle,
             week,
-            trainingMax,
+            trainingMax: currentTrainingMax,
             amrapReps,
             date: new Date().toLocaleString()
           });
-          alert("First workout saved!");
-          displayCurrentWorkout({ cycle, week: week + 1, trainingMax });
-          return;
+          week += 1;
         }
     
-        // Add a new entry for each subsequent progress
-        store.add({
-          exercise: currentExercise,
-          cycle,
-          week,
-          trainingMax,
-          amrapReps,
-          date: new Date().toLocaleString()
-        });
-    
         alert("Progress saved!");
-        displayCurrentWorkout({ cycle, week, trainingMax });
+        displayCurrentWorkout({ cycle, week, trainingMax: currentTrainingMax });
       };
     }
 
