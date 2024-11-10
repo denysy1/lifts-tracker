@@ -36,10 +36,9 @@ button:hover {
   opacity: 0.9;
 }
 
-/* Exercise Selection Buttons Row */
+/* Exercise Selection Buttons */
 #overhead-press-btn, #bench-press-btn, #squat-btn, #deadlift-btn {
   background-color: #007bff;
-  display: inline-block;
   margin: 0 5px;
 }
 
@@ -49,7 +48,7 @@ button:hover {
 
 /* Save and Clear Buttons */
 #save {
-  background-color: #28a745; /* Green for Save */
+  background-color: #28a745;
   margin-top: 10px;
 }
 
@@ -58,7 +57,7 @@ button:hover {
 }
 
 #clear-last-entry {
-  background-color: #dc3545; /* Red for Clear */
+  background-color: #dc3545;
   margin-top: 10px;
 }
 
@@ -117,16 +116,19 @@ input[type="number"] {
   background-color: #0056b3;
 }
 
-/* History Display */
-#history {
-  width: 100%;
-  max-width: 600px;
-  margin-top: 20px;
-  padding: 10px;
-  border: 1px solid #ddd;
-  background-color: #fff;
+/* Offline Notification */
+#offline-notification {
+  margin-top: 10px;
+  font-weight: bold;
+  font-size: 1.1rem;
 }
 
-#prescribedSets {
-  margin-top: 10px;
+/* Media Query for Small Screens */
+@media (max-width: 600px) {
+  #overhead-press-btn, #bench-press-btn, #squat-btn, #deadlift-btn {
+    display: block;
+    width: 100%;
+    max-width: 200px;
+    margin: 5px auto;
+  }
 }
