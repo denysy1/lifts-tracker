@@ -1,0 +1,17 @@
+{
+  "name": "Gym Tracker",
+  "short_name": "GymTracker",
+  "description": "A simple progressive web app to track gym lifts",
+  "scope": "/gym-tracker/",
+  "start_url": "/gym-tracker/",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "display": "standalone",
+  "icons": [
+    {
+      "src": "/gym-tracker/img/icon.png",
+      "type": "image/png",
+      "sizes": "700x700"
+    }
+  ]
+}
