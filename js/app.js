@@ -161,10 +161,22 @@ document.addEventListener("DOMContentLoaded", () => {
         
         request.onsuccess = (event) => {
             const records = event.target.result;
+        
+            // Verify retrieved records with debugging output
+            console.log("Retrieved records from IndexedDB:", records);
+        
             const lastEntry = records[records.length - 1];
             let cycle = lastEntry.cycle;
             let week = lastEntry.week;
             let trainingMax = lastEntry.trainingMax;
+        
+            console.log(`Starting saveProgress - Initial State: Cycle: ${cycle}, Week: ${week}, Training Max: ${trainingMax}, AMRAP Reps: ${lastEntry.amrapReps}`);
+        
+            // Additional debugging to observe the current AMRAP value in `lastEntry`
+            console.log(`Confirming retrieved AMRAP Reps for Cycle ${cycle}, Week ${week}:`, lastEntry.amrapReps);
+      
+          // Continue with existing logic for incrementing/decrementing
+      
     
             // Debug initial state
             console.log(`Starting saveProgress - Initial State: Cycle: ${cycle}, Week: ${week}, Training Max: ${trainingMax}, AMRAP Reps: ${amrapReps}`);
