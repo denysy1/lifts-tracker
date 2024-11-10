@@ -166,26 +166,25 @@ document.addEventListener("DOMContentLoaded", () => {
             let week = lastEntry.week;
             let trainingMax = lastEntry.trainingMax;
     
-            // Logic to update training max based on AMRAP reps
-            if (amrapReps >= 1) {
-                trainingMax += increment;
-                if (amrapReps >= 10) trainingMax += 5;
-                if (amrapReps >= 15) trainingMax += 5;
-                if (amrapReps >= 20) trainingMax += 5;
-                if (amrapReps >= 25) trainingMax += 5;
-                if (amrapReps >= 30) trainingMax += 5;
-                consecutiveLowAMRAP[currentExercise] = 0; // Reset counter for good performance
-            } else {
-                trainingMax -= increment;
-                if (week === 3 && amrapReps < 5) {
-                    consecutiveLowAMRAP[currentExercise] += 1; // Increment consecutive low AMRAP counter
-                }
-            }
-    
             // Calculate next entry's values
             if (lastEntry.amrapReps !== null) {
                 // Advance week and cycle appropriately
                 if (week === 3) {
+                                // Logic to update training max based on AMRAP reps
+                    if (amrapReps >= 1) {
+                      trainingMax += increment;
+                      if (amrapReps >= 10) trainingMax += 5;
+                      if (amrapReps >= 15) trainingMax += 5;
+                      if (amrapReps >= 20) trainingMax += 5;
+                      if (amrapReps >= 25) trainingMax += 5;
+                      if (amrapReps >= 30) trainingMax += 5;
+                      consecutiveLowAMRAP[currentExercise] = 0; // Reset counter for good performance
+                    } else {
+                        trainingMax -= increment;
+                        if (amrapReps < 5) {
+                            consecutiveLowAMRAP[currentExercise] += 1; // Increment consecutive low AMRAP counter
+                        }
+                    }
                     week = 1;
                     cycle += 1;
                 } else {
