@@ -151,54 +151,80 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       function saveProgress() {
-          const amrapReps = parseInt(document.getElementById("amrap").value);
-          const increment = incrementValues[currentExercise];
-
-          const transaction = db.transaction(["lifts"], "readwrite");
-          const store = transaction.objectStore("lifts");
-
-          const request = store.index("exercise").getAll(currentExercise);
-
-          request.onsuccess = (event) => {
-              const records = event.target.result;
-              const lastEntry = records[records.length - 1];
-              let cycle = lastEntry.cycle;
-              let week = lastEntry.week;
-              let trainingMax = lastEntry.trainingMax;
-
-              if (amrapReps >= 1) {
-                  trainingMax += increment;
-                  if (amrapReps >= 10) trainingMax += 5;
-                  if (amrapReps >= 15) trainingMax += 5;
-                  if (amrapReps >= 20) trainingMax += 5;
-                  if (amrapReps >= 25) trainingMax += 5;
-                  if (amrapReps >= 30) trainingMax += 5;
-                  consecutiveLowAMRAP[currentExercise] = 0;
-              } else {
-                  trainingMax -= increment;
-                  if (week === 3 && amrapReps < 5) {
-                      consecutiveLowAMRAP[currentExercise] += 1;
-                  }
-              }
-
-              const newEntry = {
-                  exercise: currentExercise,
-                  cycle,
-                  week,
-                  trainingMax,
-                  amrapReps,
-                  date: new Date().toLocaleString(),
-                  consecutiveLowAMRAP: consecutiveLowAMRAP[currentExercise]
-              };
-
-              const addRequest = store.add(newEntry);
-              addRequest.onsuccess = () => {
-                  alert("Progress saved!");
-                  displayCurrentWorkout(newEntry);
-                  console.log("Progress saved:", newEntry);
-              };
-          };
+        const amrapReps = parseInt(document.getElementById("amrap").value);
+        const increment = incrementValues[currentExercise];
+        
+        const transaction = db.transaction(["lifts"], "readwrite");
+        const store = transaction.objectStore("lifts");
+        
+        const request = store.index("exercise").getAll(currentExercise);
+        
+        request.onsuccess = (event) => {
+            const records = event.target.result;
+            const lastEntry = records[records.length - 1];
+            let cycle = lastEntry.cycle;
+            let week = lastEntry.week;
+            let trainingMax = lastEntry.trainingMax;
+    
+            // Logic to update training max based on AMRAP reps
+            if (amrapReps >= 1) {
+                trainingMax += increment;
+                if (amrapReps >= 10) trainingMax += 5;
+                if (amrapReps >= 15) trainingMax += 5;
+                if (amrapReps >= 20) trainingMax += 5;
+                if (amrapReps >= 25) trainingMax += 5;
+                if (amrapReps >= 30) trainingMax += 5;
+                consecutiveLowAMRAP[currentExercise] = 0; // Reset counter for good performance
+            } else {
+                trainingMax -= increment;
+                if (week === 3 && amrapReps < 5) {
+                    consecutiveLowAMRAP[currentExercise] += 1; // Increment consecutive low AMRAP counter
+                }
+            }
+    
+            // Calculate next entry's values
+            if (lastEntry.amrapReps !== null) {
+                // Advance week and cycle appropriately
+                if (week === 3) {
+                    week = 1;
+                    cycle += 1;
+                } else {
+                    week += 1;
+                }
+        
+                const newEntry = {
+                    exercise: currentExercise,
+                    cycle,
+                    week,
+                    trainingMax,
+                    amrapReps,
+                    date: new Date().toLocaleString(),
+                    consecutiveLowAMRAP: consecutiveLowAMRAP[currentExercise] // Save updated value
+                };
+        
+                // Add new entry and display the updated workout
+                const addRequest = store.add(newEntry);
+                addRequest.onsuccess = () => {
+                    alert("Progress saved!");
+                    displayCurrentWorkout(newEntry);
+                };
+            } else {
+                // Update the initialization entry if it's the first time saving
+                week += 1;
+                lastEntry.amrapReps = amrapReps;
+                lastEntry.week = week;
+                lastEntry.date = new Date().toLocaleString();
+                lastEntry.consecutiveLowAMRAP = consecutiveLowAMRAP[currentExercise];
+    
+                const putRequest = store.put(lastEntry);
+                putRequest.onsuccess = () => {
+                    alert("Progress saved!");
+                    displayCurrentWorkout(lastEntry);
+                };
+            }
+        };
       }
+    
 
       function clearLastEntry() {
           const transaction = db.transaction(["lifts"], "readwrite");
