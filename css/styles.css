@@ -32,31 +32,15 @@ h1 {
   margin-bottom: 1rem;
 }
 
-h2 {
-  font-size: 1.5rem;
-  color: #34495e;
+.button-row {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
   margin-bottom: 1rem;
-}
-
-label {
-  font-weight: bold;
-  display: block;
-  margin: 10px 0 5px;
-}
-
-select, input[type="number"] {
-  width: 100%;
-  padding: 10px;
-  margin-bottom: 1rem;
-  border: 1px solid #d1d5db;
-  border-radius: 5px;
-  font-size: 1rem;
 }
 
 button {
-  width: 100%;
   padding: 12px;
-  margin-top: 10px;
   border: none;
   border-radius: 5px;
   font-size: 1rem;
@@ -64,37 +48,23 @@ button {
   transition: background 0.3s;
 }
 
-button#initialize {
-  background: #4CAF50;
-  color: white;
-}
-
-button#calculate {
+#overhead-press-btn, #bench-press-btn, #squat-btn, #deadlift-btn {
   background: #3498db;
   color: white;
 }
 
-button#save {
+button:hover {
+  background: #2980b9;
+}
+
+#initializeExercise, #save {
   background: #4CAF50;
   color: white;
 }
 
-button#view-history, button#reset-history {
+#clear-last-entry, #view-history {
   background: #95a5a6;
   color: white;
-}
-
-button#amrap-plus, button#amrap-minus {
-  width: 48%;
-  display: inline-block;
-  background: #3498db;
-  color: white;
-}
-
-button#amrap-plus:hover, button#amrap-minus:hover,
-button#initialize:hover, button#calculate:hover,
-button#save:hover, button#view-history:hover, button#reset-history:hover {
-  background: #2980b9;
 }
 
 #prescribedSets p {
