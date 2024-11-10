@@ -107,11 +107,11 @@ document.addEventListener("DOMContentLoaded", () => {
       request.onsuccess = (event) => {
         const records = event.target.result;
     
-        let cycle, week, trainingMaxValue;
+        let cycle, week, currentTrainingMax;
     
         if (records.length > 0) {
           const lastEntry = records[records.length - 1];
-          ({ cycle, week, trainingMax: trainingMaxValue } = lastEntry);
+          ({ cycle, week, trainingMax: currentTrainingMax } = lastEntry);
     
           if (records.length === 1 && lastEntry.amrapReps === null) {
             // Update the first entry if it has null amrapReps
@@ -120,23 +120,31 @@ document.addEventListener("DOMContentLoaded", () => {
               amrapReps,
               date: new Date().toLocaleString()
             });
-            week += 1;
+    
+            // Update variables for the next workout
+            if (week === 3) {
+              currentTrainingMax += amrapReps >= 1 ? 5 : -5;
+              cycle += 1;
+              week = 1;
+            } else {
+              week += 1;
+            }
           } else {
-            // Save the current week's data before updating week and cycle
+            // Save the current week's data
             store.add({
               exercise: currentExercise,
               cycle,
               week,
-              trainingMax: trainingMaxValue,
+              trainingMax: currentTrainingMax,
               amrapReps,
               date: new Date().toLocaleString()
             });
     
-            // Now update week and cycle for the next workout
+            // Update variables for the next workout
             if (week === 3) {
-              trainingMaxValue += amrapReps >= 1 ? 5 : -5;
-              week = 1;
+              currentTrainingMax += amrapReps >= 1 ? 5 : -5;
               cycle += 1;
+              week = 1;
             } else {
               week += 1;
             }
@@ -145,23 +153,36 @@ document.addEventListener("DOMContentLoaded", () => {
           // First-time entry, initialize values
           cycle = 1;
           week = 1;
-          trainingMaxValue = trainingMax[currentExercise];
+          currentTrainingMax = trainingMax[currentExercise];
     
+          // Save the first workout data
           store.add({
             exercise: currentExercise,
             cycle,
             week,
-            trainingMax: trainingMaxValue,
+            trainingMax: currentTrainingMax,
             amrapReps,
             date: new Date().toLocaleString()
           });
-          week += 1;
+    
+          // Update variables for the next workout
+          if (week === 3) {
+            currentTrainingMax += amrapReps >= 1 ? 5 : -5;
+            cycle += 1;
+            week = 1;
+          } else {
+            week += 1;
+          }
         }
     
+        // Update the global training max for the current exercise
+        trainingMax[currentExercise] = currentTrainingMax;
+    
         alert("Progress saved!");
-        displayCurrentWorkout({ cycle, week, trainingMax: trainingMaxValue });
+        displayCurrentWorkout({ cycle, week, trainingMax: currentTrainingMax });
       };
     }
+
 
 
     function clearLastEntry() {
