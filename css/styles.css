@@ -1,90 +1,99 @@
-/* Basic Reset */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
+/* General Page Layout */
 body {
   font-family: Arial, sans-serif;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
-  min-height: 100vh;
-  background: #f3f4f6;
+  margin: 0;
+  padding: 20px;
+  background-color: #f4f4f9;
   color: #333;
 }
 
-.container {
-  width: 100%;
-  max-width: 400px;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  background-color: #ffffff;
-  text-align: center;
-}
-
+/* Title and Headings */
 h1 {
   font-size: 2rem;
-  font-weight: bold;
-  color: #2c3e50;
-  margin-bottom: 1rem;
+  margin-bottom: 20px;
 }
 
-.button-row {
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-  margin-bottom: 1rem;
+h2, h3 {
+  margin: 10px 0;
 }
 
+/* Button Layout */
 button {
-  padding: 12px;
+  background-color: #007bff;
+  color: white;
   border: none;
+  padding: 10px 20px;
+  margin: 5px;
+  cursor: pointer;
   border-radius: 5px;
   font-size: 1rem;
-  cursor: pointer;
-  transition: background 0.3s;
-}
-
-#overhead-press-btn, #bench-press-btn, #squat-btn, #deadlift-btn {
-  background: #3498db;
-  color: white;
 }
 
 button:hover {
-  background: #2980b9;
+  background-color: #0056b3;
 }
 
-#initializeExercise, #save {
-  background: #4CAF50;
-  color: white;
+/* Container for Exercise Buttons */
+div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
 }
 
-#clear-last-entry, #view-history {
-  background: #95a5a6;
-  color: white;
-}
-
-#prescribedSets p {
-  margin: 10px 0;
-  font-weight: 500;
-}
-
-#amrap {
+/* Horizontal Layout for Exercise Buttons */
+#overhead-press-btn, #bench-press-btn, #squat-btn, #deadlift-btn {
   display: inline-block;
-  width: calc(100% - 20px);
-  margin: 10px;
-  padding: 10px;
-  border: 1px solid #d1d5db;
-  border-radius: 5px;
+  margin: 0 5px;
 }
 
-.history-container {
-  margin-top: 20px;
-  padding: 15px;
-  background: #e9ecef;
-  border-radius: 5px;
+/* Initialization and Tracker Sections */
+#initialization, #tracker {
+  width: 100%;
+  max-width: 400px;
   text-align: left;
+  margin-bottom: 20px;
+}
+
+label {
+  display: block;
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+input[type="number"] {
+  width: 100%;
+  padding: 8px;
+  margin-top: 5px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+}
+
+/* Layout for AMRAP Controls */
+#amrap-plus, #amrap-minus {
+  margin: 5px;
+}
+
+/* History Display */
+#history {
+  width: 100%;
+  max-width: 600px;
+  margin-top: 20px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  background-color: #fff;
+}
+
+#prescribedSets {
+  margin-top: 10px;
+}
+
+#export-history, #import-history, #view-history, #clear-last-entry {
+  margin-top: 10px;
+  width: 100%;
+  max-width: 200px;
 }
