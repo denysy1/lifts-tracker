@@ -121,32 +121,13 @@ document.addEventListener("DOMContentLoaded", () => {
     
       request.onsuccess = (event) => {
         const records = event.target.result;
+        const lastEntry = records[records.length - 1];
+        let cycle = lastEntry.cycle;
+        let week = lastEntry.week;
+        let trainingMax = lastEntry.trainingMax;
     
-        let cycle, week, trainingMax;
-    
-        if (records.length === 1) {
-          // First workout entry after initialization; overwrite the initial record
-          const initialRecord = records[0];
-          cycle = initialRecord.cycle;
-          week = initialRecord.week;
-          trainingMax = initialRecord.trainingMax;
-    
-          // Update the initial record with AMRAP reps and date
-          initialRecord.amrapReps = amrapReps;
-          initialRecord.date = new Date().toLocaleString();
-    
-          // Update the entry in IndexedDB
-          const updateRequest = store.put(initialRecord);
-          updateRequest.onsuccess = () => {
-            alert("First workout progress saved!");
-            displayCurrentWorkout();
-          };
-    
-        } else {
-          // Continue from the last saved entry if there are prior workout records
-          const lastEntry = records[records.length - 1];
-          ({ cycle, week, trainingMax } = lastEntry);
-    
+        // If this is not the initialization entry (has no amrapReps yet)
+        if (lastEntry.amrapReps !== null) {
           // Determine next week and cycle
           if (week === 3) {
             trainingMax += amrapReps >= 1 ? 5 : -5;
@@ -156,6 +137,7 @@ document.addEventListener("DOMContentLoaded", () => {
             week += 1;
           }
     
+          // Add new entry
           store.add({
             exercise: currentExercise,
             cycle,
@@ -164,10 +146,15 @@ document.addEventListener("DOMContentLoaded", () => {
             amrapReps,
             date: new Date().toLocaleString()
           });
-    
-          alert("Progress saved!");
-          displayCurrentWorkout();
+        } else {
+          // Update the initialization entry with AMRAP reps
+          lastEntry.amrapReps = amrapReps;
+          lastEntry.date = new Date().toLocaleString();
+          store.put(lastEntry);
         }
+    
+        alert("Progress saved!");
+        displayCurrentWorkout();
       };
     }
 
