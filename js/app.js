@@ -107,81 +107,57 @@ document.addEventListener("DOMContentLoaded", () => {
       request.onsuccess = (event) => {
         const records = event.target.result;
     
-        let cycle, week, currentTrainingMax;
+        let cycle, week, trainingMax;
     
-        if (records.length > 0) {
-          const lastEntry = records[records.length - 1];
-          ({ cycle, week, trainingMax: currentTrainingMax } = lastEntry);
+        if (records.length === 1) {
+          // First workout entry after initialization; overwrite the initial record
+          const initialRecord = records[0];
+          cycle = initialRecord.cycle;
+          week = initialRecord.week;
+          trainingMax = initialRecord.trainingMax;
     
-          if (records.length === 1 && lastEntry.amrapReps === null) {
-            // Update the first entry if it has null amrapReps
-            store.put({
-              ...lastEntry,
-              amrapReps,
-              date: new Date().toLocaleString()
-            });
+          // Update the initial record with AMRAP reps and date
+          initialRecord.amrapReps = amrapReps;
+          initialRecord.date = new Date().toLocaleString();
     
-            // Update variables for the next workout
-            if (week === 3) {
-              currentTrainingMax += amrapReps >= 1 ? 5 : -5;
-              cycle += 1;
-              week = 1;
-            } else {
-              week += 1;
-            }
-          } else {
-            // Save the current week's data
-            store.add({
-              exercise: currentExercise,
-              cycle,
-              week,
-              trainingMax: currentTrainingMax,
-              amrapReps,
-              date: new Date().toLocaleString()
-            });
+          // Update the entry in IndexedDB
+          const updateRequest = store.put(initialRecord);
+          updateRequest.onsuccess = () => {
+            alert("First workout progress saved!");
+            // Set up the next workout display for Week 2
+            displayCurrentWorkout({ cycle, week: week + 1, trainingMax });
+          };
     
-            // Update variables for the next workout
-            if (week === 3) {
-              currentTrainingMax += amrapReps >= 1 ? 5 : -5;
-              cycle += 1;
-              week = 1;
-            } else {
-              week += 1;
-            }
-          }
         } else {
-          // First-time entry, initialize values
-          cycle = 1;
-          week = 1;
-          currentTrainingMax = trainingMax[currentExercise];
+          // Continue from the last saved entry if there are prior workout records
+          const lastEntry = records[records.length - 1];
+          ({ cycle, week, trainingMax } = lastEntry);
     
-          // Save the first workout data
+          // Determine next week and cycle
+          if (week === 3) {
+            trainingMax += amrapReps >= 1 ? 5 : -5;  // Adjust training max at the end of the cycle
+            week = 1;  // Reset to Week 1
+            cycle += 1;  // Increment cycle
+          } else {
+            week += 1;  // Progress to the next week
+          }
+    
+          // Add the new workout entry to the database
           store.add({
             exercise: currentExercise,
             cycle,
             week,
-            trainingMax: currentTrainingMax,
+            trainingMax,
             amrapReps,
             date: new Date().toLocaleString()
-          });
-    
-          // Update variables for the next workout
-          if (week === 3) {
-            currentTrainingMax += amrapReps >= 1 ? 5 : -5;
-            cycle += 1;
-            week = 1;
-          } else {
-            week += 1;
-          }
+          }).onsuccess = () => {
+            alert("Progress saved!");
+            displayCurrentWorkout({ cycle, week, trainingMax });
+          };
         }
-    
-        // Update the global training max for the current exercise
-        trainingMax[currentExercise] = currentTrainingMax;
-    
-        alert("Progress saved!");
-        displayCurrentWorkout({ cycle, week, trainingMax: currentTrainingMax });
       };
     }
+
 
 
 
