@@ -2,7 +2,8 @@ const request = indexedDB.open("GymTrackerDB", 1);
 
 request.onupgradeneeded = (event) => {
   const db = event.target.result;
-  db.createObjectStore("lifts", { keyPath: "id", autoIncrement: true });
+  const store = db.createObjectStore("lifts", { keyPath: "id", autoIncrement: true });
+  store.createIndex("exercise", "exercise", { unique: false });
 };
 
 request.onsuccess = (event) => {
@@ -35,10 +36,10 @@ request.onsuccess = (event) => {
 
     document.getElementById("setup").style.display = "none";
     document.getElementById("tracker").style.display = "block";
-    displayCurrentWorkout();
+    displayCurrentWorkout(); // Load the data for the selected exercise
   }
 
-  function saveInitialData(exercise, trainingMax) {
+  function saveInitialData(exercise, initialTrainingMax) {
     const transaction = db.transaction(["lifts"], "readwrite");
     const store = transaction.objectStore("lifts");
 
@@ -46,7 +47,8 @@ request.onsuccess = (event) => {
       exercise,
       cycle: 1,
       week: 1,
-      trainingMax,
+      trainingMax: initialTrainingMax,
+      amrapReps: 0,
       date: new Date().toLocaleString()
     });
   }
@@ -56,7 +58,8 @@ request.onsuccess = (event) => {
 
     const transaction = db.transaction(["lifts"], "readonly");
     const store = transaction.objectStore("lifts");
-    const request = store.index("exercise").getAll(exercise);
+    const index = store.index("exercise");
+    const request = index.getAll(exercise);
 
     request.onsuccess = (event) => {
       const records = event.target.result;
@@ -80,6 +83,10 @@ request.onsuccess = (event) => {
         document.getElementById("prescribedSets").innerHTML = setsHtml;
 
         document.getElementById("amrap").value = reps[2]; // Default AMRAP reps to set 3 target
+      } else {
+        document.getElementById("cycleNumber").textContent = "1";
+        document.getElementById("weekNumber").textContent = "1";
+        document.getElementById("prescribedSets").innerHTML = "<p>Please initialize the training max.</p>";
       }
     };
   }
@@ -96,9 +103,11 @@ request.onsuccess = (event) => {
     const transaction = db.transaction(["lifts"], "readwrite");
     const store = transaction.objectStore("lifts");
 
-    store.getAll(exercise).onsuccess = (event) => {
-      const data = event.target.result;
-      const lastEntry = data[data.length - 1];
+    const request = store.index("exercise").getAll(exercise);
+
+    request.onsuccess = (event) => {
+      const records = event.target.result;
+      const lastEntry = records[records.length - 1];
       let { cycle, week, trainingMax } = lastEntry;
 
       if (week === 3) {
@@ -119,7 +128,7 @@ request.onsuccess = (event) => {
       });
 
       alert("Progress saved!");
-      displayCurrentWorkout();
+      displayCurrentWorkout(); // Reload workout details for the updated cycle and week
     };
   }
 
