@@ -181,21 +181,19 @@ document.addEventListener("DOMContentLoaded", () => {
                     // End of cycle, update training max based on AMRAP and reset to week 1 in the new cycle
                     week = 1;
                     cycle++;
-    
-                    // Apply AMRAP-based adjustments for the next cycle's training max
-                    if (amrapReps === 0) {
-                        trainingMax -= increment; // Decrease training max on 0 reps
-                        consecutiveLowAMRAP[currentExercise]++;
-                    } else {
-                        trainingMax += increment; // Base increment for completing Week 3
-                        consecutiveLowAMRAP[currentExercise] = 0; // Reset counter for good performance
-                        
-                        // Apply additional increments based on high AMRAP reps
-                        if (amrapReps >= 10) trainingMax += 5;
-                        if (amrapReps >= 15) trainingMax += 5;
-                        if (amrapReps >= 20) trainingMax += 5;
-                        if (amrapReps >= 25) trainingMax += 5;
-                        if (amrapReps >= 30) trainingMax += 5;
+                    
+                    // AMRAP adjustments for new cycle's training max
+                    if (amrapReps >= 0) {
+                        if (amrapReps === 0) {
+                            trainingMax -= increment;
+                            consecutiveLowAMRAP[currentExercise]++;
+                        } else {
+                            trainingMax += increment;
+                            if (amrapReps >= 10) trainingMax += 5;
+                            if (amrapReps >= 15) trainingMax += 5;
+                            if (amrapReps >= 20) trainingMax += 5;
+                            consecutiveLowAMRAP[currentExercise] = 0;
+                        }
                     }
                 } else {
                     // Advance to the next week within the same cycle
@@ -226,7 +224,6 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error("Error retrieving last entry:", err);
         };
     }
-    
     
     
     
