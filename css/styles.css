@@ -66,10 +66,10 @@ button:hover {
 }
 
 /* Plus, Minus, Initialize and Import History Buttons */
-.plus-btn, .minus-btn, #initialize-btn, #import-history {
+#amrap-plus, #amrap-minus, #initializeExercise, #import-history {
   background-color: #343a40;
 }
 
-.plus-btn:hover, .minus-btn:hover, #initialize-btn:hover, #import-history:hover {
+#amrap-plus:hover, #amrap-minus:hover, #initializeExercise:hover, #import-history:hover {
   background-color: #23272b;
 }
