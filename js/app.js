@@ -31,12 +31,27 @@ request.onsuccess = (event) => {
 
     for (const exercise in oneRepMaxes) {
       trainingMax[exercise] = Math.floor(oneRepMaxes[exercise] * 0.9); // 90% of 1RM
-      // Only store training max for reference, no initial entry in history
+      saveInitialData(exercise, trainingMax[exercise]);
     }
 
     document.getElementById("setup").style.display = "none";
     document.getElementById("tracker").style.display = "block";
     displayCurrentWorkout(); // Load the data for the selected exercise
+  }
+
+  function saveInitialData(exercise, initialTrainingMax) {
+    // Store the initial training max in memory but don’t add to history
+    const transaction = db.transaction(["lifts"], "readwrite");
+    const store = transaction.objectStore("lifts");
+
+    store.put({
+      exercise,
+      cycle: 1,
+      week: 1,
+      trainingMax: initialTrainingMax,
+      amrapReps: null, // Set AMRAP Reps as null to indicate it's uninitialized
+      date: null // Set date to null, so it doesn't show in history
+    });
   }
 
   function displayCurrentWorkout() {
@@ -93,19 +108,11 @@ request.onsuccess = (event) => {
 
     request.onsuccess = (event) => {
       const records = event.target.result;
-      let cycle, week;
-
-      if (records.length > 0) {
-        const lastEntry = records[records.length - 1];
-        ({ cycle, week, trainingMax: trainingMax[exercise] } = lastEntry);
-      } else {
-        // Initialize cycle and week if no records exist
-        cycle = 1;
-        week = 1;
-      }
+      const lastEntry = records[records.length - 1];
+      let { cycle, week, trainingMax } = lastEntry;
 
       if (week === 3) {
-        trainingMax[exercise] += amrapReps >= 1 ? 5 : -5;
+        trainingMax += amrapReps >= 1 ? 5 : -5;
         week = 1;
         cycle += 1;
       } else {
@@ -116,7 +123,7 @@ request.onsuccess = (event) => {
         exercise,
         cycle,
         week,
-        trainingMax: trainingMax[exercise],
+        trainingMax,
         amrapReps,
         date: new Date().toLocaleString()
       });
@@ -138,29 +145,37 @@ request.onsuccess = (event) => {
       let historyHtml = `<h2>History for ${exercise}</h2>`;
 
       records.forEach(record => {
-        historyHtml += `<p>${record.date}: Cycle ${record.cycle}, Week ${record.week}, Training Max: ${record.trainingMax} lbs, AMRAP Reps: ${record.amrapReps}</p>`;
+        if (record.date && record.amrapReps !== null) { // Only show entries with actual data
+          historyHtml += `<p>${record.date}: Cycle ${record.cycle}, Week ${record.week}, Training Max: ${record.trainingMax} lbs, AMRAP Reps: ${record.amrapReps}</p>`;
+        }
       });
 
       document.getElementById("history").innerHTML = historyHtml;
     };
   }
 
-  function resetHistory() {
-    if (confirm("Are you sure you want to reset all history for all exercises? This action cannot be undone.")) {
-      const transaction = db.transaction(["lifts"], "readwrite");
-      const store = transaction.objectStore("lifts");
+function resetHistory() {
+  const exercise = document.getElementById("exercise").value;
+  
+  if (confirm(`Are you sure you want to reset all history for ${exercise}? This action cannot be undone.`)) {
+    const transaction = db.transaction(["lifts"], "readwrite");
+    const store = transaction.objectStore("lifts");
+    const index = store.index("exercise");
+    const request = index.getAllKeys(exercise);
 
-      const clearRequest = store.clear();
+    request.onsuccess = (event) => {
+      const keys = event.target.result;
+      keys.forEach(key => store.delete(key));
 
-      clearRequest.onsuccess = () => {
-        alert("History for all exercises has been reset.");
-        location.reload(); // Reload the page to reset the state
-      };
+      alert(`History for ${exercise} has been reset.`);
+      location.reload(); // Reload the page to reset the state
+    };
 
-      clearRequest.onerror = (event) => {
-        console.error("Error clearing history:", event.target.error);
-        alert("An error occurred while resetting history. Please try again.");
-      };
-    }
+    request.onerror = (event) => {
+      console.error("Error clearing history:", event.target.error);
+      alert("An error occurred while resetting history. Please try again.");
+    };
   }
+}
+
 };
