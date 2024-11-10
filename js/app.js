@@ -12,7 +12,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let currentExercise = null;
     let trainingMax = {};
-    let firstSave = false; // Flag to track if it's the first save after initialization
     const setPercentages = { 1: [0.65, 0.75, 0.85], 2: [0.70, 0.80, 0.90], 3: [0.75, 0.85, 0.95] };
     const setReps = { 1: [5, 5, 5], 2: [3, 3, 3], 3: [5, 3, 1] };
 
@@ -68,7 +67,6 @@ document.addEventListener("DOMContentLoaded", () => {
         date: null
       });
 
-      firstSave = true; // Set flag to ensure the first save logs as Week 1
       document.getElementById("initialization").style.display = "none";
       document.getElementById("tracker").style.display = "block";
       displayCurrentWorkout();
@@ -120,16 +118,14 @@ document.addEventListener("DOMContentLoaded", () => {
       request.onsuccess = (event) => {
         const records = event.target.result;
 
-        // Set initial values for cycle, week, and training max
         let cycle, week, trainingMax;
 
-        if (firstSave) {
-          // First save after initialization; start at Cycle 1, Week 1
+        if (records.length === 0) {
+          // No prior records; start at Cycle 1, Week 1
           cycle = 1;
           week = 1;
           trainingMax = trainingMax[currentExercise];
-          firstSave = false; // Reset the flag after first save
-        } else if (records.length > 0) {
+        } else {
           // Continue from the last saved entry if there are prior records
           const lastEntry = records[records.length - 1];
           ({ cycle, week, trainingMax } = lastEntry);
@@ -142,11 +138,6 @@ document.addEventListener("DOMContentLoaded", () => {
           } else {
             week += 1;
           }
-        } else {
-          // If for some reason there's no prior entry, fallback to defaults
-          cycle = 1;
-          week = 1;
-          trainingMax = trainingMax[currentExercise];
         }
 
         store.add({
