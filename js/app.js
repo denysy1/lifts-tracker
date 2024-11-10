@@ -126,9 +126,8 @@ document.addEventListener("DOMContentLoaded", () => {
         let week = lastEntry.week;
         let trainingMax = lastEntry.trainingMax;
     
-        // If this is not the initialization entry (has no amrapReps yet)
+        // Calculate next entry's values
         if (lastEntry.amrapReps !== null) {
-          // Determine next week and cycle
           if (week === 3) {
             trainingMax += amrapReps >= 1 ? 5 : -5;
             week = 1;
@@ -137,24 +136,32 @@ document.addEventListener("DOMContentLoaded", () => {
             week += 1;
           }
     
-          // Add new entry
-          store.add({
+          const newEntry = {
             exercise: currentExercise,
             cycle,
             week,
             trainingMax,
             amrapReps,
             date: new Date().toLocaleString()
-          });
+          };
+    
+          // Add new entry and wait for it to complete
+          const addRequest = store.add(newEntry);
+          addRequest.onsuccess = () => {
+            alert("Progress saved!");
+            // Pass the new entry data directly to displayCurrentWorkout
+            displayCurrentWorkout(newEntry);
+          };
         } else {
-          // Update the initialization entry with AMRAP reps
+          // Update the initialization entry
           lastEntry.amrapReps = amrapReps;
           lastEntry.date = new Date().toLocaleString();
-          store.put(lastEntry);
+          const putRequest = store.put(lastEntry);
+          putRequest.onsuccess = () => {
+            alert("Progress saved!");
+            displayCurrentWorkout(lastEntry);
+          };
         }
-    
-        alert("Progress saved!");
-        displayCurrentWorkout();
       };
     }
 
