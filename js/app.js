@@ -113,12 +113,31 @@ document.addEventListener("DOMContentLoaded", () => {
           const lastEntry = records[records.length - 1];
           ({ cycle, week, trainingMax } = lastEntry);
 
-          if (week === 3) {
-            trainingMax += amrapReps >= 1 ? 5 : -5;
-            week = 1;
-            cycle += 1;
+          // If this is the first entry and it has null amrapReps, update it instead of creating new
+          if (records.length === 1 && lastEntry.amrapReps === null) {
+            store.put({
+              ...lastEntry,
+              amrapReps,
+              date: new Date().toLocaleString()
+            });
           } else {
-            week += 1;
+            // Normal progression logic
+            if (week === 3) {
+              trainingMax += amrapReps >= 1 ? 5 : -5;
+              week = 1;
+              cycle += 1;
+            } else {
+              week += 1;
+            }
+
+            store.add({
+              exercise: currentExercise,
+              cycle,
+              week,
+              trainingMax,
+              amrapReps,
+              date: new Date().toLocaleString()
+            });
           }
 
         } else {
@@ -126,16 +145,16 @@ document.addEventListener("DOMContentLoaded", () => {
           cycle = 1;
           week = 1;
           trainingMax = trainingMax[currentExercise];
-        }
 
-        store.add({
-          exercise: currentExercise,
-          cycle,
-          week,
-          trainingMax,
-          amrapReps,
-          date: new Date().toLocaleString()
-        });
+          store.add({
+            exercise: currentExercise,
+            cycle,
+            week,
+            trainingMax,
+            amrapReps,
+            date: new Date().toLocaleString()
+          });
+        }
 
         alert("Progress saved!");
         displayCurrentWorkout({ cycle, week, trainingMax });
