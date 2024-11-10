@@ -4,57 +4,53 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lifts Tracker</title>
-  <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="css/styles.css">
+  <link rel="manifest" href="/lifts-tracker/manifest.webmanifest">
+  <link rel="stylesheet" href="/lifts-tracker/css/styles.css">
 </head>
 <body>
-  <div class="container">
-    <h1>Lifts Tracker</h1>
-
-    <!-- Exercise Selection Buttons in a Row -->
-    <div id="exercise-buttons" class="button-row">
-      <button id="overhead-press-btn">OP</button>
-      <button id="bench-press-btn">BE</button>
-      <button id="squat-btn">SQ</button>
-      <button id="deadlift-btn">DL</button>
-    </div>
-
-    <!-- Initialization for each exercise -->
-    <div id="initialization" style="display: none;">
-      <h2>Initialize Training Max</h2>
-      <label for="trainingMaxInput">Enter 1RM:</label>
-      <input type="number" id="trainingMaxInput" placeholder="Enter 1RM">
-      <button id="initializeExercise">Initialize</button>
-    </div>
-
-    <!-- Prescribed Sets and AMRAP Reps -->
-    <div id="tracker" style="display: none;">
-      <h3 id="exerciseName"></h3>
-      <h4>Cycle: <span id="cycleNumber"></span>, Week: <span id="weekNumber"></span></h4>
-
-      <div id="prescribedSets"></div>
-
-      <label for="amrap">AMRAP Reps:</label>
-      <div style="display: flex; gap: 5px; align-items: center;">
-        <button id="amrap-minus">-</button>
-        <input type="number" id="amrap">
-        <button id="amrap-plus">+</button>
-      </div>
-
-      <button id="save">Save Progress</button>
-      <button id="clear-last-entry">Clear Last Entry</button>
-      <button id="view-history">View History</button>
-    </div>
-
-    <!-- History Section -->
-    <div id="history" class="history-container"></div>
+  <h1>Lifts Tracker</h1>
+  
+  <!-- Exercise Selection Buttons -->
+  <div>
+    <button id="overhead-press-btn">OP</button>
+    <button id="bench-press-btn">BE</button>
+    <button id="squat-btn">SQ</button>
+    <button id="deadlift-btn">DL</button>
   </div>
-
-  <script>
-    if (navigator.serviceWorker) {
-      navigator.serviceWorker.register('sw.js');
-    }
-  </script>
-  <script src="js/app.js"></script>
+  
+  <!-- Current Exercise Display -->
+  <h2 id="exerciseName">Select an Exercise</h2>
+  
+  <!-- Initialization Section -->
+  <div id="initialization" style="display: none;">
+    <label for="trainingMaxInput">Enter 1-Rep Max (1RM):</label>
+    <input type="number" id="trainingMaxInput">
+    <button id="initializeExercise">Initialize</button>
+  </div>
+  
+  <!-- Tracker Section -->
+  <div id="tracker" style="display: none;">
+    <h3>Cycle: <span id="cycleNumber"></span>, Week: <span id="weekNumber"></span></h3>
+    <div id="prescribedSets"></div>
+    <label for="amrap">AMRAP Reps:</label>
+    <input type="number" id="amrap">
+    <button id="amrap-plus">+</button>
+    <button id="amrap-minus">-</button>
+    <button id="save">Save Progress</button>
+  </div>
+  
+  <!-- History and Utility Buttons -->
+  <div>
+    <button id="view-history">View History</button>
+    <button id="clear-last-entry">Clear Last Entry</button>
+    <button id="export-history">Export History</button>
+    <label for="import-history" style="cursor: pointer;">Import History</label>
+    <input type="file" id="import-history" style="display: none;">
+  </div>
+  
+  <!-- History Display -->
+  <div id="history"></div>
+  
+  <script src="/lifts-tracker/js/app.js"></script>
 </body>
 </html>
