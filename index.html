@@ -6,6 +6,7 @@
   <title>Lifts Tracker</title>
   <link rel="manifest" href="/lifts-tracker/manifest.webmanifest">
   <link rel="stylesheet" href="/lifts-tracker/css/styles.css">
+  <link rel="icon" href="/lifts-tracker/img/favicon.ico" type="image/x-icon">
 </head>
 <body>
   <h1>Lifts Tracker</h1>
@@ -24,7 +25,7 @@
   <!-- Initialization Section -->
   <div id="initialization" style="display: none;">
     <label for="trainingMaxInput">Enter 1-Rep Max (1RM):</label>
-    <input type="number" id="trainingMaxInput">
+    <input type="number" id="trainingMaxInput" min="1" required>
     <button id="initializeExercise">Initialize</button>
   </div>
 
@@ -33,7 +34,7 @@
     <h3>Cycle: <span id="cycleNumber"></span>, Week: <span id="weekNumber"></span></h3>
     <div id="prescribedSets"></div>
     <label for="amrap">AMRAP Reps:</label>
-    <input type="number" id="amrap">
+    <input type="number" id="amrap" min="0" required>
     <div id="amrap-controls">
       <button id="amrap-plus">+</button>
       <button id="amrap-minus">-</button>
@@ -52,6 +53,11 @@
 
   <!-- History Display -->
   <div id="history"></div>
+
+  <!-- Offline Notification -->
+  <div id="offline-notification" style="display: none; color: red;">
+    You are currently offline. Some features may not be available.
+  </div>
 
   <script src="/lifts-tracker/js/app.js"></script>
 </body>
