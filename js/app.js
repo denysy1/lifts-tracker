@@ -118,10 +118,16 @@ document.addEventListener("DOMContentLoaded", () => {
       request.onsuccess = (event) => {
         const records = event.target.result;
 
-        // Check if this is the first save after initialization
+        // Set initial values for cycle, week, and training max
         let cycle, week, trainingMax;
 
-        if (records.length > 0) {
+        if (records.length === 0) {
+          // No prior records; start at Cycle 1, Week 1
+          cycle = 1;
+          week = 1;
+          trainingMax = trainingMax[currentExercise];
+        } else {
+          // Continue from the last saved entry
           const lastEntry = records[records.length - 1];
           ({ cycle, week, trainingMax } = lastEntry);
 
@@ -133,11 +139,6 @@ document.addEventListener("DOMContentLoaded", () => {
           } else {
             week += 1;
           }
-        } else {
-          // Start from Cycle 1, Week 1 if no prior history exists
-          cycle = 1;
-          week = 1;
-          trainingMax = trainingMax[currentExercise];
         }
 
         store.add({
