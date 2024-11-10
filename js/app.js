@@ -169,7 +169,12 @@ document.addEventListener("DOMContentLoaded", () => {
             if (isDeloadWeek) {
                 // Skip saving progress and reset consecutiveLowAMRAP after deload week
                 alert("Deload Week: Rest and recovery. No progress saved.");
-                consecutiveLowAMRAP[currentExercise] = 0;
+                consecutiveLowAMRAP[currentExercise] = 0; // Reset only after deload week completes
+                
+                // Pass the last record data to displayCurrentWorkout to show Week 1 of the next cycle
+                const lastRecord = records[records.length - 1];
+                displayCurrentWorkout(lastRecord);
+                
                 return; // Exit the function without saving
             }
     
@@ -269,7 +274,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
               records.forEach(record => {
                   if (record.date && record.amrapReps !== null) {
-                      historyHtml += `<p>${record.date}: Cycle ${record.cycle}, Week ${record.week}, Training Max: ${record.trainingMax} lbs, AMRAP Reps: ${record.amrapReps}</p>`;
+                      historyHtml += `<p>${record.date}: Cycle ${record.cycle}, Week ${record.week}, Training Max Decision: ${record.trainingMax} lbs, AMRAP Reps: ${record.amrapReps}</p>`;
                   }
               });
 
