@@ -166,31 +166,36 @@ document.addEventListener("DOMContentLoaded", () => {
             let week = lastEntry.week;
             let trainingMax = lastEntry.trainingMax;
     
-            // Calculate next entry's values
+            // Check if it's the third week and determine training max adjustments
             if (lastEntry.amrapReps !== null) {
-                // Advance week and cycle appropriately
                 if (week === 3) {
-                                // Logic to update training max based on AMRAP reps
-                    if (amrapReps >= 1) {
-                      trainingMax += increment;
-                      if (amrapReps >= 10) trainingMax += 5;
-                      if (amrapReps >= 15) trainingMax += 5;
-                      if (amrapReps >= 20) trainingMax += 5;
-                      if (amrapReps >= 25) trainingMax += 5;
-                      if (amrapReps >= 30) trainingMax += 5;
-                      consecutiveLowAMRAP[currentExercise] = 0; // Reset counter for good performance
+                    // Adjust training max based on AMRAP performance
+                    if (amrapReps > 0) {
+                        // Increment training max by baseline increment
+                        trainingMax += increment;
+    
+                        // Add additional increments based on high AMRAP reps
+                        if (amrapReps >= 10) trainingMax += 5;
+                        if (amrapReps >= 15) trainingMax += 5;
+                        if (amrapReps >= 20) trainingMax += 5;
+                        if (amrapReps >= 25) trainingMax += 5;
+                        if (amrapReps >= 30) trainingMax += 5;
+    
+                        consecutiveLowAMRAP[currentExercise] = 0; // Reset counter for good performance
                     } else {
+                        // If AMRAP is 0, decrement training max by the baseline increment
                         trainingMax -= increment;
-                        if (amrapReps < 5) {
-                            consecutiveLowAMRAP[currentExercise] += 1; // Increment consecutive low AMRAP counter
-                        }
+                        consecutiveLowAMRAP[currentExercise] += 1; // Track consecutive low AMRAP
                     }
+    
+                    // Reset week to 1 and increment cycle
                     week = 1;
                     cycle += 1;
                 } else {
+                    // For weeks other than week 3, simply advance to the next week
                     week += 1;
                 }
-        
+    
                 const newEntry = {
                     exercise: currentExercise,
                     cycle,
@@ -198,9 +203,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     trainingMax,
                     amrapReps,
                     date: new Date().toLocaleString(),
-                    consecutiveLowAMRAP: consecutiveLowAMRAP[currentExercise] // Save updated value
+                    consecutiveLowAMRAP: consecutiveLowAMRAP[currentExercise]
                 };
-        
+    
                 // Add new entry and display the updated workout
                 const addRequest = store.add(newEntry);
                 addRequest.onsuccess = () => {
@@ -208,7 +213,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     displayCurrentWorkout(newEntry);
                 };
             } else {
-                // Update the initialization entry if it's the first time saving
+                // Handle initialization case if it's the first time saving
                 week += 1;
                 lastEntry.amrapReps = amrapReps;
                 lastEntry.week = week;
@@ -222,7 +227,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 };
             }
         };
-      }
+    }
+    
     
 
       function clearLastEntry() {
