@@ -9,53 +9,28 @@ request.onupgradeneeded = (event) => {
 request.onsuccess = (event) => {
   const db = event.target.result;
 
+  let currentExercise = null;
   let trainingMax = {};
   const setPercentages = { 1: [0.65, 0.75, 0.85], 2: [0.70, 0.80, 0.90], 3: [0.75, 0.85, 0.95] };
   const setReps = { 1: [5, 5, 5], 2: [3, 3, 3], 3: [5, 3, 1] };
 
-  document.getElementById("initialize").onclick = initializeTrainingMax;
-  document.getElementById("exercise").onchange = displayCurrentWorkout;
+  // Exercise buttons
+  document.getElementById("overhead-press-btn").onclick = () => selectExercise("Overhead Press");
+  document.getElementById("bench-press-btn").onclick = () => selectExercise("Bench Press");
+  document.getElementById("squat-btn").onclick = () => selectExercise("Squat");
+  document.getElementById("deadlift-btn").onclick = () => selectExercise("Deadlift");
+
+  // Initialization and Save buttons
+  document.getElementById("initializeExercise").onclick = initializeTrainingMax;
   document.getElementById("save").onclick = saveProgress;
+  document.getElementById("clear-last-entry").onclick = clearLastEntry;
   document.getElementById("view-history").onclick = viewHistory;
-  document.getElementById("reset-history").onclick = resetHistory;
   document.getElementById("amrap-plus").onclick = () => adjustAmrapReps(1);
   document.getElementById("amrap-minus").onclick = () => adjustAmrapReps(-1);
 
-  function initializeTrainingMax() {
-    const oneRepMaxes = {
-      "Overhead Press": parseInt(document.getElementById("overheadPressMax").value),
-      "Bench Press": parseInt(document.getElementById("benchPressMax").value),
-      "Squat": parseInt(document.getElementById("squatMax").value),
-      "Deadlift": parseInt(document.getElementById("deadliftMax").value)
-    };
-
-    for (const exercise in oneRepMaxes) {
-      trainingMax[exercise] = Math.floor(oneRepMaxes[exercise] * 0.9); // 90% of 1RM
-      saveInitialData(exercise, trainingMax[exercise]);
-    }
-
-    document.getElementById("setup").style.display = "none";
-    document.getElementById("tracker").style.display = "block";
-    displayCurrentWorkout(); // Load the data for the selected exercise
-  }
-
-  function saveInitialData(exercise, initialTrainingMax) {
-    // Store the initial training max in memory but don’t add to history
-    const transaction = db.transaction(["lifts"], "readwrite");
-    const store = transaction.objectStore("lifts");
-
-    store.put({
-      exercise,
-      cycle: 1,
-      week: 1,
-      trainingMax: initialTrainingMax,
-      amrapReps: null, // Set AMRAP Reps as null to indicate it's uninitialized
-      date: null // Set date to null, so it doesn't show in history
-    });
-  }
-
-  function displayCurrentWorkout() {
-    const exercise = document.getElementById("exercise").value;
+  function selectExercise(exercise) {
+    currentExercise = exercise;
+    document.getElementById("exerciseName").textContent = exercise;
 
     const transaction = db.transaction(["lifts"], "readonly");
     const store = transaction.objectStore("lifts");
@@ -64,31 +39,68 @@ request.onsuccess = (event) => {
 
     request.onsuccess = (event) => {
       const records = event.target.result;
-      if (records.length > 0) {
-        const data = records[records.length - 1];
-        trainingMax[exercise] = data.trainingMax;
 
-        let cycle = data.cycle;
-        let week = data.week;
-        document.getElementById("cycleNumber").textContent = cycle;
-        document.getElementById("weekNumber").textContent = week;
-
-        const weightPercents = setPercentages[week];
-        const reps = setReps[week];
-        const weights = weightPercents.map(percent => Math.round(trainingMax[exercise] * percent));
-
-        let setsHtml = "<h3>Prescribed Sets</h3>";
-        weights.forEach((weight, i) => {
-          setsHtml += `<p>Set ${i + 1}: ${weight} lbs x ${reps[i]} reps</p>`;
-        });
-        document.getElementById("prescribedSets").innerHTML = setsHtml;
-
-        document.getElementById("amrap").value = reps[2]; // Default AMRAP reps to set 3 target
+      if (records.length === 0) {
+        // No history found, show initialization
+        document.getElementById("initialization").style.display = "block";
+        document.getElementById("tracker").style.display = "none";
       } else {
-        document.getElementById("cycleNumber").textContent = "1";
-        document.getElementById("weekNumber").textContent = "1";
-        document.getElementById("prescribedSets").innerHTML = "<p>Please initialize the training max.</p>";
+        // History found, display current workout
+        document.getElementById("initialization").style.display = "none";
+        document.getElementById("tracker").style.display = "block";
+        displayCurrentWorkout();
       }
+    };
+  }
+
+  function initializeTrainingMax() {
+    const oneRepMax = parseInt(document.getElementById("trainingMaxInput").value);
+    trainingMax[currentExercise] = Math.floor(oneRepMax * 0.9); // 90% of 1RM
+
+    const transaction = db.transaction(["lifts"], "readwrite");
+    const store = transaction.objectStore("lifts");
+
+    store.add({
+      exercise: currentExercise,
+      cycle: 1,
+      week: 1,
+      trainingMax: trainingMax[currentExercise],
+      amrapReps: null,
+      date: null
+    });
+
+    document.getElementById("initialization").style.display = "none";
+    document.getElementById("tracker").style.display = "block";
+    displayCurrentWorkout();
+  }
+
+  function displayCurrentWorkout() {
+    const transaction = db.transaction(["lifts"], "readonly");
+    const store = transaction.objectStore("lifts");
+    const index = store.index("exercise");
+    const request = index.getAll(currentExercise);
+
+    request.onsuccess = (event) => {
+      const records = event.target.result;
+      const data = records[records.length - 1];
+      trainingMax[currentExercise] = data.trainingMax;
+
+      let cycle = data.cycle;
+      let week = data.week;
+      document.getElementById("cycleNumber").textContent = cycle;
+      document.getElementById("weekNumber").textContent = week;
+
+      const weightPercents = setPercentages[week];
+      const reps = setReps[week];
+      const weights = weightPercents.map(percent => Math.round(trainingMax[currentExercise] * percent));
+
+      let setsHtml = "<h3>Prescribed Sets</h3>";
+      weights.forEach((weight, i) => {
+        setsHtml += `<p>Set ${i + 1}: ${weight} lbs x ${reps[i]} reps</p>`;
+      });
+      document.getElementById("prescribedSets").innerHTML = setsHtml;
+
+      document.getElementById("amrap").value = reps[2]; // Default AMRAP reps to set 3 target
     };
   }
 
@@ -97,26 +109,19 @@ request.onsuccess = (event) => {
     amrapInput.value = parseInt(amrapInput.value) + change;
   }
 
-function saveProgress() {
-  const exercise = document.getElementById("exercise").value;
-  const amrapReps = parseInt(document.getElementById("amrap").value);
+  function saveProgress() {
+    const amrapReps = parseInt(document.getElementById("amrap").value);
 
-  const transaction = db.transaction(["lifts"], "readwrite");
-  const store = transaction.objectStore("lifts");
+    const transaction = db.transaction(["lifts"], "readwrite");
+    const store = transaction.objectStore("lifts");
 
-  const request = store.index("exercise").getAll(exercise);
+    const request = store.index("exercise").getAll(currentExercise);
 
-  request.onsuccess = (event) => {
-    const records = event.target.result;
-    
-    let cycle, week, trainingMax;
-
-    if (records.length > 0) {
-      // If there's an existing record, get the last entry
+    request.onsuccess = (event) => {
+      const records = event.target.result;
       const lastEntry = records[records.length - 1];
-      ({ cycle, week, trainingMax } = lastEntry);
+      let { cycle, week, trainingMax } = lastEntry;
 
-      // Determine next week and cycle
       if (week === 3) {
         trainingMax += amrapReps >= 1 ? 5 : -5;
         week = 1;
@@ -124,72 +129,22 @@ function saveProgress() {
       } else {
         week += 1;
       }
-    } else {
-      // No previous record, so start from Cycle 1, Week 1
-      cycle = 1;
-      week = 1;
-      trainingMax = trainingMax[exercise]; // Use initial training max
-    }
 
-    // Save the new progress entry
-    store.add({
-      exercise,
-      cycle,
-      week,
-      trainingMax,
-      amrapReps,
-      date: new Date().toLocaleString()
-    });
-
-    alert("Progress saved!");
-    displayCurrentWorkout(); // Reload workout details for the updated cycle and week
-  };
-}
-
-
-  function viewHistory() {
-    const exercise = document.getElementById("exercise").value;
-
-    const transaction = db.transaction(["lifts"], "readonly");
-    const store = transaction.objectStore("lifts");
-    const request = store.index("exercise").getAll(exercise);
-
-    request.onsuccess = (event) => {
-      const records = event.target.result;
-      let historyHtml = `<h2>History for ${exercise}</h2>`;
-
-      records.forEach(record => {
-        if (record.date && record.amrapReps !== null) { // Only show entries with actual data
-          historyHtml += `<p>${record.date}: Cycle ${record.cycle}, Week ${record.week}, Training Max: ${record.trainingMax} lbs, AMRAP Reps: ${record.amrapReps}</p>`;
-        }
+      store.add({
+        exercise: currentExercise,
+        cycle,
+        week,
+        trainingMax,
+        amrapReps,
+        date: new Date().toLocaleString()
       });
 
-      document.getElementById("history").innerHTML = historyHtml;
+      alert("Progress saved!");
+      displayCurrentWorkout();
     };
   }
 
-function resetHistory() {
-  const exercise = document.getElementById("exercise").value;
-  
-  if (confirm(`Are you sure you want to reset all history for ${exercise}? This action cannot be undone.`)) {
+  function clearLastEntry() {
     const transaction = db.transaction(["lifts"], "readwrite");
     const store = transaction.objectStore("lifts");
-    const index = store.index("exercise");
-    const request = index.getAllKeys(exercise);
-
-    request.onsuccess = (event) => {
-      const keys = event.target.result;
-      keys.forEach(key => store.delete(key));
-
-      alert(`History for ${exercise} has been reset.`);
-      location.reload(); // Reload the page to reset the state
-    };
-
-    request.onerror = (event) => {
-      console.error("Error clearing history:", event.target.error);
-      alert("An error occurred while resetting history. Please try again.");
-    };
-  }
-}
-
-};
+    const
