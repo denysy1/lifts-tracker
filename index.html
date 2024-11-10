@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gym Tracker</title>
+  <link rel="canonical" href="https://your-username.github.io/gym-tracker/" />
+  <link rel="manifest" href="/gym-tracker/manifest.webmanifest">
+  <link rel="stylesheet" href="/gym-tracker/css/styles.css">
+</head>
+<body>
+  <h1>Gym Tracker</h1>
+
+  <div class="tracker">
+    <label for="exercise">Exercise:</label>
+    <select id="exercise">
+      <option value="Overhead Press">Overhead Press</option>
+      <option value="Bench Press">Bench Press</option>
+      <option value="Squat">Squat</option>
+      <option value="Deadlift">Deadlift</option>
+    </select>
+    
+    <label for="trainingMax">Training Max (lbs):</label>
+    <input type="number" id="trainingMax">
+
+    <button id="calculate">Calculate Sets</button>
+
+    <div id="prescribedSets"></div>
+
+    <label for="amrap">AMRAP Reps:</label>
+    <input type="number" id="amrap">
+
+    <button id="save">Save Progress</button>
+    <button id="view-history">View History</button>
+  </div>
+
+  <div id="history"></div>
+
+  <script>
+    if (navigator.serviceWorker) {
+      navigator.serviceWorker.register(
+        '/gym-tracker/sw.js',
+        { scope: '/gym-tracker/' }
+      );
+    }
+  </script>
+  <script src="/gym-tracker/js/app.js"></script>
+</body>
+</html>
