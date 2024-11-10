@@ -97,20 +97,26 @@ request.onsuccess = (event) => {
     amrapInput.value = parseInt(amrapInput.value) + change;
   }
 
-  function saveProgress() {
-    const exercise = document.getElementById("exercise").value;
-    const amrapReps = parseInt(document.getElementById("amrap").value);
+function saveProgress() {
+  const exercise = document.getElementById("exercise").value;
+  const amrapReps = parseInt(document.getElementById("amrap").value);
 
-    const transaction = db.transaction(["lifts"], "readwrite");
-    const store = transaction.objectStore("lifts");
+  const transaction = db.transaction(["lifts"], "readwrite");
+  const store = transaction.objectStore("lifts");
 
-    const request = store.index("exercise").getAll(exercise);
+  const request = store.index("exercise").getAll(exercise);
 
-    request.onsuccess = (event) => {
-      const records = event.target.result;
+  request.onsuccess = (event) => {
+    const records = event.target.result;
+    
+    let cycle, week, trainingMax;
+
+    if (records.length > 0) {
+      // If there's an existing record, get the last entry
       const lastEntry = records[records.length - 1];
-      let { cycle, week, trainingMax } = lastEntry;
+      ({ cycle, week, trainingMax } = lastEntry);
 
+      // Determine next week and cycle
       if (week === 3) {
         trainingMax += amrapReps >= 1 ? 5 : -5;
         week = 1;
@@ -118,20 +124,28 @@ request.onsuccess = (event) => {
       } else {
         week += 1;
       }
+    } else {
+      // No previous record, so start from Cycle 1, Week 1
+      cycle = 1;
+      week = 1;
+      trainingMax = trainingMax[exercise]; // Use initial training max
+    }
 
-      store.add({
-        exercise,
-        cycle,
-        week,
-        trainingMax,
-        amrapReps,
-        date: new Date().toLocaleString()
-      });
+    // Save the new progress entry
+    store.add({
+      exercise,
+      cycle,
+      week,
+      trainingMax,
+      amrapReps,
+      date: new Date().toLocaleString()
+    });
 
-      alert("Progress saved!");
-      displayCurrentWorkout(); // Reload workout details for the updated cycle and week
-    };
-  }
+    alert("Progress saved!");
+    displayCurrentWorkout(); // Reload workout details for the updated cycle and week
+  };
+}
+
 
   function viewHistory() {
     const exercise = document.getElementById("exercise").value;
