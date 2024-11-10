@@ -1,5 +1,5 @@
-const GHPATH = '/gym-tracker';
-const APP_PREFIX = 'gymtracker_';
+const GHPATH = '/lifts-tracker';
+const APP_PREFIX = 'liftstracker_';
 const VERSION = 'version_01';
 const URLS = [    
   `${GHPATH}/`,
