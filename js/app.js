@@ -219,11 +219,12 @@ document.addEventListener("DOMContentLoaded", () => {
                         consecutiveLowAMRAP[currentExercise] += 1;
                         console.log(`AMRAP = 0: Decrementing Training Max by ${increment}. New Training Max = ${trainingMax}`);
                     }
-    
-                    // Move to next cycle
-                    lastWeek = 0;
+
+                } else if (lastWeek === 3) {
+                    lastWeek = 1;
                     cycle += 1;
                     console.log(`Advancing to next cycle: Cycle ${cycle}, Week ${lastWeek}`);
+
                 } else {
                     lastWeek += 1;
                     console.log(`Advancing to next week: Week ${lastWeek}`);
