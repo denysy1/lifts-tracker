@@ -178,26 +178,24 @@ document.addEventListener("DOMContentLoaded", () => {
     
                 // Regular week and cycle progression
                 if (week === 3) {
-                    // End of cycle, update training max based on AMRAP and reset to week 1 in the new cycle
                     week = 1;
                     cycle++;
-                    
-                    // AMRAP adjustments for new cycle's training max
-                    if (amrapReps >= 0) {
-                        if (amrapReps === 0) {
-                            trainingMax -= increment;
-                            consecutiveLowAMRAP[currentExercise]++;
-                        } else {
-                            trainingMax += increment;
-                            if (amrapReps >= 10) trainingMax += 5;
-                            if (amrapReps >= 15) trainingMax += 5;
-                            if (amrapReps >= 20) trainingMax += 5;
-                            consecutiveLowAMRAP[currentExercise] = 0;
-                        }
-                    }
                 } else {
-                    // Advance to the next week within the same cycle
                     week++;
+                }
+            }
+    
+            // Handle AMRAP adjustments for non-initial weeks
+            if (!isFirstSave && week === 3 && amrapReps >= 0) {
+                if (amrapReps === 0) {
+                    trainingMax -= increment;
+                    consecutiveLowAMRAP[currentExercise]++;
+                } else {
+                    trainingMax += increment;
+                    if (amrapReps >= 10) trainingMax += 5;
+                    if (amrapReps >= 15) trainingMax += 5;
+                    if (amrapReps >= 20) trainingMax += 5;
+                    consecutiveLowAMRAP[currentExercise] = 0;
                 }
             }
     
@@ -224,7 +222,6 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error("Error retrieving last entry:", err);
         };
     }
-    
     
     
     
