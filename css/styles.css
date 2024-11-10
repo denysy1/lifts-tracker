@@ -8,6 +8,7 @@ body {
   padding: 20px;
   background-color: #f4f4f9;
   color: #333;
+  text-align: center;
 }
 
 /* Title and Headings */
@@ -20,41 +21,56 @@ h2, h3 {
   margin: 10px 0;
 }
 
-/* Button Layout */
+/* Button Styling */
 button {
-  background-color: #007bff;
-  color: white;
   border: none;
   padding: 10px 20px;
   margin: 5px;
   cursor: pointer;
   border-radius: 5px;
   font-size: 1rem;
+  color: white;
 }
 
 button:hover {
+  opacity: 0.9;
+}
+
+/* Exercise Selection Buttons Row */
+#overhead-press-btn, #bench-press-btn, #squat-btn, #deadlift-btn {
+  background-color: #007bff;
+  display: inline-block;
+  margin: 0 5px;
+}
+
+#overhead-press-btn:hover, #bench-press-btn:hover, #squat-btn:hover, #deadlift-btn:hover {
   background-color: #0056b3;
 }
 
-/* Container for Exercise Buttons */
-div {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 20px;
+/* Save and Clear Buttons */
+#save {
+  background-color: #28a745; /* Green for Save */
+  margin-top: 10px;
 }
 
-/* Horizontal Layout for Exercise Buttons */
-#overhead-press-btn, #bench-press-btn, #squat-btn, #deadlift-btn {
-  display: inline-block;
-  margin: 0 5px;
+#save:hover {
+  background-color: #218838;
+}
+
+#clear-last-entry {
+  background-color: #dc3545; /* Red for Clear */
+  margin-top: 10px;
+}
+
+#clear-last-entry:hover {
+  background-color: #c82333;
 }
 
 /* Initialization and Tracker Sections */
 #initialization, #tracker {
   width: 100%;
   max-width: 400px;
-  text-align: left;
+  text-align: center;
   margin-bottom: 20px;
 }
 
@@ -64,18 +80,41 @@ label {
   font-weight: bold;
 }
 
+/* AMRAP Input Styling */
 input[type="number"] {
-  width: 100%;
+  width: 80px;
   padding: 8px;
   margin-top: 5px;
   border-radius: 5px;
   border: 1px solid #ccc;
-  font-size: 1rem;
+  font-size: 1.2rem;
+  text-align: center;
 }
 
-/* Layout for AMRAP Controls */
+/* Center Plus and Minus Buttons */
 #amrap-plus, #amrap-minus {
   margin: 5px;
+  padding: 5px 15px;
+  font-size: 1.2rem;
+}
+
+#amrap-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 10px;
+}
+
+/* History and Utility Buttons */
+#export-history, #import-history, #view-history {
+  background-color: #007bff;
+  width: 100%;
+  max-width: 200px;
+  margin-top: 10px;
+}
+
+#export-history:hover, #import-history:hover, #view-history:hover {
+  background-color: #0056b3;
 }
 
 /* History Display */
@@ -90,10 +129,4 @@ input[type="number"] {
 
 #prescribedSets {
   margin-top: 10px;
-}
-
-#export-history, #import-history, #view-history, #clear-last-entry {
-  margin-top: 10px;
-  width: 100%;
-  max-width: 200px;
 }
