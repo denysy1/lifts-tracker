@@ -66,7 +66,7 @@ button:hover {
 }
 
 /* Plus, Minus, Initialize and Import History Buttons */
-#amrap-plus, #amrap-minus, #initializeExercise, #import-history {
+#amrap-plus, #amrap-minus, #initializeExercise, #import-history, #export-history, #view-history {
   background-color: #343a40;
 }
 
