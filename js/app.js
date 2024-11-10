@@ -204,6 +204,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     trainingMax -= increment;
                     consecutiveLowAMRAP[currentExercise]++;
                 } else if (amrapReps < 5) {
+                    trainingMax += increment;
                     consecutiveLowAMRAP[currentExercise]++;
                 } else {
                     trainingMax += increment;
