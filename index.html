@@ -1,52 +1,47 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gym Tracker</title>
-  <link rel="canonical" href="https://denysy1.github.io/lifts-tracker/" />
-  <link rel="manifest" href="/lifts-tracker/manifest.webmanifest">
-  <link rel="stylesheet" href="/lifts-tracker/css/styles.css">
-</head>
 <body>
-  <h1>Gym Tracker</h1>
+  <div class="container">
+    <h1>Lifts Tracker</h1>
 
-  <div id="setup">
-    <h2>Initialize Training Max</h2>
-    <label for="overheadPressMax">Overhead Press 1RM:</label>
-    <input type="number" id="overheadPressMax">
-    <label for="benchPressMax">Bench Press 1RM:</label>
-    <input type="number" id="benchPressMax">
-    <label for="squatMax">Squat 1RM:</label>
-    <input type="number" id="squatMax">
-    <label for="deadliftMax">Deadlift 1RM:</label>
-    <input type="number" id="deadliftMax">
-    <button id="initialize">Initialize</button>
+    <div id="setup">
+      <h2>Initialize Training Max</h2>
+      <label for="overheadPressMax">Overhead Press 1RM:</label>
+      <input type="number" id="overheadPressMax">
+      <label for="benchPressMax">Bench Press 1RM:</label>
+      <input type="number" id="benchPressMax">
+      <label for="squatMax">Squat 1RM:</label>
+      <input type="number" id="squatMax">
+      <label for="deadliftMax">Deadlift 1RM:</label>
+      <input type="number" id="deadliftMax">
+      <button id="initialize">Initialize</button>
+    </div>
+
+    <div id="tracker" style="display: none;">
+      <label for="exercise">Exercise:</label>
+      <select id="exercise">
+        <option value="Overhead Press">Overhead Press</option>
+        <option value="Bench Press">Bench Press</option>
+        <option value="Squat">Squat</option>
+        <option value="Deadlift">Deadlift</option>
+      </select>
+
+      <h3>Cycle: <span id="cycleNumber"></span>, Week: <span id="weekNumber"></span></h3>
+
+      <div id="prescribedSets"></div>
+
+      <label for="amrap">AMRAP Reps:</label>
+      <div style="display: flex; gap: 5px; align-items: center;">
+        <button id="amrap-minus">-</button>
+        <input type="number" id="amrap">
+        <button id="amrap-plus">+</button>
+      </div>
+
+      <button id="save">Save Progress</button>
+      <button id="view-history">View History</button>
+      <button id="reset-history">Reset History</button>
+    </div>
+
+    <div id="history" class="history-container"></div>
   </div>
-
-  <div id="tracker" style="display: none;">
-    <label for="exercise">Exercise:</label>
-    <select id="exercise">
-      <option value="Overhead Press">Overhead Press</option>
-      <option value="Bench Press">Bench Press</option>
-      <option value="Squat">Squat</option>
-      <option value="Deadlift">Deadlift</option>
-    </select>
-
-    <h3>Cycle: <span id="cycleNumber"></span>, Week: <span id="weekNumber"></span></h3>
-
-    <div id="prescribedSets"></div>
-
-    <label for="amrap">AMRAP Reps:</label>
-    <input type="number" id="amrap">
-    <button id="amrap-minus">-</button>
-    <button id="amrap-plus">+</button>
-
-    <button id="save">Save Progress</button>
-    <button id="view-history">View History</button>
-  </div>
-
-  <div id="history"></div>
 
   <script>
     if (navigator.serviceWorker) {
@@ -58,4 +53,3 @@
   </script>
   <script src="/lifts-tracker/js/app.js"></script>
 </body>
-</html>
