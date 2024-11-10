@@ -31,26 +31,12 @@ request.onsuccess = (event) => {
 
     for (const exercise in oneRepMaxes) {
       trainingMax[exercise] = Math.floor(oneRepMaxes[exercise] * 0.9); // 90% of 1RM
-      saveInitialData(exercise, trainingMax[exercise]);
+      // Only store training max for reference, no initial entry in history
     }
 
     document.getElementById("setup").style.display = "none";
     document.getElementById("tracker").style.display = "block";
     displayCurrentWorkout(); // Load the data for the selected exercise
-  }
-
-  function saveInitialData(exercise, initialTrainingMax) {
-    const transaction = db.transaction(["lifts"], "readwrite");
-    const store = transaction.objectStore("lifts");
-
-    store.put({
-      exercise,
-      cycle: 1,
-      week: 1,
-      trainingMax: initialTrainingMax,
-      amrapReps: 0,
-      date: new Date().toLocaleString()
-    });
   }
 
   function displayCurrentWorkout() {
@@ -107,11 +93,19 @@ request.onsuccess = (event) => {
 
     request.onsuccess = (event) => {
       const records = event.target.result;
-      const lastEntry = records[records.length - 1];
-      let { cycle, week, trainingMax } = lastEntry;
+      let cycle, week;
+
+      if (records.length > 0) {
+        const lastEntry = records[records.length - 1];
+        ({ cycle, week, trainingMax: trainingMax[exercise] } = lastEntry);
+      } else {
+        // Initialize cycle and week if no records exist
+        cycle = 1;
+        week = 1;
+      }
 
       if (week === 3) {
-        trainingMax += amrapReps >= 1 ? 5 : -5;
+        trainingMax[exercise] += amrapReps >= 1 ? 5 : -5;
         week = 1;
         cycle += 1;
       } else {
@@ -122,7 +116,7 @@ request.onsuccess = (event) => {
         exercise,
         cycle,
         week,
-        trainingMax,
+        trainingMax: trainingMax[exercise],
         amrapReps,
         date: new Date().toLocaleString()
       });
@@ -152,16 +146,14 @@ request.onsuccess = (event) => {
   }
 
   function resetHistory() {
-    const exercise = document.getElementById("exercise").value;
-    
-    if (confirm(`Are you sure you want to reset all history for ${exercise}? This action cannot be undone.`)) {
+    if (confirm("Are you sure you want to reset all history for all exercises? This action cannot be undone.")) {
       const transaction = db.transaction(["lifts"], "readwrite");
       const store = transaction.objectStore("lifts");
 
       const clearRequest = store.clear();
 
       clearRequest.onsuccess = () => {
-        alert(`History for ${exercise} has been reset.`);
+        alert("History for all exercises has been reset.");
         location.reload(); // Reload the page to reset the state
       };
 
