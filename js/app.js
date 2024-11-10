@@ -176,6 +176,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     if (amrapReps > 0) {
                         trainingMax += increment; // Base increment
                         console.log(`Incremented by baseline: New Training Max = ${trainingMax}`);
+                        console.log(`recorded amrapReps = ${amrapReps}`)
     
                         // Additional increments based on AMRAP performance
                         if (amrapReps >= 10) {
