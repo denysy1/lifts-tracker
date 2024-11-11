@@ -1,5 +1,5 @@
 # Lifts Tracker
-Lifts Tracker is a Progressive Web App (PWA) designed to help you asynchronously track your workouts and follow the 5/3/1 periodization scheme for the four main lifts independently of one another. The app incorporated autoregulation and automatic deload week scheduling.
+Lifts Tracker is a Progressive Web App (PWA) designed to help you asynchronously track your workouts and follow the 5/3/1 periodization scheme for the four main lifts independently of one another. The app incorporated autoregulation and automated deload week scheduling.
 
 ## Mobile Installation Instructions
 
