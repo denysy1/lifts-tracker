@@ -94,25 +94,41 @@ document.addEventListener("DOMContentLoaded", () => {
           };
       }
 
+      function displayScaledWeightsForBench(trainingMax, weightPercents) {
+        const scalingFactors = {
+            "Incline Bench Press": 0.9,    // 90% of Bench Press weight
+            "Decline Bench Press": 0.95,   // 95% of Bench Press weight
+            "Dumbbell Press": 0.8,         // 80% of Bench Press weight
+            "Incline Dumbbell Press": 0.75 // 75% of Bench Press weight
+        };
+    
+        let scaledWeightsHtml = "<h3>Alternative Exercise Weights</h3>";
+    
+        for (let [exercise, factor] of Object.entries(scalingFactors)) {
+            const scaledWeights = weightPercents.map(percent => Math.round(trainingMax * percent * factor));
+            scaledWeightsHtml += `<p>${exercise}: ${scaledWeights.join(" lbs, ")} lbs</p>`;
+        }
+    
+        document.getElementById("alternativeWeights").innerHTML = scaledWeightsHtml;
+      }
+      
       function displayCurrentWorkout(initialData) {
           const transaction = db.transaction(["lifts"], "readonly");
           const store = transaction.objectStore("lifts");
           const index = store.index("exercise");
           const request = index.getAll(currentExercise);
-
+      
           request.onsuccess = (event) => {
               const records = event.target.result;
               const lastWorkout = initialData || records[records.length - 1];
               trainingMax[currentExercise] = lastWorkout.trainingMax;
-
+      
               let cycle = lastWorkout.cycle;
               let week = lastWorkout.week;
-
               let isDeloadWeek = consecutiveLowAMRAP[currentExercise] >= 2;
-
+      
               if (isDeloadWeek) {
                   document.getElementById("deloadNotice").textContent = "Deload Week: Reduced volume for recovery";
-                  //consecutiveLowAMRAP[currentExercise] = 0; // Reset counter after deload
               } else {
                   document.getElementById("deloadNotice").textContent = "";
                   if (week === 3) {
@@ -122,17 +138,17 @@ document.addEventListener("DOMContentLoaded", () => {
                       week++;
                   }
               }
-
+      
               document.getElementById("cycleNumber").textContent = cycle;
               document.getElementById("weekNumber").textContent = week;
-
+      
               const weightPercents = setPercentages[week];
               let reps = setReps[week];
-
+      
               if (isDeloadWeek) {
                   reps = reps.map(r => Math.ceil(r * 0.7)); // Reduce reps by 30%
               }
-
+      
               const weights = weightPercents.map(percent => Math.round(trainingMax[currentExercise] * percent));
               let setsHtml = "<h3>Prescribed Sets</h3>";
               weights.forEach((weight, i) => {
@@ -140,10 +156,18 @@ document.addEventListener("DOMContentLoaded", () => {
               });
               document.getElementById("prescribedSets").innerHTML = setsHtml;
               document.getElementById("amrap").value = reps[2];
-
+      
+              // Display alternative weights if "Bench Press" is selected
+              if (currentExercise === "Bench Press") {
+                  displayScaledWeightsForBench(trainingMax[currentExercise], weightPercents);
+              } else {
+                  document.getElementById("alternativeWeights").innerHTML = ""; // Clear if not bench press
+              }
+      
               console.log("Displayed workout for", currentExercise, "Cycle:", cycle, "Week:", week);
           };
       }
+    
 
       function adjustAmrapReps(change) {
           const amrapInput = document.getElementById("amrap");

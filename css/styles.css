@@ -81,3 +81,9 @@ button:hover {
   font-size: 1.1rem;
   margin-bottom: 10px;
 }
+
+#alternativeWeights {
+  margin-top: 10px;
+  font-style: italic;
+  color: #666;
+}
