@@ -17,7 +17,7 @@ Lifts Tracker is a Progressive Web App (PWA) designed to help you asynchronously
 
 Once installed, the app will work offline and behave like a native app.
 
-## Programming
+## Training Programming
 
 #### Autoregulation Based on AMRAP Performance
 Lifts Tracker dynamically adjusts your training max based on your performance in the AMRAP set of each cycle. If you hit at least 1 rep, your training max will increase by the standard increment. For every 5 additional reps (10, 15, 20, etc.), an extra 5 lbs is added, allowing faster progression when you exceed targets without overloading. This adaptive approach helps keep your lifts challenging yet achievable, promoting sustainable strength gains over time.
