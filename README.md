@@ -1,5 +1,5 @@
 # Lifts Tracker
-Lifts Tracker is a Progressive Web App (PWA) designed to help you track your workouts and follow the 5/3/1 progression program for the four main lifts independently of one another. The app with auto-deload if you miss the lift in Week 3 of the cycle as well.
+Lifts Tracker is a Progressive Web App (PWA) designed to help you asynchronously track your workouts and follow the 5/3/1 periodization scheme for the four main lifts independently of one another. The app incorporated autoregulation and automatic deload week scheduling.
 
 ## Mobile Installation Instructions
 
@@ -17,6 +17,7 @@ Lifts Tracker is a Progressive Web App (PWA) designed to help you track your wor
 
 Once installed, the app will work offline and behave like a native app.
 
+## Programming
 
 #### Autoregulation Based on AMRAP Performance
 Lifts Tracker dynamically adjusts your training max based on your performance in the AMRAP set of each cycle. If you hit at least 1 rep, your training max will increase by the standard increment. For every 5 additional reps (10, 15, 20, etc.), an extra 5 lbs is added, allowing faster progression when you exceed targets without overloading. This adaptive approach helps keep your lifts challenging yet achievable, promoting sustainable strength gains over time.
