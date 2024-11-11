@@ -87,3 +87,36 @@ button:hover {
   font-style: italic;
   color: #666;
 }
+
+#showAlternativeWeightsBtn {
+  margin-top: 10px;
+  padding: 8px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  border: none;
+  border-radius: 4px;
+  background-color: #4CAF50; /* Adjust color as needed */
+  color: white;
+  transition: background-color 0.3s ease;
+}
+
+#showAlternativeWeightsBtn:hover {
+  background-color: #45a049; /* Darker shade on hover */
+}
+
+#alternativeWeights {
+  margin-top: 15px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: #f9f9f9;
+  color: #333;
+  font-style: italic;
+}
+
+#alternativeWeights h3 {
+  margin-top: 0;
+  font-weight: bold;
+  color: #555;
+}
+
