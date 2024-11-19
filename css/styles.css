@@ -135,6 +135,7 @@ button:hover {
 
 #amrap-controls {
   display: flex;
+  touch-action: manipulation;
   justify-content: center; /* Center the buttons horizontally */
   gap: 10px; /* Add spacing between +/- buttons */
   margin-top: 5px;
