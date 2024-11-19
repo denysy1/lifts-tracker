@@ -116,9 +116,16 @@ document.addEventListener("DOMContentLoaded", () => {
         // Function to hide alternative weights
         function hideAlternativeWeights() {
             const altWeightsElement = document.getElementById("alternativeWeights");
-            altWeightsElement.innerHTML = ""; // Clear contents
-            altWeightsElement.style.display = "none"; // Hide element
+        
+            // Check if the element exists before modifying it
+            if (altWeightsElement) {
+                altWeightsElement.innerHTML = ""; // Clear contents
+                altWeightsElement.style.display = "none"; // Hide element
+            } else {
+                console.warn("#alternativeWeights element is missing or not loaded in the DOM.");
+            }
         }
+        
   
       function selectExercise(exercise) {
         currentExercise = exercise;
@@ -184,6 +191,11 @@ document.addEventListener("DOMContentLoaded", () => {
         request.onsuccess = (event) => {
             hideAlternativeWeights();
             const records = event.target.result;
+            if (!records.length) {
+                console.error("No records found for the selected exercise.");
+                return;
+            }
+    
             const lastWorkout = initialData || records[records.length - 1];
             trainingMax[currentExercise] = lastWorkout.trainingMax;
     
@@ -214,6 +226,7 @@ document.addEventListener("DOMContentLoaded", () => {
             let deloadReps = reps;
             let deloadWeights = weightPercents.map(percent => Math.round(trainingMax[currentExercise] * percent));
     
+            // Deload adjustments
             if (isDeloadWeek) {
                 document.getElementById("deloadNotice").textContent = "Deload Week: Reduced volume for recovery";
                 deloadReps = reps.map(r => Math.ceil(r * 0.7)); // Reduce volume by 30%
@@ -236,11 +249,19 @@ document.addEventListener("DOMContentLoaded", () => {
     
             // Update AMRAP, cycle/week info, and block type
             document.getElementById("amrap").value = reps[2];
-            document.getElementById("cycleNumber").textContent = cycle;
-            document.getElementById("weekNumber").textContent = week;
-            document.getElementById("blockType").textContent = blockType.charAt(0).toUpperCase() + blockType.slice(1); // Capitalize block type
+            document.getElementById("cycleNumber").textContent = cycle || "N/A";
+            document.getElementById("weekNumber").textContent = week || "N/A";
+            document.getElementById("blockType").textContent = blockType ? blockType.charAt(0).toUpperCase() + blockType.slice(1) : "N/A";
+    
+            console.log(`Workout displayed: Cycle ${cycle}, Week ${week}, Block ${blockType}`);
+        };
+    
+        request.onerror = (event) => {
+            console.error("Error retrieving workout data:", event.target.error);
         };
       }
+    
+    
     
     
     

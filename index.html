@@ -42,22 +42,35 @@
     <!-- Deload Notification -->
     <div id="deloadNotice" style="color: #ff4500; font-weight: bold; margin-bottom: 10px;"></div>
 
+    <!-- Prescribed Sets -->
     <div id="prescribedSets"></div>
-    <div id="supplementWork"></div> <!-- Supplement Work Section -->
+
+    <!-- Supplement Work -->
+    <div id="supplementWork"></div>
 
     <!-- Show Alternative Weights Button -->
-    <button id="showAlternativeWeightsBtn">Show Alternative Exercise Weights</button>
+    <div class="button-row">
+        <button id="showAlternativeWeightsBtn">Show Alternative Exercise Weights</button>
+    </div>
+
     <div id="alternativeWeights"></div>
 
-    <!-- AMRAP Reps -->
-    <label for="amrap">AMRAP Reps:</label>
-    <input type="number" id="amrap" min="0" required>
+    <!-- AMRAP Section -->
+    <div class="amrap-row">
+        <label for="amrap">AMRAP Reps:</label>
+        <input type="number" id="amrap" min="0" required>
+    </div>
+
+    <!-- AMRAP Controls -->
     <div id="amrap-controls">
         <button id="amrap-plus">+</button>
         <button id="amrap-minus">-</button>
     </div>
+
+    <!-- Save Progress -->
     <button id="save">Save Progress</button>
   </div>
+
 
 
   <!-- History and Utility Buttons -->
