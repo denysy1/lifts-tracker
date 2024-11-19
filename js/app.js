@@ -47,6 +47,28 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("amrap-minus").onclick = () => adjustAmrapReps(-1);
       document.getElementById("showAlternativeWeightsBtn").onclick = () => showAlternativeWeights();
 
+      function adjustAmrapReps(change) {
+        const amrapField = document.getElementById("amrap");
+        let currentValue = parseInt(amrapField.value);
+    
+        // Ensure the current value is a valid number
+        if (isNaN(currentValue)) {
+            currentValue = 0;
+        }
+    
+        // Adjust the value
+        currentValue += change;
+    
+        // Prevent negative reps
+        if (currentValue < 0) {
+            currentValue = 0;
+        }
+    
+        // Update the input field with the new value
+        amrapField.value = currentValue;
+      }
+    
+
       function showAlternativeWeights() {
         if (!currentExercise || !trainingMax[currentExercise]) {
             alert("Please select an exercise and initialize your training max first.");
@@ -205,14 +227,22 @@ document.addEventListener("DOMContentLoaded", () => {
             deloadWeights.forEach((weight, i) => {
                 setsHtml += `<p>Set ${i + 1}: ${weight} lbs x ${deloadReps[i]} reps</p>`;
             });
-    
             document.getElementById("prescribedSets").innerHTML = setsHtml;
-            document.getElementById("amrap").value = reps[2];
     
+            // Add Supplement Work (BBB: 5 sets of 10 reps at 50% training max)
+            let bbbWeight = Math.round(trainingMax[currentExercise] * 0.5);
+            let bbbHtml = `<h3>Supplement Work</h3><p>BBB: 5x10 @ ${bbbWeight} lbs</p>`;
+            document.getElementById("supplementWork").innerHTML = bbbHtml;
+    
+            // Update AMRAP, cycle/week info, and block type
+            document.getElementById("amrap").value = reps[2];
             document.getElementById("cycleNumber").textContent = cycle;
             document.getElementById("weekNumber").textContent = week;
+            document.getElementById("blockType").textContent = blockType.charAt(0).toUpperCase() + blockType.slice(1); // Capitalize block type
         };
       }
+    
+    
     
   
       function saveProgress() {

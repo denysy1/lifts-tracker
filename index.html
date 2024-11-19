@@ -33,14 +33,19 @@
 
   <!-- Tracker Section -->
   <div id="tracker" style="display: none;">
-    <h3>Cycle: <span id="cycleNumber"></span>, Week: <span id="weekNumber"></span></h3>
+    <h3>
+        Cycle: <span id="cycleNumber"></span>, 
+        Week: <span id="weekNumber"></span>, 
+        Block: <span id="blockType"></span>
+    </h3>
 
     <!-- Deload Notification -->
     <div id="deloadNotice" style="color: #ff4500; font-weight: bold; margin-bottom: 10px;"></div>
 
     <div id="prescribedSets"></div>
-    
-    <!-- Button and Alternative Weights -->
+    <div id="supplementWork"></div> <!-- Supplement Work Section -->
+
+    <!-- Show Alternative Weights Button -->
     <button id="showAlternativeWeightsBtn">Show Alternative Exercise Weights</button>
     <div id="alternativeWeights"></div>
 
@@ -52,7 +57,7 @@
         <button id="amrap-minus">-</button>
     </div>
     <button id="save">Save Progress</button>
-</div>
+  </div>
 
 
   <!-- History and Utility Buttons -->

@@ -50,6 +50,9 @@ button:hover {
 #save {
   background-color: #28a745;
   margin-top: 10px;
+  width: auto; /* Button adjusts to content size */
+  max-width: 200px; /* Optional: limit maximum width */
+  text-align: center;
 }
 
 #save:hover {
@@ -78,7 +81,7 @@ button:hover {
 #tracker {
   display: flex;
   flex-direction: column; /* Stack elements vertically */
-  align-items: flex-start; /* Align items to the left */
+  align-items: center;    /* Center align all elements */
   width: 100%; /* Ensure full width for consistent alignment */
   max-width: 500px; /* Optional: Limit the width for better layout */
   margin: 0 auto; /* Center tracker on the page */
@@ -87,7 +90,8 @@ button:hover {
 /* Show Alternative Weights Button */
 #showAlternativeWeightsBtn {
   margin-bottom: 10px; /* Add space below the button */
-  width: 100%; /* Ensure the button spans full width */
+  width: auto; /* Ensure button width is appropriate for content */
+  max-width: 200px; /* Optional: limit maximum width */
   text-align: center; /* Center-align text inside the button */
   padding: 8px 16px;
   font-size: 14px;
@@ -124,14 +128,33 @@ button:hover {
 /* AMRAP Field */
 #amrap {
   margin-top: 10px;
-  width: 100%; /* Ensure consistency with other elements */
+  width: auto; /* Allow natural width */
+  max-width: 150px; /* Prevent it from being too wide */
   text-align: center; /* Center the text in the input */
 }
 
 #amrap-controls {
   display: flex;
   justify-content: center; /* Center the buttons horizontally */
-  gap: 10px; /* Add spacing between the buttons */
+  gap: 10px; /* Add spacing between +/- buttons */
   margin-top: 5px;
+}
+
+/* Force Vertical Stacking of Elements in Tracker */
+#showAlternativeWeightsBtn,
+#alternativeWeights,
+#amrap,
+#amrap-controls,
+#save {
+  width: 100%; /* Ensure full-width alignment */
+  text-align: center; /* Align content to the center */
+}
+
+#supplementWork {
+  margin-top: 20px;
+  font-size: 1rem;
+  line-height: 1.5;
+  text-align: center;
+  color: #333;
 }
 
