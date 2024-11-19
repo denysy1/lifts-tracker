@@ -65,13 +65,52 @@ button:hover {
   background-color: #c82333;
 }
 
-/* Plus, Minus, Initialize and Import History Buttons */
+/* Plus, Minus, Initialize, and Import History Buttons */
 #amrap-plus, #amrap-minus, #initializeExercise, #import-history, #export-history, #view-history {
   background-color: #343a40;
 }
 
 #amrap-plus:hover, #amrap-minus:hover, #initializeExercise:hover, #import-history:hover {
   background-color: #23272b;
+}
+
+/* Tracker Layout */
+#tracker {
+  display: flex;
+  flex-direction: column; /* Stack elements vertically */
+  align-items: flex-start; /* Align items to the left */
+  width: 100%; /* Ensure full width for consistent alignment */
+  max-width: 500px; /* Optional: Limit the width for better layout */
+  margin: 0 auto; /* Center tracker on the page */
+}
+
+/* Show Alternative Weights Button */
+#showAlternativeWeightsBtn {
+  margin-bottom: 10px; /* Add space below the button */
+  width: 100%; /* Ensure the button spans full width */
+  text-align: center; /* Center-align text inside the button */
+  padding: 8px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  border: none;
+  border-radius: 4px;
+  background-color: #4CAF50; /* Button color */
+  color: white;
+  transition: background-color 0.3s ease;
+}
+
+#showAlternativeWeightsBtn:hover {
+  background-color: #45a049; /* Darker shade on hover */
+}
+
+/* Alternative Exercise Weights Text Styling */
+#alternativeWeights {
+  display: none; /* Hidden by default */
+  margin-top: 10px;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #333;
+  font-style: normal; /* Regular font style */
 }
 
 /* Deload Notification Styling */
@@ -82,41 +121,17 @@ button:hover {
   margin-bottom: 10px;
 }
 
-#alternativeWeights {
+/* AMRAP Field */
+#amrap {
   margin-top: 10px;
-  font-style: italic;
-  color: #666;
+  width: 100%; /* Ensure consistency with other elements */
+  text-align: center; /* Center the text in the input */
 }
 
-#showAlternativeWeightsBtn {
-  margin-top: 10px;
-  padding: 8px 16px;
-  font-size: 14px;
-  cursor: pointer;
-  border: none;
-  border-radius: 4px;
-  background-color: #4CAF50; /* Adjust color as needed */
-  color: white;
-  transition: background-color 0.3s ease;
-}
-
-#showAlternativeWeightsBtn:hover {
-  background-color: #45a049; /* Darker shade on hover */
-}
-
-#alternativeWeights {
-  margin-top: 15px;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  background-color: #f9f9f9;
-  color: #333;
-  font-style: italic;
-}
-
-#alternativeWeights h3 {
-  margin-top: 0;
-  font-weight: bold;
-  color: #555;
+#amrap-controls {
+  display: flex;
+  justify-content: center; /* Center the buttons horizontally */
+  gap: 10px; /* Add spacing between the buttons */
+  margin-top: 5px;
 }
 

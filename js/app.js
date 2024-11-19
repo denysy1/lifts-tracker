@@ -45,6 +45,58 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("view-history").onclick = viewHistory;
       document.getElementById("amrap-plus").onclick = () => adjustAmrapReps(1);
       document.getElementById("amrap-minus").onclick = () => adjustAmrapReps(-1);
+      document.getElementById("showAlternativeWeightsBtn").onclick = () => showAlternativeWeights();
+
+      function showAlternativeWeights() {
+        if (!currentExercise || !trainingMax[currentExercise]) {
+            alert("Please select an exercise and initialize your training max first.");
+            return;
+        }
+    
+        // Define alternative exercises and scaling factors
+        const alternatives = {
+            "Overhead Press": [
+                { name: "Dumbbell Overhead Press", scale: 0.8 }
+            ],
+            "Bench Press": [
+                { name: "Incline Bench Press", scale: 0.9 },
+                { name: "Decline Bench Press", scale: 1.0 },
+                { name: "Dumbbell Press", scale: 0.75 },
+                { name: "Incline Dumbbell Press", scale: 0.7 }
+            ],
+            "Squat": [
+                { name: "Leg Press", scale: 2.0 }
+            ],
+            "Deadlift": [
+                { name: "Leg Curls", scale: 0.5 }
+            ]
+        };
+    
+        const altExercises = alternatives[currentExercise];
+        if (!altExercises) {
+            alert("No alternative exercises available for this lift.");
+            return;
+        }
+    
+        // Calculate and display alternative weights
+        const weights = altExercises.map(
+            alt => `${alt.name}: ${Math.round(trainingMax[currentExercise] * alt.scale)} lbs`
+        ).join("<br>");
+    
+        const alternativeWeightsText = `<h3>Alternative Weights</h3>${weights}`;
+        const altWeightsElement = document.getElementById("alternativeWeights");
+    
+        altWeightsElement.innerHTML = alternativeWeightsText;
+        altWeightsElement.style.display = "block"; // Explicitly make it visible
+      }
+    
+
+        // Function to hide alternative weights
+        function hideAlternativeWeights() {
+            const altWeightsElement = document.getElementById("alternativeWeights");
+            altWeightsElement.innerHTML = ""; // Clear contents
+            altWeightsElement.style.display = "none"; // Hide element
+        }
   
       function selectExercise(exercise) {
         currentExercise = exercise;
@@ -108,6 +160,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const request = index.getAll(currentExercise);
     
         request.onsuccess = (event) => {
+            hideAlternativeWeights();
             const records = event.target.result;
             const lastWorkout = initialData || records[records.length - 1];
             trainingMax[currentExercise] = lastWorkout.trainingMax;
