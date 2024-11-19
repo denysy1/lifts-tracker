@@ -9,16 +9,6 @@ Lifts Tracker is a Progressive Web App (PWA) designed to give you a flexible way
 - **Leader and Anchor Blocks**: Implements the 5/3/1 Forever block programming for structured progression.
 - **Offline Functionality**: Works offline after installation and behaves like a native app.
 
-## Leader and Anchor Blocks
-Lifts Tracker incorporates the Leader and Anchor programming from the 5/3/1 Forever program:
-- **Leader Blocks**: Focus on base strength development with high volume and straightforward progression. During Leader blocks, prescribed sets follow the "5s PRO" format, using fixed percentages (65%, 75%, 85%) and 5 reps per set.
-- **Anchor Blocks**: Transition to lower volume, higher intensity work to peak strength. Each week in an Anchor block progresses with increasing intensity:
-  - Week 1: 65%, 75%, 85% for 5 reps each.
-  - Week 2: 70%, 80%, 90% for 3 reps each.
-  - Week 3: 75%, 85%, 95% for 5, 3, and 1 rep, respectively.
-
-Each training cycle alternates between Leader and Anchor blocks, ensuring balanced progression and recovery.
-
 ## Mobile Installation Instructions
 
 ### For iPhone (iOS)
@@ -42,3 +32,13 @@ Lifts Tracker dynamically adjusts your training max based on your performance in
 
 ### Deload Weeks for Optimal Recovery
 Lifts Tracker automatically schedules a deload week when needed to help prevent burnout and overtraining. If you complete two consecutive cycles with fewer than 5 reps in the final AMRAP set of Week 3, the app will trigger a deload week. During this week, you’ll lift the same weights but with about 30% fewer reps, allowing for active recovery without losing progress. This adaptive feature ensures you stay on track, promoting steady gains while giving your body time to recover.
+
+### Leader and Anchor Blocks
+Lifts Tracker incorporates the Leader and Anchor programming from the 5/3/1 Forever program:
+- **Leader Blocks**: Focus on base strength development with high volume and straightforward progression. During Leader blocks, prescribed sets follow the "5s PRO" format, using fixed percentages (65%, 75%, 85%) and 5 reps per set.
+- **Anchor Blocks**: Transition to lower volume, higher intensity work to peak strength. Each week in an Anchor block progresses with increasing intensity:
+  - Week 1: 65%, 75%, 85% for 5 reps each.
+  - Week 2: 70%, 80%, 90% for 3 reps each.
+  - Week 3: 75%, 85%, 95% for 5, 3, and 1 rep, respectively.
+
+Each training cycle alternates between Leader and Anchor blocks, ensuring balanced progression and recovery.
