@@ -106,58 +106,61 @@ document.addEventListener("DOMContentLoaded", () => {
         const store = transaction.objectStore("lifts");
         const index = store.index("exercise");
         const request = index.getAll(currentExercise);
-  
+    
         request.onsuccess = (event) => {
-          const records = event.target.result;
-          const lastWorkout = initialData || records[records.length - 1];
-          trainingMax[currentExercise] = lastWorkout.trainingMax;
-  
-          let cycle = lastWorkout.cycle;
-          let week = lastWorkout.week;
-          let isDeloadWeek = consecutiveLowAMRAP[currentExercise] >= 1;
-          
-          if (isDeloadWeek) {
-            document.getElementById("deloadNotice").textContent = "Deload Week: Reduced volume for recovery";
+            const records = event.target.result;
+            const lastWorkout = initialData || records[records.length - 1];
+            trainingMax[currentExercise] = lastWorkout.trainingMax;
+    
+            let cycle = lastWorkout.cycle;
+            let week = lastWorkout.week;
+            let isDeloadWeek = consecutiveLowAMRAP[currentExercise] >= 1;
+    
+            // Determine block type and transition logic
+            if (!isDeloadWeek && week === 3) {
+                week = 1;
+                cycle++;
+                if (blockCounter === 2 && blockType === "leader") {
+                    blockType = "anchor";
+                    blockCounter = 1;
+                } else if (blockCounter === 1 && blockType === "anchor") {
+                    blockType = "leader";
+                    blockCounter = 1;
+                } else {
+                    blockCounter++;
+                }
+            } else if (!isDeloadWeek) {
+                week++;
+            }
+    
+            const weightPercents = blockType === "leader" ? setPercentagesLeader : setPercentagesAnchor[week];
+            const reps = blockType === "leader" ? setRepsLeader : setRepsAnchor[week];
+    
+            let deloadReps = reps;
+            let deloadWeights = weightPercents.map(percent => Math.round(trainingMax[currentExercise] * percent));
+    
+            if (isDeloadWeek) {
+                document.getElementById("deloadNotice").textContent = "Deload Week: Reduced volume for recovery";
+                deloadReps = reps.map(r => Math.ceil(r * 0.7)); // Reduce volume by 30%
+                deloadWeights = deloadWeights.map(weight => Math.round(weight * 0.7)); // Reduce intensity by 30%
             } else {
                 document.getElementById("deloadNotice").textContent = "";
-                if (week === 3) {
-                    week = 1;
-                    cycle++;
-                    // Transition between blocks
-                    if (blockCounter === 2 && blockType === "leader") {
-                      blockType = "anchor";
-                      blockCounter = 1;
-                    } else if (blockCounter === 1 && blockType === "anchor") {
-                      blockType = "leader";
-                      blockCounter = 1;
-                    } else {
-                      blockCounter++;
-                    }
-                  } else {
-                    week++;
-                  }
             }
-
-          const weightPercents = blockType === "leader" ? setPercentagesLeader : setPercentagesAnchor[week];
-          const reps = blockType === "leader" ? setRepsLeader : setRepsAnchor[week];
-
-          if (isDeloadWeek) {
-            reps = reps.map(r => Math.ceil(r * 0.7));
-          }
-  
-          const weights = weightPercents.map(percent => Math.round(trainingMax[currentExercise] * percent));
-          let setsHtml = "<h3>Prescribed Sets</h3>";
-          weights.forEach((weight, i) => {
-            setsHtml += `<p>Set ${i + 1}: ${weight} lbs x ${reps[i]} reps</p>`;
-          });
-  
-          document.getElementById("prescribedSets").innerHTML = setsHtml;
-          document.getElementById("amrap").value = reps[2];
-  
-          document.getElementById("cycleNumber").textContent = cycle;
-          document.getElementById("weekNumber").textContent = week;
+    
+            // Display prescribed sets
+            let setsHtml = "<h3>Prescribed Sets</h3>";
+            deloadWeights.forEach((weight, i) => {
+                setsHtml += `<p>Set ${i + 1}: ${weight} lbs x ${deloadReps[i]} reps</p>`;
+            });
+    
+            document.getElementById("prescribedSets").innerHTML = setsHtml;
+            document.getElementById("amrap").value = reps[2];
+    
+            document.getElementById("cycleNumber").textContent = cycle;
+            document.getElementById("weekNumber").textContent = week;
         };
       }
+    
   
       function saveProgress() {
         const amrapReps = parseInt(document.getElementById("amrap").value);
