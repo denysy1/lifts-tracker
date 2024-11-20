@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lifts-tracker-cache-v0.3.1';
+const CACHE_NAME = 'lifts-tracker-cache-v0.3.2';
 const URLS_TO_CACHE = [
   '/lifts-tracker/',
   '/lifts-tracker/index.html',
