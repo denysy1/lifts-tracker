@@ -46,6 +46,8 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("amrap-plus").onclick = () => adjustAmrapReps(1);
       document.getElementById("amrap-minus").onclick = () => adjustAmrapReps(-1);
       document.getElementById("showAlternativeWeightsBtn").onclick = () => showAlternativeWeights();
+      document.getElementById("export-history").onclick = () => exportHistory();
+      document.getElementById("import-history").onclick = () => importHistory();
 
       function adjustAmrapReps(change) {
         const amrapField = document.getElementById("amrap");
@@ -99,10 +101,13 @@ document.addEventListener("DOMContentLoaded", () => {
             alert("No alternative exercises available for this lift.");
             return;
         }
+        
+        // Get the weight of the third set from the prescribed sets
+        const thirdSetWeight = parseInt(document.querySelector("#prescribedSets p:nth-child(4)").textContent.split(" ")[2]);
     
         // Calculate and display alternative weights
         const weights = altExercises.map(
-            alt => `${alt.name}: ${Math.round(trainingMax[currentExercise] * alt.scale)} lbs`
+        alt => `${alt.name}: ${Math.round(thirdSetWeight * alt.scale/5)*5} lbs`
         ).join("<br>");
     
         const alternativeWeightsText = `<h3>Alternative Weights</h3>${weights}`;
@@ -238,12 +243,13 @@ document.addEventListener("DOMContentLoaded", () => {
             // Display prescribed sets
             let setsHtml = "<h3>Prescribed Sets</h3>";
             deloadWeights.forEach((weight, i) => {
+                weight = Math.round(weight/5)*5; // Round to nearest 5 lbs
                 setsHtml += `<p>Set ${i + 1}: ${weight} lbs x ${deloadReps[i]} reps</p>`;
             });
             document.getElementById("prescribedSets").innerHTML = setsHtml;
     
             // Add Supplement Work (BBB: 5 sets of 10 reps at 50% training max)
-            let bbbWeight = Math.round(trainingMax[currentExercise] * 0.5);
+            let bbbWeight = Math.round(trainingMax[currentExercise] * 0.5/5)*5;
             let bbbHtml = `<h3>Supplement Work</h3><p>BBB: 5x10 @ ${bbbWeight} lbs</p>`;
             document.getElementById("supplementWork").innerHTML = bbbHtml;
     
@@ -393,6 +399,92 @@ document.addEventListener("DOMContentLoaded", () => {
           document.getElementById("history").innerHTML = historyHtml;
         };
       }
+
+      function exportHistory() {
+        const transaction = db.transaction(["lifts"], "readonly");
+        const store = transaction.objectStore("lifts");
+        const request = store.getAll();
+      
+        request.onsuccess = (event) => {
+          const records = event.target.result;
+          console.log('Exporting history:', records); // Debugging line
+      
+          // Convert the data to a JSON string
+          const historyJson = JSON.stringify(records, null, 2);
+          console.log('History JSON:', historyJson); // Debugging line
+      
+          // Create a Blob from the JSON string
+          const blob = new Blob([historyJson], { type: 'application/json' });
+      
+          // Create a download link for the Blob
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'lifts-tracker-history.json';
+          document.body.appendChild(a);
+          a.click();
+      
+          // Clean up
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        };
+      
+        request.onerror = (event) => {
+          console.error('Error retrieving history from IndexedDB:', event.target.error);
+        };
+      }
+
+      function importHistory() {
+        const fileInput = document.getElementById('file-input');
+        fileInput.click();
+      
+        fileInput.onchange = (event) => {
+          const file = event.target.files[0];
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              try {
+                const importedData = JSON.parse(e.target.result);
+                if (Array.isArray(importedData)) {
+                  overwriteHistory(importedData);
+                } else {
+                  alert('Invalid file format. Please upload a valid JSON file.');
+                }
+              } catch (error) {
+                alert('Error reading file. Please upload a valid JSON file.');
+              }
+            };
+            reader.readAsText(file);
+          }
+        };
+      }
+      
+      function overwriteHistory(data) {
+        const transaction = db.transaction(["lifts"], "readwrite");
+        const store = transaction.objectStore("lifts");
+      
+        // Clear existing history
+        const clearRequest = store.clear();
+        clearRequest.onsuccess = () => {
+          // Add imported data to the store
+          data.forEach(record => {
+            store.add(record);
+          });
+      
+          transaction.oncomplete = () => {
+            alert('History imported successfully!');
+          };
+      
+          transaction.onerror = (event) => {
+            console.error('Error importing history:', event.target.error);
+            alert('Error importing history. Please try again.');
+          };
+        };
+      
+        clearRequest.onerror = (event) => {
+          console.error('Error clearing existing history:', event.target.error);
+          alert('Error clearing existing history. Please try again.');
+        };
+      }
     };
   });
-  
