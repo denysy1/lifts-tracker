@@ -356,7 +356,7 @@ document.addEventListener("DOMContentLoaded", () => {
           const addRequest = store.add(newEntry);
           addRequest.onsuccess = () => {
             alert("Progress saved!");
-            displayCurrentWorkout(newEntry);
+            selectExercise(currentExercise);
           };
         };
       }
