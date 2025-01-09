@@ -1,3 +1,5 @@
+const disableLeaderBlock = true; // Set to `false` to enable Leader blocks
+
 document.addEventListener("DOMContentLoaded", () => {
   const request = indexedDB.open("GymTrackerDB", 1);
 
@@ -187,6 +189,8 @@ document.addEventListener("DOMContentLoaded", () => {
       };
     }
 
+
+
     function displayCurrentWorkout(initialData) {
       const transaction = db.transaction(["lifts"], "readonly");
       const store = transaction.objectStore("lifts");
@@ -208,18 +212,21 @@ document.addEventListener("DOMContentLoaded", () => {
         let week = lastWorkout.week;
         let isDeloadWeek = consecutiveLowAMRAP[currentExercise] >= 1;
 
-        // Determine block type and transition logic
         if (!isDeloadWeek && week === 3) {
           week = 1;
           cycle++;
-          if (blockCounter === 2 && blockType === "leader") {
-            blockType = "anchor";
-            blockCounter = 1;
-          } else if (blockCounter === 1 && blockType === "anchor") {
-            blockType = "leader";
-            blockCounter = 1;
+          if (!disableLeaderBlock) {
+            if (blockCounter === 2 && blockType === "leader") {
+              blockType = "anchor";
+              blockCounter = 1;
+            } else if (blockCounter === 1 && blockType === "anchor") {
+              blockType = "leader";
+              blockCounter = 1;
+            } else {
+              blockCounter++;
+            }
           } else {
-            blockCounter++;
+            blockType = "anchor";
           }
         } else if (!isDeloadWeek) {
           week++;
@@ -231,29 +238,25 @@ document.addEventListener("DOMContentLoaded", () => {
         let deloadReps = reps;
         let deloadWeights = weightPercents.map(percent => Math.round(trainingMax[currentExercise] * percent));
 
-        // Deload adjustments
         if (isDeloadWeek) {
           document.getElementById("deloadNotice").textContent = "Deload Week: Reduced volume for recovery";
-          deloadReps = reps.map(r => Math.ceil(r * 0.7)); // Reduce volume by 30%
-          deloadWeights = deloadWeights.map(weight => Math.round(weight * 0.7)); // Reduce intensity by 30%
+          deloadReps = reps.map(r => Math.ceil(r * 0.7));
+          deloadWeights = deloadWeights.map(weight => Math.round(weight * 0.7));
         } else {
           document.getElementById("deloadNotice").textContent = "";
         }
 
-        // Display prescribed sets
         let setsHtml = "<h3>Prescribed Sets</h3>";
         deloadWeights.forEach((weight, i) => {
-          weight = Math.round(weight / 5) * 5; // Round to nearest 5 lbs
+          weight = Math.round(weight / 5) * 5;
           setsHtml += `<p>Set ${i + 1}: ${weight} lbs x ${deloadReps[i]} reps</p>`;
         });
         document.getElementById("prescribedSets").innerHTML = setsHtml;
 
-        // Add Supplement Work (BBB: 5 sets of 10 reps at 50% training max)
         let bbbWeight = Math.round(trainingMax[currentExercise] * 0.5 / 5) * 5;
         let bbbHtml = `<h3>Supplement Work</h3><p>BBB: 5x10 @ ${bbbWeight} lbs</p>`;
         document.getElementById("supplementWork").innerHTML = bbbHtml;
 
-        // Update AMRAP, cycle/week info, and block type
         document.getElementById("amrap").value = reps[2];
         document.getElementById("cycleNumber").textContent = cycle || "N/A";
         document.getElementById("weekNumber").textContent = week || "N/A";
@@ -269,25 +272,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
+    
+
+
+
 
 
 
     function saveProgress() {
       const amrapReps = parseInt(document.getElementById("amrap").value);
       const increment = incrementValues[currentExercise];
-
+    
       const transaction = db.transaction(["lifts"], "readwrite");
       const store = transaction.objectStore("lifts");
-
+    
       const request = store.index("exercise").getAll(currentExercise);
-
+    
       request.onsuccess = (event) => {
         const records = event.target.result;
-
+    
         let cycle, week, trainingMax;
         let isFirstSave = records.length === 1 && records[0].week === 0;
         let isDeloadWeek = consecutiveLowAMRAP[currentExercise] >= 1;
-
+    
         if (isDeloadWeek) {
           alert("Deload Week: Rest and recovery. No progress saved.");
           consecutiveLowAMRAP[currentExercise] = 0;
@@ -295,7 +302,7 @@ document.addEventListener("DOMContentLoaded", () => {
           displayCurrentWorkout(lastRecord);
           return;
         }
-
+    
         if (isFirstSave) {
           cycle = 1;
           week = 1;
@@ -307,24 +314,28 @@ document.addEventListener("DOMContentLoaded", () => {
           trainingMax = lastEntry.trainingMax;
           blockType = lastEntry.blockType;
           blockCounter = lastEntry.blockCounter;
-
+    
           if (week === 3) {
             week = 1;
             cycle++;
-            if (blockCounter === 2 && blockType === "leader") {
-              blockType = "anchor";
-              blockCounter = 1;
-            } else if (blockCounter === 1 && blockType === "anchor") {
-              blockType = "leader";
-              blockCounter = 1;
+            if (!disableLeaderBlock) {
+              if (blockCounter === 2 && blockType === "leader") {
+                blockType = "anchor";
+                blockCounter = 1;
+              } else if (blockCounter === 1 && blockType === "anchor") {
+                blockType = "leader";
+                blockCounter = 1;
+              } else {
+                blockCounter++;
+              }
             } else {
-              blockCounter++;
+              blockType = "anchor"; // Default to Anchor block when Leader is disabled
             }
           } else {
             week++;
           }
         }
-
+    
         if (!isFirstSave && week === 3 && amrapReps >= 0) {
           if (amrapReps === 0) {
             trainingMax -= increment;
@@ -340,7 +351,7 @@ document.addEventListener("DOMContentLoaded", () => {
             consecutiveLowAMRAP[currentExercise] = 0;
           }
         }
-
+    
         const newEntry = {
           exercise: currentExercise,
           cycle,
@@ -352,7 +363,7 @@ document.addEventListener("DOMContentLoaded", () => {
           date: new Date().toLocaleString(),
           consecutiveLowAMRAP: consecutiveLowAMRAP[currentExercise]
         };
-
+    
         const addRequest = store.add(newEntry);
         addRequest.onsuccess = () => {
           alert("Progress saved!");
@@ -360,6 +371,7 @@ document.addEventListener("DOMContentLoaded", () => {
         };
       };
     }
+    
 
     function clearLastEntry() {
       const transaction = db.transaction(["lifts"], "readwrite");
