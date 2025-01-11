@@ -42,3 +42,12 @@ Lifts Tracker incorporates the Leader and Anchor programming from the 5/3/1 Fore
   - Week 3: 75%, 85%, 95% for 5, 3, and 1 rep, respectively.
 
 Each training cycle alternates between Leader and Anchor blocks, ensuring balanced progression and recovery.
+
+### Customizable Configurations
+
+Lifts Tracker allows users to fine-tune their training preferences by importing a configuration file (use the config.JSON file as a template). Parameters such as AMRAP thresholds, deload percentages, training max multipliers, and block cycles can be customized to match your individual training style.
+
+#### How to Upload a Configuration File
+1. Click the **Import Config** button in the app interface.
+2. Select a valid JSON file containing your custom configuration.
+3. The configuration will be saved to IndexedDB and applied immediately in the current session.

@@ -1,4 +1,38 @@
-const disableLeaderBlock = true; // Set to `false` to enable Leader blocks
+let config = {
+  disableLeaderBlock: true,
+  setPercentagesLeader: [0.65, 0.75, 0.85],
+  setPercentagesAnchor: { 1: [0.65, 0.75, 0.85], 2: [0.70, 0.80, 0.90], 3: [0.75, 0.85, 0.95] },
+  setRepsLeader: [5, 5, 5],
+  setRepsAnchor: { 1: [5, 5, 5], 2: [3, 3, 3], 3: [5, 3, 1] },
+  incrementValues: {
+    "Overhead Press": 5,
+    "Bench Press": 5,
+    "Squat": 10,
+    "Deadlift": 10
+  },
+  alternatives: {
+    "Overhead Press": [{ name: "Dumbbell Overhead Press", scale: 0.8 }],
+    "Bench Press": [
+      { name: "Incline Bench Press", scale: 0.9 },
+      { name: "Decline Bench Press", scale: 1.0 },
+      { name: "Dumbbell Press", scale: 0.75 },
+      { name: "Incline Dumbbell Press", scale: 0.7 }
+    ],
+    "Squat": [{ name: "Leg Press", scale: 2.0 }],
+    "Deadlift": [{ name: "Leg Curls", scale: 0.5 }]
+  },
+  deloadPercentage: 0.7,
+  amrapProgressionThresholds: [10, 15, 20],
+  amrapProgressionIncrementMultipliers: [1, 1, 1],
+  deloadTriggerConsecutiveLowAMRAP: 1,
+  supplementWorkPercentage: 0.5,
+  trainingMaxInitializationFactor: 0.9,
+  cyclesPerBlockType: {
+    leader: 2,
+    anchor: 1
+  }
+};
+
 
 document.addEventListener("DOMContentLoaded", () => {
   const request = indexedDB.open("GymTrackerDB", 1);
@@ -7,6 +41,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const db = event.target.result;
     const store = db.createObjectStore("lifts", { keyPath: "id", autoIncrement: true });
     store.createIndex("exercise", "exercise", { unique: false });
+
+    if (!db.objectStoreNames.contains("config")) {
+      db.createObjectStore("config", { keyPath: "key" });
+    }
   };
 
   request.onsuccess = (event) => {
@@ -14,17 +52,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let currentExercise = null;
     let trainingMax = {};
-    const setPercentagesLeader = [0.65, 0.75, 0.85]; // 5s PRO percentages
-    const setPercentagesAnchor = { 1: [0.65, 0.75, 0.85], 2: [0.70, 0.80, 0.90], 3: [0.75, 0.85, 0.95] }; // Anchor percentages
-    const setRepsLeader = [5, 5, 5]; // 5s PRO reps
-    const setRepsAnchor = { 1: [5, 5, 5], 2: [3, 3, 3], 3: [5, 3, 1] };
-
-    const incrementValues = {
-      "Overhead Press": 5,
-      "Bench Press": 5,
-      "Squat": 10,
-      "Deadlift": 10
-    };
 
     let consecutiveLowAMRAP = {
       "Overhead Press": 0,
@@ -33,7 +60,10 @@ document.addEventListener("DOMContentLoaded", () => {
       "Deadlift": 0
     };
 
-    let blockType = "leader"; // Default block type
+    // Load configuration from IndexedDB to overwrite defaults
+    loadConfigFromDB();
+
+    let blockType = "anchor"; // Default block type
     let blockCounter = 1; // Tracks number of leader/anchor blocks
 
     document.getElementById("overhead-press-btn").onclick = () => selectExercise("Overhead Press");
@@ -50,6 +80,86 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("showAlternativeWeightsBtn").onclick = () => showAlternativeWeights();
     document.getElementById("export-history").onclick = () => exportHistory();
     document.getElementById("import-history").onclick = () => importHistory();
+    document.getElementById("import-config").onclick = loadConfigFile;
+
+
+
+    function loadConfigFromDB() {
+      const transaction = db.transaction(["config"], "readonly");
+      const store = transaction.objectStore("config");
+    
+      store.getAll().onsuccess = (event) => {
+        const configs = event.target.result;
+    
+        configs.forEach(({ key, value }) => {
+          if (config.hasOwnProperty(key)) {
+            config[key] = value; // Assign value to the config object
+          } else {
+            console.warn(`Unknown config key: ${key}`);
+          }
+        });
+    
+        // Debug log to verify successful config loading
+        console.log("Configuration loaded successfully:", config);
+      };
+    
+      store.getAll().onerror = (event) => {
+        console.error("Error loading configuration from IndexedDB:", event.target.error);
+        alert("Error loading configuration. Using default values.");
+      };
+    }
+     
+    
+
+    function loadConfigFile() {
+      const fileInput = document.getElementById("configFileInput");
+      fileInput.click();
+    
+      fileInput.onchange = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            try {
+              const configData = JSON.parse(e.target.result);
+              saveConfigToDB(configData);
+            } catch (error) {
+              alert("Invalid configuration file. Please upload a valid JSON file.");
+            }
+          };
+          reader.readAsText(file);
+        }
+      };
+    }
+    
+    function saveConfigToDB(newConfig) {
+      const transaction = db.transaction(["config"], "readwrite");
+      const store = transaction.objectStore("config");
+    
+      // Clear existing config
+      store.clear().onsuccess = () => {
+        // Iterate over the new configuration
+        for (const [key, value] of Object.entries(newConfig)) {
+          // Only save keys that already exist in the config object
+          if (key in config) {
+            store.put({ key, value });
+            config[key] = value; // Update in-memory config as well
+          } else {
+            console.warn(`Skipping invalid or unknown config key: ${key}`);
+          }
+        }
+    
+        alert("Configuration updated successfully!");
+        console.log("Updated config:", config);
+      };
+    
+      transaction.onerror = (event) => {
+        console.error("Error saving configuration to IndexedDB:", event.target.error);
+        alert("Error saving configuration.");
+      };
+    }
+    
+    
 
     function adjustAmrapReps(change) {
       const amrapField = document.getElementById("amrap");
@@ -79,26 +189,9 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      // Define alternative exercises and scaling factors
-      const alternatives = {
-        "Overhead Press": [
-          { name: "Dumbbell Overhead Press", scale: 0.8 }
-        ],
-        "Bench Press": [
-          { name: "Incline Bench Press", scale: 0.9 },
-          { name: "Decline Bench Press", scale: 1.0 },
-          { name: "Dumbbell Press", scale: 0.75 },
-          { name: "Incline Dumbbell Press", scale: 0.7 }
-        ],
-        "Squat": [
-          { name: "Leg Press", scale: 2.0 }
-        ],
-        "Deadlift": [
-          { name: "Leg Curls", scale: 0.5 }
-        ]
-      };
 
-      const altExercises = alternatives[currentExercise];
+
+      const altExercises = config.alternatives[currentExercise];
       if (!altExercises) {
         alert("No alternative exercises available for this lift.");
         return;
@@ -163,7 +256,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function initializeTrainingMax() {
       const oneRepMax = parseInt(document.getElementById("trainingMaxInput").value);
-      trainingMax[currentExercise] = Math.floor(oneRepMax * 0.9);
+      trainingMax[currentExercise] = Math.floor(oneRepMax * config.trainingMaxInitializationFactor);
 
       const transaction = db.transaction(["lifts"], "readwrite");
       const store = transaction.objectStore("lifts");
@@ -210,16 +303,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
         let cycle = lastWorkout.cycle;
         let week = lastWorkout.week;
-        let isDeloadWeek = consecutiveLowAMRAP[currentExercise] >= 1;
+        let isDeloadWeek = consecutiveLowAMRAP[currentExercise] >= config.deloadTriggerConsecutiveLowAMRAP;
 
         if (!isDeloadWeek && week === 3) {
           week = 1;
           cycle++;
-          if (!disableLeaderBlock) {
-            if (blockCounter === 2 && blockType === "leader") {
+          if (!config.disableLeaderBlock) {
+            if (blockCounter === config.cyclesPerBlockType.leader && blockType === "leader") {
               blockType = "anchor";
               blockCounter = 1;
-            } else if (blockCounter === 1 && blockType === "anchor") {
+            } else if (blockCounter === config.cyclesPerBlockType.anchor && blockType === "anchor") {
               blockType = "leader";
               blockCounter = 1;
             } else {
@@ -232,16 +325,16 @@ document.addEventListener("DOMContentLoaded", () => {
           week++;
         }
 
-        const weightPercents = blockType === "leader" ? setPercentagesLeader : setPercentagesAnchor[week];
-        const reps = blockType === "leader" ? setRepsLeader : setRepsAnchor[week];
+        const weightPercents = blockType === "leader" ? config.setPercentagesLeader : config.setPercentagesAnchor[week];
+        const reps = blockType === "leader" ? config.setRepsLeader : config.setRepsAnchor[week];
 
         let deloadReps = reps;
         let deloadWeights = weightPercents.map(percent => Math.round(trainingMax[currentExercise] * percent));
 
         if (isDeloadWeek) {
           document.getElementById("deloadNotice").textContent = "Deload Week: Reduced volume for recovery";
-          deloadReps = reps.map(r => Math.ceil(r * 0.7));
-          deloadWeights = deloadWeights.map(weight => Math.round(weight * 0.7));
+          deloadReps = reps.map(r => Math.ceil(r * config.deloadPercentage));
+          deloadWeights = deloadWeights.map(weight => Math.round(weight * config.deloadPercentage));
         } else {
           document.getElementById("deloadNotice").textContent = "";
         }
@@ -253,7 +346,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
         document.getElementById("prescribedSets").innerHTML = setsHtml;
 
-        let bbbWeight = Math.round(trainingMax[currentExercise] * 0.5 / 5) * 5;
+        let bbbWeight = Math.round(trainingMax[currentExercise] * config.supplementWorkPercentage / 5) * 5;
         let bbbHtml = `<h3>Supplement Work</h3><p>BBB: 5x10 @ ${bbbWeight} lbs</p>`;
         document.getElementById("supplementWork").innerHTML = bbbHtml;
 
@@ -281,7 +374,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function saveProgress() {
       const amrapReps = parseInt(document.getElementById("amrap").value);
-      const increment = incrementValues[currentExercise];
+      const increment = config.incrementValues[currentExercise];
     
       const transaction = db.transaction(["lifts"], "readwrite");
       const store = transaction.objectStore("lifts");
@@ -318,7 +411,7 @@ document.addEventListener("DOMContentLoaded", () => {
           if (week === 3) {
             week = 1;
             cycle++;
-            if (!disableLeaderBlock) {
+            if (!config.disableLeaderBlock) {
               if (blockCounter === 2 && blockType === "leader") {
                 blockType = "anchor";
                 blockCounter = 1;
@@ -345,9 +438,14 @@ document.addEventListener("DOMContentLoaded", () => {
             consecutiveLowAMRAP[currentExercise]++;
           } else {
             trainingMax += increment;
-            if (amrapReps >= 10) trainingMax += 5;
-            if (amrapReps >= 15) trainingMax += 5;
-            if (amrapReps >= 20) trainingMax += 5;
+
+            // accelerated incrementing logic:
+            for (let i = 0; i < config.amrapProgressionThresholds.length; i++) {
+              if (amrapReps >= config.amrapProgressionThresholds[i]) {
+                trainingMax += increment * config.amrapProgressionIncrementMultipliers[i];
+              }
+            }
+
             consecutiveLowAMRAP[currentExercise] = 0;
           }
         }
@@ -366,6 +464,12 @@ document.addEventListener("DOMContentLoaded", () => {
     
         const addRequest = store.add(newEntry);
         addRequest.onsuccess = () => {
+          // Easter egg logic
+          if (currentExercise === "Squat" && amrapReps >= 20) {
+            const audio = new Audio("img/yb.mp3");
+            audio.play();
+          }
+    
           alert("Progress saved!");
           selectExercise(currentExercise);
         };
