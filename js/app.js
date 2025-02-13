@@ -4,6 +4,7 @@ let config = {
   setPercentagesAnchor: { 1: [0.65, 0.75, 0.85], 2: [0.70, 0.80, 0.90], 3: [0.75, 0.85, 0.95] },
   setRepsLeader: [5, 5, 5],
   setRepsAnchor: { 1: [5, 5, 5], 2: [3, 3, 3], 3: [5, 3, 1] },
+  targetRepsAnchor: { 1: 10, 2: 8, 3: 6 },
   incrementValues: {
     "Overhead Press": 5,
     "Bench Press": 5,
@@ -340,6 +341,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const weightPercents = blockType === "leader" ? config.setPercentagesLeader : config.setPercentagesAnchor[week];
         const reps = blockType === "leader" ? config.setRepsLeader : config.setRepsAnchor[week];
+        const targetReps = blockType === "anchor" ? config.targetRepsAnchor[week] : reps[2];
+
 
         let deloadReps = reps;
         let deloadWeights = weightPercents.map(percent => Math.round(trainingMax[currentExercise] * percent));
@@ -355,7 +358,8 @@ document.addEventListener("DOMContentLoaded", () => {
         let setsHtml = "<h3>Prescribed Sets</h3>";
         deloadWeights.forEach((weight, i) => {
           weight = Math.round(weight / 5) * 5;
-          setsHtml += `<p>Set ${i + 1}: ${weight} lbs x ${deloadReps[i]} reps</p>`;
+          let repInfo = i === 2 ? ` (Target: ${targetReps} reps)` : "";
+          setsHtml += `<p>Set ${i + 1}: ${weight} lbs x ${deloadReps[i]} reps${repInfo}</p>`;
         });
         document.getElementById("prescribedSets").innerHTML = setsHtml;
 
