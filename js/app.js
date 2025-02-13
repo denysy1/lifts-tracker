@@ -21,6 +21,7 @@ let config = {
     "Squat": [{ name: "Leg Press", scale: 2.0 }],
     "Deadlift": [{ name: "Leg Curls", scale: 0.5 }]
   },
+  oneRM_correction_factor: 1.0, // Adjusts 1RM calculation (default 1.0, increase to lower estimated 1RM)
   deloadPercentage: 0.7,
   amrapProgressionThresholds: [10, 15, 20],
   amrapProgressionIncrementMultipliers: [1, 1, 1],
@@ -167,7 +168,7 @@ document.addEventListener("DOMContentLoaded", () => {
       amrapField.value = currentValue;
     }
     
-    // New function to adjust the actual weight input (in 5 lb increments)
+    // adjust the actual weight input (in 5 lb increments)
     function adjustActualWeight(change) {
       const actualWeightField = document.getElementById("actualWeight");
       let currentValue = parseInt(actualWeightField.value);
@@ -187,7 +188,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (actualWeight <= 0) return 0;
       // Calculate the estimated 1RM from the actual performance.
       // 1RM_actual = actualWeight / (1.0278 - 0.0278 * actualReps)
-      const oneRM_actual = actualWeight / (1.0278 - 0.0278 * actualReps);
+      const oneRM_actual = actualWeight / (config.oneRM_correction_factor * (1.0278 - 0.0278 * actualReps));
       // Now, solve for effective reps (R_eff)
       const effectiveRepsValue = (1.0278 - (prescribedWeight / oneRM_actual)) / 0.0278;
       return effectiveRepsValue;
@@ -256,12 +257,24 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     
     function initializeTrainingMax() {
-      const oneRepMax = parseInt(document.getElementById("trainingMaxInput").value);
-      trainingMax[currentExercise] = Math.floor(oneRepMax * config.trainingMaxInitializationFactor);
-
+      const weightUsed = parseFloat(document.getElementById("maxWeightInput").value);
+      const maxReps = parseInt(document.getElementById("maxRepsInput").value);
+    
+      // Ensure valid input
+      if (isNaN(weightUsed) || isNaN(maxReps) || weightUsed <= 0 || maxReps <= 0) {
+        alert("Please enter valid weight and reps.");
+        return;
+      }
+    
+      // Calculate estimated 1RM using the formula
+      const estimated1RM = weightUsed / (config.oneRM_correction_factor * (1.0278 - 0.0278 * maxReps));
+    
+      // Apply the training max initialization factor
+      trainingMax[currentExercise] = Math.floor(estimated1RM * config.trainingMaxInitializationFactor);
+    
       const transaction = db.transaction(["lifts"], "readwrite");
       const store = transaction.objectStore("lifts");
-
+    
       const newEntry = {
         exercise: currentExercise,
         cycle: 1,
@@ -273,15 +286,16 @@ document.addEventListener("DOMContentLoaded", () => {
         date: new Date().toLocaleString(),
         consecutiveLowAMRAP: 0
       };
-
+    
       const request = store.add(newEntry);
-
+    
       request.onsuccess = () => {
         document.getElementById("initialization").style.display = "none";
         document.getElementById("tracker").style.display = "block";
         displayCurrentWorkout(newEntry);
       };
     }
+    
     
     function displayCurrentWorkout(initialData) {
       const transaction = db.transaction(["lifts"], "readonly");

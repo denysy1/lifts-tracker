@@ -17,6 +17,7 @@
     "2": [3, 3, 3],
     "3": [5, 3, 1]
   },
+  "oneRM_correction_factor": 0.9,
   "deloadPercentage": 0.7,
   "disableLeaderBlock": true,
   "cyclesPerBlockType": {

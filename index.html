@@ -26,10 +26,18 @@
 
   <!-- Initialization Section -->
   <div id="initialization" style="display: none;">
-    <label for="trainingMaxInput">Enter 1-Rep Max (1RM):</label>
-    <input type="number" id="trainingMaxInput" min="1" required>
+    <div class="input-column">
+      <label for="maxWeightInput">Enter Weight Used (lbs):</label>
+      <input type="number" id="maxWeightInput" min="1" required>
+
+      <label for="maxRepsInput">Enter Max Reps Performed:</label>
+      <input type="number" id="maxRepsInput" min="1" required>
+    </div>
+    
     <button id="initializeExercise">Initialize</button>
   </div>
+
+
 
   <!-- Tracker Section -->
   <div id="tracker" style="display: none;">
