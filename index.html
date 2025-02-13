@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
   <title>Lifts Tracker</title>
   
   <!-- Relative paths to work both locally and on GitHub Pages -->
@@ -35,9 +34,9 @@
   <!-- Tracker Section -->
   <div id="tracker" style="display: none;">
     <h3>
-        Cycle: <span id="cycleNumber"></span>, 
-        Week: <span id="weekNumber"></span>, 
-        Block: <span id="blockType"></span>
+      Cycle: <span id="cycleNumber"></span>, 
+      Week: <span id="weekNumber"></span>, 
+      Block: <span id="blockType"></span>
     </h3>
 
     <!-- Deload Notification -->
@@ -51,28 +50,38 @@
 
     <!-- Show Alternative Weights Button -->
     <div class="button-row">
-        <button id="showAlternativeWeightsBtn">Show Alternative Exercise Weights</button>
+      <button id="showAlternativeWeightsBtn">Show Alternative Exercise Weights</button>
     </div>
 
     <div id="alternativeWeights"></div>
 
     <!-- AMRAP Section -->
     <div class="amrap-row">
-        <label for="amrap">AMRAP Reps:</label>
-        <input type="number" id="amrap" min="0" required>
+      <label for="amrap">AMRAP Reps:</label>
+      <input type="number" id="amrap" min="0" required>
     </div>
 
     <!-- AMRAP Controls -->
     <div id="amrap-controls">
-        <button id="amrap-plus">+</button>
-        <button id="amrap-minus">-</button>
+      <button id="amrap-plus">+</button>
+      <button id="amrap-minus">-</button>
+    </div>
+
+    <!-- New Actual Weight Input Section for Set 3 -->
+    <div class="actual-weight-row">
+      <label for="actualWeight">Actual Weight for Set 3 (lbs):</label>
+      <input type="number" id="actualWeight" min="0" required>
+    </div>
+
+    <!-- Actual Weight Controls -->
+    <div id="actualWeight-controls">
+      <button id="actualWeight-plus">+</button>
+      <button id="actualWeight-minus">-</button>
     </div>
 
     <!-- Save Progress -->
     <button id="save">Save Progress</button>
   </div>
-
-
 
   <!-- History and Utility Buttons -->
   <div>
