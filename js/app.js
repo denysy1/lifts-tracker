@@ -36,58 +36,70 @@ let config = {
 };
 
 document.addEventListener("DOMContentLoaded", () => {
-  const request = indexedDB.open("GymTrackerDB", 1);
-
-  request.onupgradeneeded = (event) => {
-    const db = event.target.result;
-    const store = db.createObjectStore("lifts", { keyPath: "id", autoIncrement: true });
-    store.createIndex("exercise", "exercise", { unique: false });
-
-    if (!db.objectStoreNames.contains("config")) {
-      db.createObjectStore("config", { keyPath: "key" });
+  // Main application class
+  class LiftTracker {
+    constructor() {
+      this.db = null;
+      this.currentExercise = null;
+      this.trainingMax = {};
+      this.consecutiveLowAMRAP = {
+        "Overhead Press": 0,
+        "Bench Press": 0,
+        "Squat": 0,
+        "Deadlift": 0
+      };
+      this.blockType = "anchor"; // Default block type
+      this.blockCounter = 1; // Tracks number of leader/anchor blocks
+      
+      this.initDatabase();
+      this.bindEventListeners();
     }
-  };
 
-  request.onsuccess = (event) => {
-    const db = event.target.result;
+    initDatabase() {
+      const request = indexedDB.open("GymTrackerDB", 1);
+      
+      request.onupgradeneeded = (event) => {
+        const db = event.target.result;
+        const store = db.createObjectStore("lifts", { keyPath: "id", autoIncrement: true });
+        store.createIndex("exercise", "exercise", { unique: false });
 
-    let currentExercise = null;
-    let trainingMax = {};
+        if (!db.objectStoreNames.contains("config")) {
+          db.createObjectStore("config", { keyPath: "key" });
+        }
+      };
+      
+      request.onsuccess = (event) => {
+        this.db = event.target.result;
+        this.loadConfigFromDB();
+      };
+      
+      request.onerror = (event) => {
+        console.error("Database error:", event.target.error);
+      };
+    }
 
-    let consecutiveLowAMRAP = {
-      "Overhead Press": 0,
-      "Bench Press": 0,
-      "Squat": 0,
-      "Deadlift": 0
-    };
+    bindEventListeners() {
+      document.getElementById("overhead-press-btn").onclick = () => this.selectExercise("Overhead Press");
+      document.getElementById("bench-press-btn").onclick = () => this.selectExercise("Bench Press");
+      document.getElementById("squat-btn").onclick = () => this.selectExercise("Squat");
+      document.getElementById("deadlift-btn").onclick = () => this.selectExercise("Deadlift");
 
-    // Load configuration from IndexedDB to overwrite defaults
-    loadConfigFromDB();
+      document.getElementById("initializeExercise").onclick = () => this.initializeTrainingMax();
+      document.getElementById("save").onclick = () => this.saveProgress();
+      document.getElementById("clear-last-entry").onclick = () => this.clearLastEntry();
+      document.getElementById("view-history").onclick = () => this.viewHistory();
+      document.getElementById("amrap-plus").onclick = () => this.adjustAmrapReps(1);
+      document.getElementById("amrap-minus").onclick = () => this.adjustAmrapReps(-1);
+      document.getElementById("actualWeight-plus").onclick = () => this.adjustActualWeight(5);
+      document.getElementById("actualWeight-minus").onclick = () => this.adjustActualWeight(-5);
+      document.getElementById("showAlternativeWeightsBtn").onclick = () => this.showAlternativeWeights();
+      document.getElementById("export-history").onclick = () => this.exportHistory();
+      document.getElementById("import-history").onclick = () => this.importHistory();
+      document.getElementById("import-config").onclick = () => this.loadConfigFile();
+    }
 
-    let blockType = "anchor"; // Default block type
-    let blockCounter = 1; // Tracks number of leader/anchor blocks
-
-    document.getElementById("overhead-press-btn").onclick = () => selectExercise("Overhead Press");
-    document.getElementById("bench-press-btn").onclick = () => selectExercise("Bench Press");
-    document.getElementById("squat-btn").onclick = () => selectExercise("Squat");
-    document.getElementById("deadlift-btn").onclick = () => selectExercise("Deadlift");
-
-    document.getElementById("initializeExercise").onclick = initializeTrainingMax;
-    document.getElementById("save").onclick = saveProgress;
-    document.getElementById("clear-last-entry").onclick = clearLastEntry;
-    document.getElementById("view-history").onclick = viewHistory;
-    document.getElementById("amrap-plus").onclick = () => adjustAmrapReps(1);
-    document.getElementById("amrap-minus").onclick = () => adjustAmrapReps(-1);
-    // New event listeners for Actual Weight plus/minus buttons
-    document.getElementById("actualWeight-plus").onclick = () => adjustActualWeight(5);
-    document.getElementById("actualWeight-minus").onclick = () => adjustActualWeight(-5);
-    document.getElementById("showAlternativeWeightsBtn").onclick = () => showAlternativeWeights();
-    document.getElementById("export-history").onclick = () => exportHistory();
-    document.getElementById("import-history").onclick = () => importHistory();
-    document.getElementById("import-config").onclick = loadConfigFile;
-
-    function loadConfigFromDB() {
-      const transaction = db.transaction(["config"], "readonly");
+    loadConfigFromDB() {
+      const transaction = this.db.transaction(["config"], "readonly");
       const store = transaction.objectStore("config");
     
       store.getAll().onsuccess = (event) => {
@@ -95,7 +107,7 @@ document.addEventListener("DOMContentLoaded", () => {
     
         configs.forEach(({ key, value }) => {
           if (config.hasOwnProperty(key)) {
-            config[key] = value; // Assign value to the config object
+            config[key] = value;
           } else {
             console.warn(`Unknown config key: ${key}`);
           }
@@ -110,7 +122,7 @@ document.addEventListener("DOMContentLoaded", () => {
       };
     }
      
-    function loadConfigFile() {
+    loadConfigFile() {
       const fileInput = document.getElementById("configFileInput");
       fileInput.click();
     
@@ -121,7 +133,7 @@ document.addEventListener("DOMContentLoaded", () => {
           reader.onload = (e) => {
             try {
               const configData = JSON.parse(e.target.result);
-              saveConfigToDB(configData);
+              this.saveConfigToDB(configData);
             } catch (error) {
               alert("Invalid configuration file. Please upload a valid JSON file.");
             }
@@ -131,8 +143,8 @@ document.addEventListener("DOMContentLoaded", () => {
       };
     }
     
-    function saveConfigToDB(newConfig) {
-      const transaction = db.transaction(["config"], "readwrite");
+    saveConfigToDB(newConfig) {
+      const transaction = this.db.transaction(["config"], "readwrite");
       const store = transaction.objectStore("config");
     
       // Clear existing config
@@ -156,7 +168,7 @@ document.addEventListener("DOMContentLoaded", () => {
       };
     }
     
-    function adjustAmrapReps(change) {
+    adjustAmrapReps(change) {
       const amrapField = document.getElementById("amrap");
       let currentValue = parseInt(amrapField.value);
       if (isNaN(currentValue)) {
@@ -169,8 +181,7 @@ document.addEventListener("DOMContentLoaded", () => {
       amrapField.value = currentValue;
     }
     
-    // adjust the actual weight input (in 5 lb increments)
-    function adjustActualWeight(change) {
+    adjustActualWeight(change) {
       const actualWeightField = document.getElementById("actualWeight");
       let currentValue = parseInt(actualWeightField.value);
       if (isNaN(currentValue)) {
@@ -183,25 +194,24 @@ document.addEventListener("DOMContentLoaded", () => {
       actualWeightField.value = currentValue;
     }
     
-    // New effectiveReps function so the conversion logic is isolated
-    function effectiveReps(actualReps, actualWeight, prescribedWeight) {
-
+    effectiveReps(actualReps, actualWeight, prescribedWeight) {
       if (actualWeight <= 0) return 0;
-      // Calculate the estimated 1RM from the actual performance.
-      // 1RM_actual = actualWeight / (1.0278 - 0.0278 * actualReps)
+      
+      // Calculate the estimated 1RM from the actual performance
       const oneRM_actual = actualWeight / (config.oneRM_correction_factor * (1.0278 - 0.0278 * actualReps));
-      // Now, solve for effective reps (R_eff)
+      
+      // Solve for effective reps (R_eff)
       const effectiveRepsValue = (1.0278 - (prescribedWeight / oneRM_actual)) / 0.0278;
       return effectiveRepsValue;
     }
     
-    function showAlternativeWeights() {
-      if (!currentExercise || !trainingMax[currentExercise]) {
+    showAlternativeWeights() {
+      if (!this.currentExercise || !this.trainingMax[this.currentExercise]) {
         alert("Please select an exercise and initialize your training max first.");
         return;
       }
 
-      const altExercises = config.alternatives[currentExercise];
+      const altExercises = config.alternatives[this.currentExercise];
       if (!altExercises) {
         alert("No alternative exercises available for this lift.");
         return;
@@ -221,7 +231,7 @@ document.addEventListener("DOMContentLoaded", () => {
       altWeightsElement.style.display = "block";
     }
     
-    function hideAlternativeWeights() {
+    hideAlternativeWeights() {
       const altWeightsElement = document.getElementById("alternativeWeights");
       if (altWeightsElement) {
         altWeightsElement.innerHTML = "";
@@ -231,11 +241,11 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
     
-    function selectExercise(exercise) {
-      currentExercise = exercise;
+    selectExercise(exercise) {
+      this.currentExercise = exercise;
       document.getElementById("exerciseName").textContent = exercise;
 
-      const transaction = db.transaction(["lifts"], "readonly");
+      const transaction = this.db.transaction(["lifts"], "readonly");
       const store = transaction.objectStore("lifts");
       const index = store.index("exercise");
       const request = index.getAll(exercise);
@@ -249,15 +259,15 @@ document.addEventListener("DOMContentLoaded", () => {
           document.getElementById("initialization").style.display = "none";
           document.getElementById("tracker").style.display = "block";
           const lastEntry = records[records.length - 1];
-          blockType = lastEntry.blockType || "leader";
-          blockCounter = lastEntry.blockCounter || 1;
-          consecutiveLowAMRAP[currentExercise] = lastEntry.consecutiveLowAMRAP || 0;
-          displayCurrentWorkout(lastEntry);
+          this.blockType = lastEntry.blockType || "leader";
+          this.blockCounter = lastEntry.blockCounter || 1;
+          this.consecutiveLowAMRAP[this.currentExercise] = lastEntry.consecutiveLowAMRAP || 0;
+          this.displayCurrentWorkout(lastEntry);
         }
       };
     }
     
-    function initializeTrainingMax() {
+    initializeTrainingMax() {
       const weightUsed = parseFloat(document.getElementById("maxWeightInput").value);
       const maxReps = parseInt(document.getElementById("maxRepsInput").value);
     
@@ -271,18 +281,18 @@ document.addEventListener("DOMContentLoaded", () => {
       const estimated1RM = weightUsed / (config.oneRM_correction_factor * (1.0278 - 0.0278 * maxReps));
     
       // Apply the training max initialization factor
-      trainingMax[currentExercise] = Math.floor(estimated1RM * config.trainingMaxInitializationFactor);
+      this.trainingMax[this.currentExercise] = Math.floor(estimated1RM * config.trainingMaxInitializationFactor);
     
-      const transaction = db.transaction(["lifts"], "readwrite");
+      const transaction = this.db.transaction(["lifts"], "readwrite");
       const store = transaction.objectStore("lifts");
     
       const newEntry = {
-        exercise: currentExercise,
+        exercise: this.currentExercise,
         cycle: 1,
         week: 0,
         blockType: "leader",
         blockCounter: 1,
-        trainingMax: trainingMax[currentExercise],
+        trainingMax: this.trainingMax[this.currentExercise],
         amrapReps: null,
         date: new Date().toLocaleString(),
         consecutiveLowAMRAP: 0
@@ -293,19 +303,18 @@ document.addEventListener("DOMContentLoaded", () => {
       request.onsuccess = () => {
         document.getElementById("initialization").style.display = "none";
         document.getElementById("tracker").style.display = "block";
-        displayCurrentWorkout(newEntry);
+        this.displayCurrentWorkout(newEntry);
       };
     }
     
-    
-    function displayCurrentWorkout(initialData) {
-      const transaction = db.transaction(["lifts"], "readonly");
+    displayCurrentWorkout(initialData) {
+      const transaction = this.db.transaction(["lifts"], "readonly");
       const store = transaction.objectStore("lifts");
       const index = store.index("exercise");
-      const request = index.getAll(currentExercise);
+      const request = index.getAll(this.currentExercise);
 
       request.onsuccess = (event) => {
-        hideAlternativeWeights();
+        this.hideAlternativeWeights();
         const records = event.target.result;
         if (!records.length) {
           console.error("No records found for the selected exercise.");
@@ -313,39 +322,38 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const lastWorkout = initialData || records[records.length - 1];
-        trainingMax[currentExercise] = lastWorkout.trainingMax;
+        this.trainingMax[this.currentExercise] = lastWorkout.trainingMax;
 
         let cycle = lastWorkout.cycle;
         let week = lastWorkout.week;
-        let isDeloadWeek = consecutiveLowAMRAP[currentExercise] >= config.deloadTriggerConsecutiveLowAMRAP;
+        let isDeloadWeek = this.consecutiveLowAMRAP[this.currentExercise] >= config.deloadTriggerConsecutiveLowAMRAP;
 
         if (!isDeloadWeek && week === 3) {
           week = 1;
           cycle++;
           if (!config.disableLeaderBlock) {
-            if (blockCounter === config.cyclesPerBlockType.leader && blockType === "leader") {
-              blockType = "anchor";
-              blockCounter = 1;
-            } else if (blockCounter === config.cyclesPerBlockType.anchor && blockType === "anchor") {
-              blockType = "leader";
-              blockCounter = 1;
+            if (this.blockCounter === config.cyclesPerBlockType.leader && this.blockType === "leader") {
+              this.blockType = "anchor";
+              this.blockCounter = 1;
+            } else if (this.blockCounter === config.cyclesPerBlockType.anchor && this.blockType === "anchor") {
+              this.blockType = "leader";
+              this.blockCounter = 1;
             } else {
-              blockCounter++;
+              this.blockCounter++;
             }
           } else {
-            blockType = "anchor";
+            this.blockType = "anchor";
           }
         } else if (!isDeloadWeek) {
           week++;
         }
 
-        const weightPercents = blockType === "leader" ? config.setPercentagesLeader : config.setPercentagesAnchor[week];
-        const reps = blockType === "leader" ? config.setRepsLeader : config.setRepsAnchor[week];
-        const targetReps = blockType === "anchor" ? config.targetRepsAnchor[week] : reps[2];
-
+        const weightPercents = this.blockType === "leader" ? config.setPercentagesLeader : config.setPercentagesAnchor[week];
+        const reps = this.blockType === "leader" ? config.setRepsLeader : config.setRepsAnchor[week];
+        const targetReps = this.blockType === "anchor" ? config.targetRepsAnchor[week] : reps[2];
 
         let deloadReps = reps;
-        let deloadWeights = weightPercents.map(percent => Math.round(trainingMax[currentExercise] * percent));
+        let deloadWeights = weightPercents.map(percent => Math.round(this.trainingMax[this.currentExercise] * percent));
 
         if (isDeloadWeek) {
           document.getElementById("deloadNotice").textContent = "Deload Week: Reduced volume for recovery";
@@ -363,19 +371,18 @@ document.addEventListener("DOMContentLoaded", () => {
         });
         document.getElementById("prescribedSets").innerHTML = setsHtml;
 
-        let bbbWeight = Math.round(trainingMax[currentExercise] * config.supplementWorkPercentage / 5) * 5;
+        let bbbWeight = Math.round(this.trainingMax[this.currentExercise] * config.supplementWorkPercentage / 5) * 5;
         let bbbHtml = `<h3>Supplement Work</h3><p>BBB: 5x10 @ ${bbbWeight} lbs</p>`;
         document.getElementById("supplementWork").innerHTML = bbbHtml;
 
         document.getElementById("amrap").value = reps[2];
-        // Optionally, you might set a default for actualWeight as well
-        document.getElementById("actualWeight").value = Math.round((trainingMax[currentExercise] * weightPercents[2]) / 5) * 5;
+        document.getElementById("actualWeight").value = Math.round((this.trainingMax[this.currentExercise] * weightPercents[2]) / 5) * 5;
 
         document.getElementById("cycleNumber").textContent = cycle || "N/A";
         document.getElementById("weekNumber").textContent = week || "N/A";
-        document.getElementById("blockType").textContent = blockType ? blockType.charAt(0).toUpperCase() + blockType.slice(1) : "N/A";
+        document.getElementById("blockType").textContent = this.blockType ? this.blockType.charAt(0).toUpperCase() + this.blockType.slice(1) : "N/A";
 
-        console.log(`Workout displayed: Cycle ${cycle}, Week ${week}, Block ${blockType}`);
+        console.log(`Workout displayed: Cycle ${cycle}, Week ${week}, Block ${this.blockType}`);
       };
 
       request.onerror = (event) => {
@@ -383,20 +390,20 @@ document.addEventListener("DOMContentLoaded", () => {
       };
     }
     
-    function saveProgress() {
+    saveProgress() {
       // Read the actual reps and the new actual weight for set 3
       const actualReps = parseInt(document.getElementById("amrap").value);
       const actualWeight = parseInt(document.getElementById("actualWeight").value);
 
-      const transaction = db.transaction(["lifts"], "readwrite");
+      const transaction = this.db.transaction(["lifts"], "readwrite");
       const store = transaction.objectStore("lifts");
-      const request = store.index("exercise").getAll(currentExercise);
+      const request = store.index("exercise").getAll(this.currentExercise);
 
       request.onsuccess = (event) => {
         const records = event.target.result;
         let cycle, week, trainingMax;
         let isFirstSave = records.length === 1 && records[0].week === 0;
-        let isDeloadWeek = consecutiveLowAMRAP[currentExercise] >= 1;
+        let isDeloadWeek = this.consecutiveLowAMRAP[this.currentExercise] >= 1;
 
         if (isFirstSave) {
           cycle = 1;
@@ -407,23 +414,23 @@ document.addEventListener("DOMContentLoaded", () => {
           cycle = lastEntry.cycle;
           week = lastEntry.week;
           trainingMax = lastEntry.trainingMax;
-          blockType = lastEntry.blockType;
-          blockCounter = lastEntry.blockCounter;
+          this.blockType = lastEntry.blockType;
+          this.blockCounter = lastEntry.blockCounter;
           if (week === 3) {
             week = 1;
             cycle++;
             if (!config.disableLeaderBlock) {
-              if (blockCounter === 2 && blockType === "leader") {
-                blockType = "anchor";
-                blockCounter = 1;
-              } else if (blockCounter === 1 && blockType === "anchor") {
-                blockType = "leader";
-                blockCounter = 1;
+              if (this.blockCounter === 2 && this.blockType === "leader") {
+                this.blockType = "anchor";
+                this.blockCounter = 1;
+              } else if (this.blockCounter === 1 && this.blockType === "anchor") {
+                this.blockType = "leader";
+                this.blockCounter = 1;
               } else {
-                blockCounter++;
+                this.blockCounter++;
               }
             } else {
-              blockType = "anchor";
+              this.blockType = "anchor";
             }
           } else {
             week++;
@@ -432,11 +439,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Calculate prescribed weight for the third set
         let weightPercents;
-        if (blockType === "leader") {
+        if (this.blockType === "leader") {
           weightPercents = config.setPercentagesLeader;
         } else {
           weightPercents = config.setPercentagesAnchor[week];
         }
+        
         let prescribedWeight;
         if (isDeloadWeek) {
           let baseWeight = trainingMax * weightPercents[2];
@@ -447,21 +455,20 @@ document.addEventListener("DOMContentLoaded", () => {
           prescribedWeight = Math.round(baseWeight / 5) * 5;
         }
 
-        // Compute effective reps using the new helper function
-        let effectiveRepsValue = effectiveReps(actualReps, actualWeight, prescribedWeight);
-        // For simplicity, round the effective reps to the nearest whole number
+        // Compute effective reps
+        let effectiveRepsValue = this.effectiveReps(actualReps, actualWeight, prescribedWeight);
         let effectiveRepsRounded = Math.round(effectiveRepsValue);
 
-        const increment = config.incrementValues[currentExercise];
+        const increment = config.incrementValues[this.currentExercise];
 
-        // Update training max based on effective reps instead of raw reps
+        // Update training max based on effective reps
         if (!isFirstSave && week === 3 && effectiveRepsRounded >= 0) {
           if (effectiveRepsRounded === 0) {
             trainingMax -= increment;
-            consecutiveLowAMRAP[currentExercise]++;
+            this.consecutiveLowAMRAP[this.currentExercise]++;
           } else if (effectiveRepsRounded < 5) {
             trainingMax += increment;
-            consecutiveLowAMRAP[currentExercise]++;
+            this.consecutiveLowAMRAP[this.currentExercise]++;
           } else {
             trainingMax += increment;
             // Accelerated incrementing logic:
@@ -470,40 +477,40 @@ document.addEventListener("DOMContentLoaded", () => {
                 trainingMax += increment * config.amrapProgressionIncrementMultipliers[i];
               }
             }
-            consecutiveLowAMRAP[currentExercise] = 0;
+            this.consecutiveLowAMRAP[this.currentExercise] = 0;
           }
         }
 
         const newEntry = {
-          exercise: currentExercise,
+          exercise: this.currentExercise,
           cycle,
           week,
           trainingMax,
-          blockType,
-          blockCounter,
-          amrapReps: effectiveRepsRounded, // Store the effective reps for record-keeping
+          blockType: this.blockType,
+          blockCounter: this.blockCounter,
+          amrapReps: effectiveRepsRounded,
           date: new Date().toLocaleString(),
-          consecutiveLowAMRAP: consecutiveLowAMRAP[currentExercise]
+          consecutiveLowAMRAP: this.consecutiveLowAMRAP[this.currentExercise]
         };
 
         const addRequest = store.add(newEntry);
         addRequest.onsuccess = () => {
           // Easter egg logic
-          if (currentExercise === "Squat" && effectiveRepsRounded >= 20) {
+          if (this.currentExercise === "Squat" && effectiveRepsRounded >= 20) {
             const audio = new Audio("img/yb.mp3");
             audio.play();
           }
           alert("Progress saved!");
-          selectExercise(currentExercise);
+          this.selectExercise(this.currentExercise);
         };
       };
     }
     
-    function clearLastEntry() {
-      const transaction = db.transaction(["lifts"], "readwrite");
+    clearLastEntry() {
+      const transaction = this.db.transaction(["lifts"], "readwrite");
       const store = transaction.objectStore("lifts");
       const index = store.index("exercise");
-      const request = index.getAllKeys(currentExercise);
+      const request = index.getAllKeys(this.currentExercise);
 
       request.onsuccess = (event) => {
         const keys = event.target.result;
@@ -511,7 +518,7 @@ document.addEventListener("DOMContentLoaded", () => {
           const lastKey = keys[keys.length - 1];
           store.delete(lastKey).onsuccess = () => {
             alert("Last entry cleared.");
-            selectExercise(currentExercise);
+            this.selectExercise(this.currentExercise);
           };
         } else {
           alert("No entry to clear.");
@@ -519,14 +526,14 @@ document.addEventListener("DOMContentLoaded", () => {
       };
     }
     
-    function viewHistory() {
-      const transaction = db.transaction(["lifts"], "readonly");
+    viewHistory() {
+      const transaction = this.db.transaction(["lifts"], "readonly");
       const store = transaction.objectStore("lifts");
-      const request = store.index("exercise").getAll(currentExercise);
+      const request = store.index("exercise").getAll(this.currentExercise);
 
       request.onsuccess = (event) => {
         const records = event.target.result;
-        let historyHtml = `<h2>History for ${currentExercise}</h2>`;
+        let historyHtml = `<h2>History for ${this.currentExercise}</h2>`;
         records.forEach(record => {
           if (record.date && record.amrapReps !== null) {
             historyHtml += `<p>${record.date}: Cycle ${record.cycle}, Week ${record.week}, Training Max: ${record.trainingMax} lbs, AMRAP (Effective) Reps: ${record.amrapReps}</p>`;
@@ -536,8 +543,8 @@ document.addEventListener("DOMContentLoaded", () => {
       };
     }
     
-    function exportHistory() {
-      const transaction = db.transaction(["lifts"], "readonly");
+    exportHistory() {
+      const transaction = this.db.transaction(["lifts"], "readonly");
       const store = transaction.objectStore("lifts");
       const request = store.getAll();
 
@@ -560,7 +567,7 @@ document.addEventListener("DOMContentLoaded", () => {
       };
     }
     
-    function importHistory() {
+    importHistory() {
       const fileInput = document.getElementById('file-input');
       fileInput.click();
       fileInput.onchange = (event) => {
@@ -571,7 +578,7 @@ document.addEventListener("DOMContentLoaded", () => {
             try {
               const importedData = JSON.parse(e.target.result);
               if (Array.isArray(importedData)) {
-                overwriteHistory(importedData);
+                this.overwriteHistory(importedData);
               } else {
                 alert('Invalid file format. Please upload a valid JSON file.');
               }
@@ -584,8 +591,8 @@ document.addEventListener("DOMContentLoaded", () => {
       };
     }
     
-    function overwriteHistory(data) {
-      const transaction = db.transaction(["lifts"], "readwrite");
+    overwriteHistory(data) {
+      const transaction = this.db.transaction(["lifts"], "readwrite");
       const store = transaction.objectStore("lifts");
 
       const clearRequest = store.clear();
@@ -607,5 +614,8 @@ document.addEventListener("DOMContentLoaded", () => {
         alert('Error clearing existing history. Please try again.');
       };
     }
-  };
+  }
+
+  // Initialize the application
+  const app = new LiftTracker();
 });
