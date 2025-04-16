@@ -285,12 +285,14 @@ document.addEventListener("DOMContentLoaded", () => {
     
       const transaction = this.db.transaction(["lifts"], "readwrite");
       const store = transaction.objectStore("lifts");
+
+      const startingBlockType = config.disableLeaderBlock ? "anchor" : "leader";
     
       const newEntry = {
         exercise: this.currentExercise,
         cycle: 1,
         week: 0,
-        blockType: "leader",
+        blockType: startingBlockType,
         blockCounter: 1,
         trainingMax: this.trainingMax[this.currentExercise],
         amrapReps: null,
