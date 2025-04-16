@@ -326,7 +326,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         let cycle = lastWorkout.cycle;
         let week = lastWorkout.week;
-        let isDeloadWeek = this.consecutiveLowAMRAP[this.currentExercise] >= config.deloadTriggerConsecutiveLowAMRAP;
+        let isDeloadWeek = this.consecutiveLowAMRAP[this.currentExercise]
+                      >= config.deloadTriggerConsecutiveLowAMRAP;
 
         if (!isDeloadWeek && week === 3) {
           week = 1;
@@ -403,7 +404,27 @@ document.addEventListener("DOMContentLoaded", () => {
         const records = event.target.result;
         let cycle, week, trainingMax;
         let isFirstSave = records.length === 1 && records[0].week === 0;
-        let isDeloadWeek = this.consecutiveLowAMRAP[this.currentExercise] >= 1;
+        let isDeloadWeek = this.consecutiveLowAMRAP[this.currentExercise]
+                       >= config.deloadTriggerConsecutiveLowAMRAP;
+
+        // ▼ EARLY‑RETURN FOR A DELAYED (DELOAD) WEEK ▼
+        if (isDeloadWeek) {
+          alert("Deload week complete. Progress entry will not be recorded.");
+          // clear the flag so we don’t get stuck in deload forever
+          this.consecutiveLowAMRAP[this.currentExercise] = 0;
+          // ── and persist that change to the last record in IndexedDB ──
+          const lastRecord = records[records.length - 1];
+          const updatedRecord = {
+            ...lastRecord,
+            consecutiveLowAMRAP: 0
+          };
+          // `id` is your keyPath on the object store
+          store.put(updatedRecord).onsuccess = () => {
+            // once that’s saved, refresh the UI
+            this.selectExercise(this.currentExercise);
+          };
+          return;
+        }
 
         if (isFirstSave) {
           cycle = 1;
@@ -416,7 +437,7 @@ document.addEventListener("DOMContentLoaded", () => {
           trainingMax = lastEntry.trainingMax;
           this.blockType = lastEntry.blockType;
           this.blockCounter = lastEntry.blockCounter;
-          if (week === 3) {
+          if (!isDeloadWeek && week === 3) {
             week = 1;
             cycle++;
             if (!config.disableLeaderBlock) {
@@ -432,7 +453,7 @@ document.addEventListener("DOMContentLoaded", () => {
             } else {
               this.blockType = "anchor";
             }
-          } else {
+          } else if (!isDeloadWeek) {
             week++;
           }
         }
