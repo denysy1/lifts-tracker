@@ -27,6 +27,12 @@ let config = {
   amrapProgressionThresholds: [10, 15, 20],
   amrapProgressionIncrementMultipliers: [1, 1, 1],
   deloadTriggerConsecutiveLowAMRAP: 1,
+  performanceWindowSize: 3,
+  decThreshold: 2,
+  accThreshold: 3,
+  adjustFactor: 0.50,
+  minIncrement: 2.5,
+  maxIncrement: 20,
   supplementWorkPercentage: 0.5,
   trainingMaxInitializationFactor: 0.9,
   cyclesPerBlockType: {
@@ -158,7 +164,7 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         }
     
-        alert("Configuration updated successfully!");
+
         console.log("Updated config:", config);
       };
     
@@ -204,6 +210,74 @@ document.addEventListener("DOMContentLoaded", () => {
       const effectiveRepsValue = (1.0278 - (prescribedWeight / oneRM_actual)) / 0.0278;
       return effectiveRepsValue;
     }
+
+    computePerformanceLog(exercise) {
+      console.log(`[tuning] 🔍 computePerformanceLog(${exercise})`);
+      return new Promise((resolve, reject) => {
+        const tx    = this.db.transaction(["lifts"], "readonly");
+        const store = tx.objectStore("lifts");
+        const idx   = store.index("exercise");
+        idx.getAll(exercise).onsuccess = (evt) => {
+          const allRecs = evt.target.result;
+          const week3   = allRecs.filter(r => r.week === 3);
+          console.log(`[tuning]   ↪ found ${allRecs.length} total, ${week3.length} week‑3 records`);
+          const windowSize = config.performanceWindowSize;    // e.g. 6
+          const recent = week3.slice(-windowSize);
+    
+          const minReps = config.amrapProgressionThresholds[0];
+    
+          const log = recent.map(r => {
+            if (r.amrapReps === 0)               return "DEC";
+            else if (r.amrapReps < minReps)      return "OK";
+            else                                  return "ACC";
+          });
+    
+          resolve(log);
+        };
+        tx.onerror = () => {
+          console.error("[tuning] computePerformanceLog DB error", tx.error);
+          reject(tx.error);
+        };
+      });
+    }
+    
+    adjustIncrementIfNeeded(exercise, log) {
+      console.log(
+        `[tuning] ${exercise} — last‐${log.length} outcomes:`,
+        log,
+        `decs=${log.filter(x=>"DEC"===x).length}`,
+        `accs=${log.filter(x=>"ACC"===x).length}`,
+        `priorIncrement=${config.incrementValues[exercise]}`
+      );
+    
+      if (log.length < Math.max(config.decThreshold, config.accThreshold)) {
+        console.log("[tuning] skipping—window not full yet");
+        return;
+      }
+    
+      const decs = log.filter(x => x === "DEC").length;
+      const accs = log.filter(x => x === "ACC").length;
+      let newInc = config.incrementValues[exercise];
+    
+      if (decs >= config.decThreshold) {
+        newInc *= (1 - config.adjustFactor);
+        console.log(`[tuning] ${exercise} saw ${decs} DEC ≥ ${config.decThreshold} → newInc=${newInc}`);
+      }
+      if (accs >= config.accThreshold) {
+        newInc *= (1 + config.adjustFactor);
+        console.log(`[tuning] ${exercise} saw ${accs} ACC ≥ ${config.accThreshold} → newInc=${newInc}`);
+      }
+    
+      // clamp
+      newInc = Math.min(config.maxIncrement, Math.max(config.minIncrement, newInc));
+      config.incrementValues[exercise] = newInc;
+      console.log(`[tuning] clamped to ${newInc}, saving to DB...`);
+    
+      this.saveConfigToDB({ incrementValues: config.incrementValues });
+    }
+    
+    
+    
     
     showAlternativeWeights() {
       if (!this.currentExercise || !this.trainingMax[this.currentExercise]) {
@@ -307,6 +381,7 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("tracker").style.display = "block";
         this.displayCurrentWorkout(newEntry);
       };
+      
     }
     
     displayCurrentWorkout(initialData) {
@@ -439,7 +514,7 @@ document.addEventListener("DOMContentLoaded", () => {
           trainingMax = lastEntry.trainingMax;
           this.blockType = lastEntry.blockType;
           this.blockCounter = lastEntry.blockCounter;
-          if (!isDeloadWeek && week === 3) {
+          if (week === 3) {
             week = 1;
             cycle++;
             if (!config.disableLeaderBlock) {
@@ -455,7 +530,7 @@ document.addEventListener("DOMContentLoaded", () => {
             } else {
               this.blockType = "anchor";
             }
-          } else if (!isDeloadWeek) {
+          } else {
             week++;
           }
         }
@@ -524,8 +599,15 @@ document.addEventListener("DOMContentLoaded", () => {
             audio.play();
           }
           alert("Progress saved!");
+          console.log(`[tuning] 📥 Progress saved for ${this.currentExercise}`);
           this.selectExercise(this.currentExercise);
+          console.log(`[tuning] ▶️ About to computePerformanceLog for ${this.currentExercise}`);
+          if (newEntry.week === 3) {
+            this.computePerformanceLog(this.currentExercise)
+              .then(log => this.adjustIncrementIfNeeded(this.currentExercise, log));
+          }      
         };
+
       };
     }
     
