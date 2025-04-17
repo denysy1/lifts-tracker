@@ -17,6 +17,11 @@
     "2": [3, 3, 3],
     "3": [5, 3, 1]
   },
+  "targetRepsAnchor": {
+    "1": 10,
+    "2": 8,
+    "3": 6
+  },
   "oneRM_correction_factor": 0.9,
   "deloadPercentage": 0.7,
   "disableLeaderBlock": true,
@@ -45,5 +50,11 @@
   "amrapProgressionIncrementMultipliers": [1, 1, 1],
   "deloadTriggerConsecutiveLowAMRAP": 1,
   "supplementWorkPercentage": 0.5,
-  "trainingMaxInitializationFactor": 0.9
+  "trainingMaxInitializationFactor": 0.9,
+  "performanceWindowSize": 3,
+  "decThreshold":         2,
+  "accThreshold":         3,
+  "adjustFactor":         0.50,
+  "minIncrement":         2.5,
+  "maxIncrement":         20
 }

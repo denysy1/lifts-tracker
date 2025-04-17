@@ -61,6 +61,33 @@ document.addEventListener("DOMContentLoaded", () => {
       this.bindEventListeners();
     }
 
+    getNextBlock(prevType, prevCount) {
+      // If leader‑blocks are disabled, always anchor with counter = 1
+      if (config.disableLeaderBlock) {
+        return { blockType: "anchor", blockCounter: 1 };
+      }
+    
+      const leaderCycles = config.cyclesPerBlockType.leader;
+      const anchorCycles = config.cyclesPerBlockType.anchor;
+    
+      if (prevType === "leader") {
+        // if we’ve done as many leader cycles as allowed → switch to anchor
+        if (prevCount >= leaderCycles) {
+          return { blockType: "anchor", blockCounter: 1 };
+        }
+        // otherwise stay in leader and bump the counter
+        return { blockType: "leader", blockCounter: prevCount + 1 };
+      } else {
+        // prevType === "anchor"
+        // if we’ve done as many anchor cycles as allowed → switch to leader
+        if (prevCount >= anchorCycles) {
+          return { blockType: "leader", blockCounter: 1 };
+        }
+        // otherwise stay in anchor and bump the counter
+        return { blockType: "anchor", blockCounter: prevCount + 1 };
+      }
+    }
+
     initDatabase() {
       const request = indexedDB.open("GymTrackerDB", 1);
       
@@ -406,25 +433,18 @@ document.addEventListener("DOMContentLoaded", () => {
         let isDeloadWeek = this.consecutiveLowAMRAP[this.currentExercise]
                       >= config.deloadTriggerConsecutiveLowAMRAP;
 
+
         if (!isDeloadWeek && week === 3) {
           week = 1;
           cycle++;
-          if (!config.disableLeaderBlock) {
-            if (this.blockCounter === config.cyclesPerBlockType.leader && this.blockType === "leader") {
-              this.blockType = "anchor";
-              this.blockCounter = 1;
-            } else if (this.blockCounter === config.cyclesPerBlockType.anchor && this.blockType === "anchor") {
-              this.blockType = "leader";
-              this.blockCounter = 1;
-            } else {
-              this.blockCounter++;
-            }
-          } else {
-            this.blockType = "anchor";
-          }
+          // use the new helper:
+          const next = this.getNextBlock(this.blockType, this.blockCounter);
+          this.blockType    = next.blockType;
+          this.blockCounter = next.blockCounter;
         } else if (!isDeloadWeek) {
           week++;
         }
+        
 
         const weightPercents = this.blockType === "leader" ? config.setPercentagesLeader : config.setPercentagesAnchor[week];
         const reps = this.blockType === "leader" ? config.setRepsLeader : config.setRepsAnchor[week];
@@ -517,22 +537,13 @@ document.addEventListener("DOMContentLoaded", () => {
           if (week === 3) {
             week = 1;
             cycle++;
-            if (!config.disableLeaderBlock) {
-              if (this.blockCounter === 2 && this.blockType === "leader") {
-                this.blockType = "anchor";
-                this.blockCounter = 1;
-              } else if (this.blockCounter === 1 && this.blockType === "anchor") {
-                this.blockType = "leader";
-                this.blockCounter = 1;
-              } else {
-                this.blockCounter++;
-              }
-            } else {
-              this.blockType = "anchor";
-            }
+            const next = this.getNextBlock(this.blockType, this.blockCounter);
+            this.blockType    = next.blockType;
+            this.blockCounter = next.blockCounter;
           } else {
             week++;
           }
+          
         }
 
         // Calculate prescribed weight for the third set
