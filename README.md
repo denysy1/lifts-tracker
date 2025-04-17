@@ -6,7 +6,8 @@ Lifts Tracker is a Progressive Web App (PWA) designed to give you a flexible way
 - **Asynchronous Tracking**: Track lifts independently without being tied to a rigid schedule.
 - **Autoregulation**: Automatically adjusts your training max based on AMRAP performance to ensure sustainable progression.
 - **Deload Scheduling**: Deload weeks are automatically triggered when performance metrics indicate a need for recovery.
-- **Leader and Anchor Blocks**: Implements the 5/3/1 Forever block programming for structured progression.
+- **Leader and Anchor Blocks**: Implements the 5/3/1 Forever block programming for structured progression (this is turned off by default).
+- **Adaptive increment tuning**: each cycle the app looks back at your last N AMRAP results and can shrink or grow your base increment automatically  
 - **Offline Functionality**: Works offline after installation and behaves like a native app.
 
 ## Mobile Installation Instructions
@@ -49,5 +50,5 @@ Lifts Tracker allows users to fine-tune their training preferences by importing 
 
 #### How to Upload a Configuration File
 1. Click the **Import Config** button in the app interface.
-2. Select a valid JSON file containing your custom configuration.
-3. The configuration will be saved to IndexedDB and applied immediately in the current session.
+2. Select a modified config.JSON file.
+3. The configuration will be saved and applied immediately in the current session.
