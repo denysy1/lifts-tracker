@@ -2,18 +2,17 @@
   "name": "Lifts Tracker",
   "short_name": "LiftsTracker",
   "description": "Track workouts with the 5/3/1 progression program",
-  "start_url": "/lifts-tracker/",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#007bff",
   "icons": [
     {
-      "src": "/lifts-tracker/img/icon.png",
-      "sizes": "512x512",
+      "src": "img/icon.png",
       "type": "image/png"
     },
     {
-      "src": "/lifts-tracker/img/favicon.ico",
+      "src": "img/favicon.ico",
       "sizes": "48x48",
       "type": "image/x-icon"
     }
