@@ -92,8 +92,8 @@ button:hover {
   background-color: #c82333;
 }
 
-/* Plus, Minus, Initialize, and Import History Buttons */
-#amrap-plus, #amrap-minus, #actualWeight-plus, #actualWeight-minus, #initializeExercise, #import-history, #export-history, #view-history, #import-config {
+/* Plus, Minus, Initialize, and Utility Buttons */
+#amrap-plus, #amrap-minus, #actualWeight-plus, #actualWeight-minus, #initializeExercise, #import-history, #export-history, #view-history, #import-config, #backup, #restore {
   background-color: #343a40;
 }
 
@@ -185,4 +185,3 @@ button:hover {
   text-align: center;
   color: #333;
 }
-

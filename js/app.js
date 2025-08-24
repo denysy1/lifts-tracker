@@ -50,14 +50,14 @@ document.addEventListener("DOMContentLoaded", () => {
       };
       this.blockType = "anchor"; // Default block type
       this.blockCounter = 1; // Tracks number of leader/anchor blocks
-      
+
       this.initDatabase();
       this.bindEventListeners();
     }
 
     initDatabase() {
       const request = indexedDB.open("GymTrackerDB", 1);
-      
+
       request.onupgradeneeded = (event) => {
         const db = event.target.result;
         const store = db.createObjectStore("lifts", { keyPath: "id", autoIncrement: true });
@@ -67,12 +67,12 @@ document.addEventListener("DOMContentLoaded", () => {
           db.createObjectStore("config", { keyPath: "key" });
         }
       };
-      
+
       request.onsuccess = (event) => {
         this.db = event.target.result;
         this.loadConfigFromDB();
       };
-      
+
       request.onerror = (event) => {
         console.error("Database error:", event.target.error);
       };
@@ -93,18 +93,18 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("actualWeight-plus").onclick = () => this.adjustActualWeight(5);
       document.getElementById("actualWeight-minus").onclick = () => this.adjustActualWeight(-5);
       document.getElementById("showAlternativeWeightsBtn").onclick = () => this.showAlternativeWeights();
-      document.getElementById("export-history").onclick = () => this.exportHistory();
-      document.getElementById("import-history").onclick = () => this.importHistory();
+      document.getElementById("backup").onclick = () => this.exportFullBackup();
+      document.getElementById("restore").onclick = () => this.importFullBackup();
       document.getElementById("import-config").onclick = () => this.loadConfigFile();
     }
 
     loadConfigFromDB() {
       const transaction = this.db.transaction(["config"], "readonly");
       const store = transaction.objectStore("config");
-    
+
       store.getAll().onsuccess = (event) => {
         const configs = event.target.result;
-    
+
         configs.forEach(({ key, value }) => {
           if (config.hasOwnProperty(key)) {
             config[key] = value;
@@ -112,20 +112,20 @@ document.addEventListener("DOMContentLoaded", () => {
             console.warn(`Unknown config key: ${key}`);
           }
         });
-    
+
         console.log("Configuration loaded successfully:", config);
       };
-    
+
       store.getAll().onerror = (event) => {
         console.error("Error loading configuration from IndexedDB:", event.target.error);
         alert("Error loading configuration. Using default values.");
       };
     }
-     
+
     loadConfigFile() {
       const fileInput = document.getElementById("configFileInput");
       fileInput.click();
-    
+
       fileInput.onchange = (event) => {
         const file = event.target.files[0];
         if (file) {
@@ -142,11 +142,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       };
     }
-    
+
     saveConfigToDB(newConfig) {
       const transaction = this.db.transaction(["config"], "readwrite");
       const store = transaction.objectStore("config");
-    
+
       // Clear existing config
       store.clear().onsuccess = () => {
         for (const [key, value] of Object.entries(newConfig)) {
@@ -157,17 +157,17 @@ document.addEventListener("DOMContentLoaded", () => {
             console.warn(`Skipping invalid or unknown config key: ${key}`);
           }
         }
-    
+
         alert("Configuration updated successfully!");
         console.log("Updated config:", config);
       };
-    
+
       transaction.onerror = (event) => {
         console.error("Error saving configuration to IndexedDB:", event.target.error);
         alert("Error saving configuration.");
       };
     }
-    
+
     adjustAmrapReps(change) {
       const amrapField = document.getElementById("amrap");
       let currentValue = parseInt(amrapField.value);
@@ -180,7 +180,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       amrapField.value = currentValue;
     }
-    
+
     adjustActualWeight(change) {
       const actualWeightField = document.getElementById("actualWeight");
       let currentValue = parseInt(actualWeightField.value);
@@ -193,18 +193,18 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       actualWeightField.value = currentValue;
     }
-    
+
     effectiveReps(actualReps, actualWeight, prescribedWeight) {
       if (actualWeight <= 0) return 0;
-      
+
       // Calculate the estimated 1RM from the actual performance
       const oneRM_actual = actualWeight / (config.oneRM_correction_factor * (1.0278 - 0.0278 * actualReps));
-      
+
       // Solve for effective reps (R_eff)
       const effectiveRepsValue = (1.0278 - (prescribedWeight / oneRM_actual)) / 0.0278;
       return effectiveRepsValue;
     }
-    
+
     showAlternativeWeights() {
       if (!this.currentExercise || !this.trainingMax[this.currentExercise]) {
         alert("Please select an exercise and initialize your training max first.");
@@ -230,7 +230,7 @@ document.addEventListener("DOMContentLoaded", () => {
       altWeightsElement.innerHTML = alternativeWeightsText;
       altWeightsElement.style.display = "block";
     }
-    
+
     hideAlternativeWeights() {
       const altWeightsElement = document.getElementById("alternativeWeights");
       if (altWeightsElement) {
@@ -240,7 +240,7 @@ document.addEventListener("DOMContentLoaded", () => {
         console.warn("#alternativeWeights element is missing or not loaded in the DOM.");
       }
     }
-    
+
     selectExercise(exercise) {
       this.currentExercise = exercise;
       document.getElementById("exerciseName").textContent = exercise;
@@ -266,28 +266,28 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       };
     }
-    
+
     initializeTrainingMax() {
       const weightUsed = parseFloat(document.getElementById("maxWeightInput").value);
       const maxReps = parseInt(document.getElementById("maxRepsInput").value);
-    
+
       // Ensure valid input
       if (isNaN(weightUsed) || isNaN(maxReps) || weightUsed <= 0 || maxReps <= 0) {
         alert("Please enter valid weight and reps.");
         return;
       }
-    
+
       // Calculate estimated 1RM using the formula
       const estimated1RM = weightUsed / (config.oneRM_correction_factor * (1.0278 - 0.0278 * maxReps));
-    
+
       // Apply the training max initialization factor
       this.trainingMax[this.currentExercise] = Math.floor(estimated1RM * config.trainingMaxInitializationFactor);
-    
+
       const transaction = this.db.transaction(["lifts"], "readwrite");
       const store = transaction.objectStore("lifts");
 
       const startingBlockType = config.disableLeaderBlock ? "anchor" : "leader";
-    
+
       const newEntry = {
         exercise: this.currentExercise,
         cycle: 1,
@@ -299,16 +299,16 @@ document.addEventListener("DOMContentLoaded", () => {
         date: new Date().toLocaleString(),
         consecutiveLowAMRAP: 0
       };
-    
+
       const request = store.add(newEntry);
-    
+
       request.onsuccess = () => {
         document.getElementById("initialization").style.display = "none";
         document.getElementById("tracker").style.display = "block";
         this.displayCurrentWorkout(newEntry);
       };
     }
-    
+
     displayCurrentWorkout(initialData) {
       const transaction = this.db.transaction(["lifts"], "readonly");
       const store = transaction.objectStore("lifts");
@@ -329,7 +329,7 @@ document.addEventListener("DOMContentLoaded", () => {
         let cycle = lastWorkout.cycle;
         let week = lastWorkout.week;
         let isDeloadWeek = this.consecutiveLowAMRAP[this.currentExercise]
-                      >= config.deloadTriggerConsecutiveLowAMRAP;
+          >= config.deloadTriggerConsecutiveLowAMRAP;
 
         if (!isDeloadWeek && week === 3) {
           week = 1;
@@ -392,7 +392,7 @@ document.addEventListener("DOMContentLoaded", () => {
         console.error("Error retrieving workout data:", event.target.error);
       };
     }
-    
+
     saveProgress() {
       // Read the actual reps and the new actual weight for set 3
       const actualReps = parseInt(document.getElementById("amrap").value);
@@ -407,7 +407,7 @@ document.addEventListener("DOMContentLoaded", () => {
         let cycle, week, trainingMax;
         let isFirstSave = records.length === 1 && records[0].week === 0;
         let isDeloadWeek = this.consecutiveLowAMRAP[this.currentExercise]
-                       >= config.deloadTriggerConsecutiveLowAMRAP;
+          >= config.deloadTriggerConsecutiveLowAMRAP;
 
         // ▼ EARLY‑RETURN FOR A DELAYED (DELOAD) WEEK ▼
         if (isDeloadWeek) {
@@ -467,7 +467,7 @@ document.addEventListener("DOMContentLoaded", () => {
         } else {
           weightPercents = config.setPercentagesAnchor[week];
         }
-        
+
         let prescribedWeight;
         if (isDeloadWeek) {
           let baseWeight = trainingMax * weightPercents[2];
@@ -528,7 +528,7 @@ document.addEventListener("DOMContentLoaded", () => {
         };
       };
     }
-    
+
     clearLastEntry() {
       const transaction = this.db.transaction(["lifts"], "readwrite");
       const store = transaction.objectStore("lifts");
@@ -548,7 +548,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       };
     }
-    
+
     viewHistory() {
       const transaction = this.db.transaction(["lifts"], "readonly");
       const store = transaction.objectStore("lifts");
@@ -565,77 +565,179 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("history").innerHTML = historyHtml;
       };
     }
-    
-    exportHistory() {
-      const transaction = this.db.transaction(["lifts"], "readonly");
-      const store = transaction.objectStore("lifts");
-      const request = store.getAll();
 
-      request.onsuccess = (event) => {
-        const records = event.target.result;
-        const historyJson = JSON.stringify(records, null, 2);
-        const blob = new Blob([historyJson], { type: 'application/json' });
+
+    exportFullBackup() {
+      // Get all object store names dynamically
+      const objectStoreNames = Array.from(this.db.objectStoreNames);
+      const transaction = this.db.transaction(objectStoreNames, "readonly");
+
+      const exportPromises = objectStoreNames.map(storeName => {
+        return new Promise((resolve, reject) => {
+          const store = transaction.objectStore(storeName);
+          const request = store.getAll();
+
+          request.onsuccess = () => {
+            resolve({
+              storeName: storeName,
+              data: request.result
+            });
+          };
+
+          request.onerror = () => {
+            reject(new Error(`Failed to export ${storeName}: ${request.error}`));
+          };
+        });
+      });
+
+      Promise.all(exportPromises).then(storeData => {
+        const fullBackup = {
+          databaseName: this.db.name,
+          version: this.db.version,
+          exportDate: new Date().toISOString(),
+          appVersion: "1.0",
+          stores: {}
+        };
+
+        // Organize data by store name
+        storeData.forEach(({ storeName, data }) => {
+          fullBackup.stores[storeName] = data;
+        });
+
+        const backupJson = JSON.stringify(fullBackup, null, 2);
+        const blob = new Blob([backupJson], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'lifts-tracker-history.json';
+        a.download = `lifts-tracker-backup-${new Date().toISOString().split('T')[0]}.json`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-      };
 
-      request.onerror = (event) => {
-        console.error('Error retrieving history from IndexedDB:', event.target.error);
+        alert('Complete backup exported successfully!');
+        console.log('Full backup exported:', fullBackup);
+      }).catch(error => {
+        console.error('Error exporting full backup:', error);
+        alert('Error exporting backup. Please try again.');
+      });
+    }
+
+    importFullBackup() {
+      const fileInput = document.getElementById('backup-input');
+      if (!fileInput) {
+        // Create the input element if it doesn't exist
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.id = 'backup-input';
+        input.accept = '.json';
+        input.style.display = 'none';
+        document.body.appendChild(input);
+      }
+
+      const input = document.getElementById('backup-input');
+      input.click();
+
+      input.onchange = (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const backupData = JSON.parse(e.target.result);
+
+            // Validate backup structure
+            if (!backupData.stores || typeof backupData.stores !== 'object') {
+              alert('Invalid backup file format. Please upload a valid backup file.');
+              return;
+            }
+
+            // Confirm with user before proceeding
+            const confirmMessage = `This will completely replace all your current data with the backup from ${backupData.exportDate ? new Date(backupData.exportDate).toLocaleDateString() : 'unknown date'}.\n\nAre you sure you want to continue?`;
+
+            if (!confirm(confirmMessage)) {
+              return;
+            }
+
+            this.restoreFullBackup(backupData);
+          } catch (error) {
+            console.error('Error parsing backup file:', error);
+            alert('Error reading backup file. Please upload a valid JSON file.');
+          }
+        };
+        reader.readAsText(file);
       };
     }
-    
-    importHistory() {
-      const fileInput = document.getElementById('file-input');
-      fileInput.click();
-      fileInput.onchange = (event) => {
-        const file = event.target.files[0];
-        if (file) {
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            try {
-              const importedData = JSON.parse(e.target.result);
-              if (Array.isArray(importedData)) {
-                this.overwriteHistory(importedData);
-              } else {
-                alert('Invalid file format. Please upload a valid JSON file.');
+
+    restoreFullBackup(backupData) {
+      const objectStoreNames = Array.from(this.db.objectStoreNames);
+      const transaction = this.db.transaction(objectStoreNames, "readwrite");
+
+      // Clear all existing stores first
+      const clearPromises = objectStoreNames.map(storeName => {
+        return new Promise((resolve, reject) => {
+          const store = transaction.objectStore(storeName);
+          const clearRequest = store.clear();
+
+          clearRequest.onsuccess = () => resolve(storeName);
+          clearRequest.onerror = () => reject(new Error(`Failed to clear ${storeName}`));
+        });
+      });
+
+      Promise.all(clearPromises).then(clearedStores => {
+        console.log('Cleared stores:', clearedStores);
+
+        // Restore data to each store
+        const restorePromises = [];
+
+        for (const [storeName, storeData] of Object.entries(backupData.stores)) {
+          if (objectStoreNames.includes(storeName) && Array.isArray(storeData)) {
+            const store = transaction.objectStore(storeName);
+
+            storeData.forEach(record => {
+              restorePromises.push(new Promise((resolve, reject) => {
+                const putRequest = store.put(record);
+                putRequest.onsuccess = () => resolve();
+                putRequest.onerror = () => reject(putRequest.error);
+              }));
+            });
+          }
+        }
+
+        Promise.all(restorePromises).then(() => {
+          // Update in-memory config from restored data
+          if (backupData.stores.config) {
+            backupData.stores.config.forEach(({ key, value }) => {
+              if (config.hasOwnProperty(key)) {
+                config[key] = value;
               }
-            } catch (error) {
-              alert('Error reading file. Please upload a valid JSON file.');
+            });
+          }
+
+          transaction.oncomplete = () => {
+            alert('Backup restored successfully!');
+            console.log('Full backup restored from:', backupData.exportDate);
+
+            // Refresh the current exercise display if one is selected
+            if (this.currentExercise) {
+              this.selectExercise(this.currentExercise);
             }
           };
-          reader.readAsText(file);
-        }
-      };
-    }
-    
-    overwriteHistory(data) {
-      const transaction = this.db.transaction(["lifts"], "readwrite");
-      const store = transaction.objectStore("lifts");
 
-      const clearRequest = store.clear();
-      clearRequest.onsuccess = () => {
-        data.forEach(record => {
-          store.add(record);
+          transaction.onerror = (event) => {
+            console.error('Error during restore transaction:', event.target.error);
+            alert('Error restoring backup. Please try again.');
+          };
+        }).catch(error => {
+          console.error('Error restoring individual records:', error);
+          alert('Error restoring backup data. Please try again.');
         });
-        transaction.oncomplete = () => {
-          alert('History imported successfully!');
-        };
-        transaction.onerror = (event) => {
-          console.error('Error importing history:', event.target.error);
-          alert('Error importing history. Please try again.');
-        };
-      };
 
-      clearRequest.onerror = (event) => {
-        console.error('Error clearing existing history:', event.target.error);
-        alert('Error clearing existing history. Please try again.');
-      };
+      }).catch(error => {
+        console.error('Error clearing existing data:', error);
+        alert('Error clearing existing data. Please try again.');
+      });
     }
   }
 
