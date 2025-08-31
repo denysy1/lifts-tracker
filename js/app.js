@@ -50,6 +50,8 @@ document.addEventListener("DOMContentLoaded", () => {
       };
       this.blockType = "anchor"; // Default block type
       this.blockCounter = 1; // Tracks number of leader/anchor blocks
+      this.selectedAlternativeExercise = null; // Track selected alternative exercise
+      this.currentScaleFactor = 1.0; // Track current scaling factor
 
       this.initDatabase();
       this.bindEventListeners();
@@ -92,10 +94,13 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("amrap-minus").onclick = () => this.adjustAmrapReps(-1);
       document.getElementById("actualWeight-plus").onclick = () => this.adjustActualWeight(5);
       document.getElementById("actualWeight-minus").onclick = () => this.adjustActualWeight(-5);
-      document.getElementById("showAlternativeWeightsBtn").onclick = () => this.showAlternativeWeights();
       document.getElementById("backup").onclick = () => this.exportFullBackup();
       document.getElementById("restore").onclick = () => this.importFullBackup();
       document.getElementById("import-config").onclick = () => this.loadConfigFile();
+
+      // Accordion event listeners
+      document.getElementById("exerciseOptionsHeader").onclick = () => this.toggleAccordion();
+      document.getElementById("exerciseSelect").onchange = () => this.onExerciseSelectionChange();
     }
 
     loadConfigFromDB() {
@@ -205,45 +210,230 @@ document.addEventListener("DOMContentLoaded", () => {
       return effectiveRepsValue;
     }
 
-    showAlternativeWeights() {
-      if (!this.currentExercise || !this.trainingMax[this.currentExercise]) {
-        alert("Please select an exercise and initialize your training max first.");
-        return;
+    // Accordion toggle functionality
+    toggleAccordion() {
+      const header = document.getElementById("exerciseOptionsHeader");
+      const content = document.getElementById("exerciseOptionsContent");
+      const isExpanded = content.style.display === "block";
+
+      if (isExpanded) {
+        content.style.display = "none";
+        header.querySelector("span").textContent = "▶ Exercise Options";
+      } else {
+        content.style.display = "block";
+        header.querySelector("span").textContent = "▼ Exercise Options";
+        this.populateExerciseDropdown();
       }
-
-      const altExercises = config.alternatives[this.currentExercise];
-      if (!altExercises) {
-        alert("No alternative exercises available for this lift.");
-        return;
-      }
-
-      // Get the weight of the third set from the prescribed sets
-      const thirdSetWeight = parseInt(document.querySelector("#prescribedSets p:nth-child(4)").textContent.split(" ")[2]);
-
-      const weights = altExercises.map(
-        alt => `${alt.name}: ${Math.round(thirdSetWeight * alt.scale / 5) * 5} lbs`
-      ).join("<br>");
-
-      const alternativeWeightsText = `<h3>Alternative Weights</h3>${weights}`;
-      const altWeightsElement = document.getElementById("alternativeWeights");
-
-      altWeightsElement.innerHTML = alternativeWeightsText;
-      altWeightsElement.style.display = "block";
     }
 
-    hideAlternativeWeights() {
-      const altWeightsElement = document.getElementById("alternativeWeights");
-      if (altWeightsElement) {
-        altWeightsElement.innerHTML = "";
-        altWeightsElement.style.display = "none";
+    // Populate the dropdown with exercise options
+    populateExerciseDropdown() {
+      if (!this.currentExercise) return;
+
+      const select = document.getElementById("exerciseSelect");
+      select.innerHTML = ""; // Clear existing options
+
+      // Add original exercise as first option
+      const originalOption = document.createElement("option");
+      originalOption.value = "original";
+      originalOption.textContent = `${this.currentExercise} (Original)`;
+      select.appendChild(originalOption);
+
+      // Add alternative exercises
+      const alternatives = config.alternatives[this.currentExercise] || [];
+      alternatives.forEach(alt => {
+        const option = document.createElement("option");
+        option.value = alt.name;
+        option.textContent = alt.name;
+        select.appendChild(option);
+      });
+
+      // Set to original by default
+      select.value = "original";
+    }
+
+    // Handle exercise selection change
+    onExerciseSelectionChange() {
+      const select = document.getElementById("exerciseSelect");
+      const selectedValue = select.value;
+
+      if (selectedValue === "original") {
+        this.selectedAlternativeExercise = null;
+        this.currentScaleFactor = 1.0;
       } else {
-        console.warn("#alternativeWeights element is missing or not loaded in the DOM.");
+        this.selectedAlternativeExercise = selectedValue;
+        const alternatives = config.alternatives[this.currentExercise] || [];
+        const selectedAlt = alternatives.find(alt => alt.name === selectedValue);
+        this.currentScaleFactor = selectedAlt ? selectedAlt.scale : 1.0;
       }
+
+      // Refresh the workout display with new scaling
+      this.refreshWorkoutDisplay();
+    }
+
+    // Refresh the workout display with current scaling
+    refreshWorkoutDisplay() {
+      // Store current database query to avoid re-querying
+      const transaction = this.db.transaction(["lifts"], "readonly");
+      const store = transaction.objectStore("lifts");
+      const index = store.index("exercise");
+      const request = index.getAll(this.currentExercise);
+
+      request.onsuccess = (event) => {
+        const records = event.target.result;
+        if (!records.length) return;
+
+        const lastWorkout = records[records.length - 1];
+        this.displayCurrentWorkoutWithScaling(lastWorkout);
+      };
+    }
+
+    // Convert weight back to original exercise equivalent for saving
+    convertToOriginalEquivalent(actualReps, actualWeight) {
+      if (this.selectedAlternativeExercise && this.currentScaleFactor !== 1.0) {
+        // Convert actual weight back to original exercise equivalent
+        const originalEquivalentWeight = actualWeight / this.currentScaleFactor;
+
+        // Calculate what this performance would be in terms of original exercise reps
+        // Get the original prescribed weight for set 3
+        const originalPrescribedWeight = this.getOriginalPrescribedWeight();
+
+        // Use effective reps calculation with original equivalent weight
+        const effectiveRepsValue = this.effectiveReps(actualReps, originalEquivalentWeight, originalPrescribedWeight);
+
+        return {
+          equivalentWeight: originalEquivalentWeight,
+          effectiveReps: effectiveRepsValue
+        };
+      }
+
+      // If using original exercise, return as-is
+      const originalPrescribedWeight = this.getOriginalPrescribedWeight();
+      const effectiveRepsValue = this.effectiveReps(actualReps, actualWeight, originalPrescribedWeight);
+
+      return {
+        equivalentWeight: actualWeight,
+        effectiveReps: effectiveRepsValue
+      };
+    }
+
+    // Get the original prescribed weight (without scaling)
+    getOriginalPrescribedWeight() {
+      // Calculate it directly since we need synchronous access
+      let weightPercents;
+      if (this.blockType === "leader") {
+        weightPercents = config.setPercentagesLeader;
+      } else {
+        // We need the week info - let's get it from the UI
+        const weekText = document.getElementById("weekNumber").textContent;
+        const week = parseInt(weekText) || 1;
+        weightPercents = config.setPercentagesAnchor[week];
+      }
+
+      const isDeloadWeek = this.consecutiveLowAMRAP[this.currentExercise] >= config.deloadTriggerConsecutiveLowAMRAP;
+      let baseWeight = this.trainingMax[this.currentExercise] * weightPercents[2];
+
+      if (isDeloadWeek) {
+        baseWeight = Math.round(baseWeight * config.deloadPercentage);
+      }
+
+      return Math.round(baseWeight / 5) * 5;
+    }
+
+    // Display workout with scaling applied
+    displayCurrentWorkoutWithScaling(initialData) {
+      const lastWorkout = initialData;
+      this.trainingMax[this.currentExercise] = lastWorkout.trainingMax;
+
+      let cycle = lastWorkout.cycle;
+      let week = lastWorkout.week;
+      let isDeloadWeek = this.consecutiveLowAMRAP[this.currentExercise] >= config.deloadTriggerConsecutiveLowAMRAP;
+
+      if (!isDeloadWeek && week === 3) {
+        week = 1;
+        cycle++;
+        if (!config.disableLeaderBlock) {
+          if (this.blockCounter === config.cyclesPerBlockType.leader && this.blockType === "leader") {
+            this.blockType = "anchor";
+            this.blockCounter = 1;
+          } else if (this.blockCounter === config.cyclesPerBlockType.anchor && this.blockType === "anchor") {
+            this.blockType = "leader";
+            this.blockCounter = 1;
+          } else {
+            this.blockCounter++;
+          }
+        } else {
+          this.blockType = "anchor";
+        }
+      } else if (!isDeloadWeek) {
+        week++;
+      }
+
+      const weightPercents = this.blockType === "leader" ? config.setPercentagesLeader : config.setPercentagesAnchor[week];
+      const reps = this.blockType === "leader" ? config.setRepsLeader : config.setRepsAnchor[week];
+      const targetReps = this.blockType === "anchor" ? config.targetRepsAnchor[week] : reps[2];
+
+      let deloadReps = reps;
+      let deloadWeights = weightPercents.map(percent => Math.round(this.trainingMax[this.currentExercise] * percent));
+
+      if (isDeloadWeek) {
+        document.getElementById("deloadNotice").textContent = "Deload Week: Reduced volume for recovery";
+        deloadReps = reps.map(r => Math.ceil(r * config.deloadPercentage));
+        deloadWeights = deloadWeights.map(weight => Math.round(weight * config.deloadPercentage));
+      } else {
+        document.getElementById("deloadNotice").textContent = "";
+      }
+
+      // Apply scaling for alternative exercises
+      let scaledWeights = deloadWeights.map(weight => Math.round((weight * this.currentScaleFactor) / 5) * 5);
+
+      let setsHtml = "<h3>Prescribed Sets</h3>";
+      scaledWeights.forEach((weight, i) => {
+        let repInfo = i === 2 ? ` (Target: ${targetReps} reps)` : "";
+        setsHtml += `<p>Set ${i + 1}: ${weight} lbs x ${deloadReps[i]} reps${repInfo}</p>`;
+      });
+
+      // Add alternative exercise styling if not using original
+      const prescribedSetsElement = document.getElementById("prescribedSets");
+      if (this.selectedAlternativeExercise) {
+        prescribedSetsElement.classList.add("alternative-exercise");
+        setsHtml = setsHtml.replace("<h3>Prescribed Sets</h3>", `<h3>Prescribed Sets (${this.selectedAlternativeExercise})</h3>`);
+      } else {
+        prescribedSetsElement.classList.remove("alternative-exercise");
+      }
+
+      prescribedSetsElement.innerHTML = setsHtml;
+
+      let bbbWeight = Math.round(this.trainingMax[this.currentExercise] * config.supplementWorkPercentage / 5) * 5;
+      let bbbHtml = `<h3>Supplement Work</h3><p>BBB: 5x10 @ ${bbbWeight} lbs</p>`;
+      document.getElementById("supplementWork").innerHTML = bbbHtml;
+
+      document.getElementById("amrap").value = reps[2];
+      // Update actual weight with scaling
+      const baseActualWeight = Math.round((this.trainingMax[this.currentExercise] * weightPercents[2]) / 5) * 5;
+      const scaledActualWeight = Math.round((baseActualWeight * this.currentScaleFactor) / 5) * 5;
+      document.getElementById("actualWeight").value = scaledActualWeight;
+
+      document.getElementById("cycleNumber").textContent = cycle || "N/A";
+      document.getElementById("weekNumber").textContent = week || "N/A";
+      document.getElementById("blockType").textContent = this.blockType ? this.blockType.charAt(0).toUpperCase() + this.blockType.slice(1) : "N/A";
+
+      console.log(`Workout displayed: Cycle ${cycle}, Week ${week}, Block ${this.blockType}, Scale: ${this.currentScaleFactor}`);
     }
 
     selectExercise(exercise) {
       this.currentExercise = exercise;
       document.getElementById("exerciseName").textContent = exercise;
+
+      // Reset alternative exercise selection when switching exercises
+      this.selectedAlternativeExercise = null;
+      this.currentScaleFactor = 1.0;
+
+      // Collapse accordion and reset to original
+      const content = document.getElementById("exerciseOptionsContent");
+      const header = document.getElementById("exerciseOptionsHeader");
+      content.style.display = "none";
+      header.querySelector("span").textContent = "▶ Exercise Options";
 
       const transaction = this.db.transaction(["lifts"], "readonly");
       const store = transaction.objectStore("lifts");
@@ -316,7 +506,6 @@ document.addEventListener("DOMContentLoaded", () => {
       const request = index.getAll(this.currentExercise);
 
       request.onsuccess = (event) => {
-        this.hideAlternativeWeights();
         const records = event.target.result;
         if (!records.length) {
           console.error("No records found for the selected exercise.");
@@ -372,7 +561,11 @@ document.addEventListener("DOMContentLoaded", () => {
           let repInfo = i === 2 ? ` (Target: ${targetReps} reps)` : "";
           setsHtml += `<p>Set ${i + 1}: ${weight} lbs x ${deloadReps[i]} reps${repInfo}</p>`;
         });
-        document.getElementById("prescribedSets").innerHTML = setsHtml;
+
+        // Ensure alternative exercise styling is removed for original exercise display
+        const prescribedSetsElement = document.getElementById("prescribedSets");
+        prescribedSetsElement.classList.remove("alternative-exercise");
+        prescribedSetsElement.innerHTML = setsHtml;
 
         let bbbWeight = Math.round(this.trainingMax[this.currentExercise] * config.supplementWorkPercentage / 5) * 5;
         let bbbHtml = `<h3>Supplement Work</h3><p>BBB: 5x10 @ ${bbbWeight} lbs</p>`;
@@ -460,27 +653,9 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         }
 
-        // Calculate prescribed weight for the third set
-        let weightPercents;
-        if (this.blockType === "leader") {
-          weightPercents = config.setPercentagesLeader;
-        } else {
-          weightPercents = config.setPercentagesAnchor[week];
-        }
-
-        let prescribedWeight;
-        if (isDeloadWeek) {
-          let baseWeight = trainingMax * weightPercents[2];
-          baseWeight = Math.round(baseWeight * config.deloadPercentage);
-          prescribedWeight = Math.round(baseWeight / 5) * 5;
-        } else {
-          let baseWeight = trainingMax * weightPercents[2];
-          prescribedWeight = Math.round(baseWeight / 5) * 5;
-        }
-
-        // Compute effective reps
-        let effectiveRepsValue = this.effectiveReps(actualReps, actualWeight, prescribedWeight);
-        let effectiveRepsRounded = Math.round(effectiveRepsValue);
+        // Convert to original exercise equivalent if using alternative exercise
+        const conversionResult = this.convertToOriginalEquivalent(actualReps, actualWeight);
+        let effectiveRepsRounded = Math.round(conversionResult.effectiveReps);
 
         const increment = config.incrementValues[this.currentExercise];
 

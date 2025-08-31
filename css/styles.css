@@ -17,17 +17,21 @@ h1 {
   margin-bottom: 20px;
 }
 
-h2, h3 {
+h2,
+h3 {
   margin: 10px 0;
 }
 
 .input-column {
   display: flex;
   flex-direction: column;
-  align-items: center; /* Center the inputs */
+  align-items: center;
+  /* Center the inputs */
   width: 100%;
-  max-width: 300px; /* Set a reasonable max width */
-  margin: 0 auto; /* Center within the parent */
+  max-width: 300px;
+  /* Set a reasonable max width */
+  margin: 0 auto;
+  /* Center within the parent */
 }
 
 .input-column label {
@@ -61,12 +65,18 @@ button:hover {
 }
 
 /* Exercise Selection Buttons */
-#overhead-press-btn, #bench-press-btn, #squat-btn, #deadlift-btn {
+#overhead-press-btn,
+#bench-press-btn,
+#squat-btn,
+#deadlift-btn {
   background-color: #007bff;
   margin: 0 5px;
 }
 
-#overhead-press-btn:hover, #bench-press-btn:hover, #squat-btn:hover, #deadlift-btn:hover {
+#overhead-press-btn:hover,
+#bench-press-btn:hover,
+#squat-btn:hover,
+#deadlift-btn:hover {
   background-color: #0056b3;
 }
 
@@ -74,8 +84,10 @@ button:hover {
 #save {
   background-color: #28a745;
   margin-top: 10px;
-  width: auto; /* Button adjusts to content size */
-  max-width: 200px; /* Optional: limit maximum width */
+  width: auto;
+  /* Button adjusts to content size */
+  max-width: 200px;
+  /* Optional: limit maximum width */
   text-align: center;
 }
 
@@ -93,48 +105,71 @@ button:hover {
 }
 
 /* Plus, Minus, Initialize, and Utility Buttons */
-#amrap-plus, #amrap-minus, #actualWeight-plus, #actualWeight-minus, #initializeExercise, #import-history, #export-history, #view-history, #import-config, #backup, #restore {
+#amrap-plus,
+#amrap-minus,
+#actualWeight-plus,
+#actualWeight-minus,
+#initializeExercise,
+#import-history,
+#export-history,
+#view-history,
+#import-config,
+#backup,
+#restore {
   background-color: #343a40;
 }
 
 /* Tracker Layout */
 #tracker {
   display: flex;
-  flex-direction: column; /* Stack elements vertically */
-  align-items: center;    /* Center align all elements */
-  width: 100%; /* Ensure full width for consistent alignment */
-  max-width: 500px; /* Optional: Limit the width for better layout */
-  margin: 0 auto; /* Center tracker on the page */
+  flex-direction: column;
+  /* Stack elements vertically */
+  align-items: center;
+  /* Center align all elements */
+  width: 100%;
+  /* Ensure full width for consistent alignment */
+  max-width: 500px;
+  /* Optional: Limit the width for better layout */
+  margin: 0 auto;
+  /* Center tracker on the page */
 }
 
 /* Show Alternative Weights Button */
 #showAlternativeWeightsBtn {
-  margin-bottom: 10px; /* Add space below the button */
-  width: auto; /* Ensure button width is appropriate for content */
-  max-width: 200px; /* Optional: limit maximum width */
-  text-align: center; /* Center-align text inside the button */
+  margin-bottom: 10px;
+  /* Add space below the button */
+  width: auto;
+  /* Ensure button width is appropriate for content */
+  max-width: 200px;
+  /* Optional: limit maximum width */
+  text-align: center;
+  /* Center-align text inside the button */
   padding: 8px 16px;
   font-size: 14px;
   cursor: pointer;
   border: none;
   border-radius: 4px;
-  background-color: #4CAF50; /* Button color */
+  background-color: #4CAF50;
+  /* Button color */
   color: white;
   transition: background-color 0.3s ease;
 }
 
 #showAlternativeWeightsBtn:hover {
-  background-color: #45a049; /* Darker shade on hover */
+  background-color: #45a049;
+  /* Darker shade on hover */
 }
 
 /* Alternative Exercise Weights Text Styling */
 #alternativeWeights {
-  display: none; /* Hidden by default */
+  display: none;
+  /* Hidden by default */
   margin-top: 10px;
   font-size: 1rem;
   line-height: 1.5;
   color: #333;
-  font-style: normal; /* Regular font style */
+  font-style: normal;
+  /* Regular font style */
 }
 
 /* Deload Notification Styling */
@@ -148,16 +183,21 @@ button:hover {
 /* AMRAP Field */
 #amrap {
   margin-top: 10px;
-  width: auto; /* Allow natural width */
-  max-width: 150px; /* Prevent it from being too wide */
-  text-align: center; /* Center the text in the input */
+  width: auto;
+  /* Allow natural width */
+  max-width: 150px;
+  /* Prevent it from being too wide */
+  text-align: center;
+  /* Center the text in the input */
 }
 
 #amrap-controls {
   display: flex;
   touch-action: manipulation;
-  justify-content: center; /* Center the buttons horizontally */
-  gap: 10px; /* Add spacing between +/- buttons */
+  justify-content: center;
+  /* Center the buttons horizontally */
+  gap: 10px;
+  /* Add spacing between +/- buttons */
   margin-top: 5px;
 }
 
@@ -174,8 +214,10 @@ button:hover {
 #amrap,
 #amrap-controls,
 #save {
-  width: 100%; /* Ensure full-width alignment */
-  text-align: center; /* Align content to the center */
+  width: 100%;
+  /* Ensure full-width alignment */
+  text-align: center;
+  /* Align content to the center */
 }
 
 #supplementWork {
@@ -184,4 +226,60 @@ button:hover {
   line-height: 1.5;
   text-align: center;
   color: #333;
+}
+
+/* Accordion Styling */
+.accordion {
+  margin: 15px auto;
+  width: 100%;
+  max-width: 400px;
+}
+
+.accordion-header {
+  background-color: #6c757d;
+  color: white;
+  padding: 10px 15px;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+  user-select: none;
+}
+
+.accordion-header:hover {
+  background-color: #5a6268;
+}
+
+.accordion-content {
+  background-color: #f8f9fa;
+  padding: 15px;
+  border: 1px solid #dee2e6;
+  border-top: none;
+  border-radius: 0 0 5px 5px;
+}
+
+.accordion-content label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: #495057;
+}
+
+.accordion-content select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 14px;
+  background-color: white;
+  text-align: center;
+}
+
+/* Alternative Exercise Indication */
+.alternative-exercise {
+  color: #007bff !important;
+  font-weight: 500;
+}
+
+.alternative-exercise h3 {
+  color: #007bff;
 }
