@@ -54,9 +54,6 @@
     <!-- Prescribed Sets -->
     <div id="prescribedSets"></div>
 
-    <!-- Supplement Work -->
-    <div id="supplementWork"></div>
-
     <!-- Exercise Options Accordion -->
     <div class="accordion">
       <div class="accordion-header" id="exerciseOptionsHeader">
@@ -71,27 +68,27 @@
     </div>
 
     <!-- AMRAP Section -->
-    <div class="amrap-row">
-      <label for="amrap">AMRAP Reps:</label>
-      <input type="number" id="amrap" min="0" required>
+    <div class="input-container">
+      <div class="input-info">
+        <span class="input-label">AMRAP Reps:</span>
+        <input type="number" id="amrap" min="0" required>
+      </div>
+      <div class="input-controls">
+        <button id="amrap-minus" class="control-btn minus">-</button>
+        <button id="amrap-plus" class="control-btn plus">+</button>
+      </div>
     </div>
 
-    <!-- AMRAP Controls -->
-    <div id="amrap-controls">
-      <button id="amrap-plus">+</button>
-      <button id="amrap-minus">-</button>
-    </div>
-
-    <!-- New Actual Weight Input Section for Set 3 -->
-    <div class="actual-weight-row">
-      <label for="actualWeight">Actual Weight for Set 3 (lbs):</label>
-      <input type="number" id="actualWeight" min="0" required>
-    </div>
-
-    <!-- Actual Weight Controls -->
-    <div id="actualWeight-controls">
-      <button id="actualWeight-plus">+</button>
-      <button id="actualWeight-minus">-</button>
+    <!-- Actual Weight Section -->
+    <div class="input-container">
+      <div class="input-info">
+        <span class="input-label">Set 3 Weight (lbs):</span>
+        <input type="number" id="actualWeight" min="0" required>
+      </div>
+      <div class="input-controls">
+        <button id="actualWeight-minus" class="control-btn minus">-</button>
+        <button id="actualWeight-plus" class="control-btn plus">+</button>
+      </div>
     </div>
 
     <!-- Save Progress -->
