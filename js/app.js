@@ -81,9 +81,13 @@ class LiftTracker {
     // Modal functionality
     document.getElementById("converter-btn").onclick = () => this.ui.openModal("converter-modal");
     document.querySelector(".close").onclick = () => this.ui.closeModal("converter-modal");
+    document.getElementById("history-close").onclick = () => this.ui.closeModal("history-modal");
     window.onclick = (event) => {
       if (event.target === document.getElementById("converter-modal")) {
         this.ui.closeModal("converter-modal");
+      }
+      if (event.target === document.getElementById("history-modal")) {
+        this.ui.closeModal("history-modal");
       }
     };
   }
@@ -744,17 +748,60 @@ class LiftTracker {
   }
 
   async viewHistory() {
+    if (!this.currentExercise) {
+      this.ui.showMessage('Please select an exercise first', 'error');
+      return;
+    }
+
     try {
       const records = await this.dbManager.getExerciseRecords(this.currentExercise);
-      let historyHtml = `<h2>History for ${this.currentExercise}</h2>`;
 
-      records.forEach(record => {
-        if (record.date && record.amrapReps !== null) {
-          historyHtml += `<p>${record.date}: Cycle ${record.cycle}, Week ${record.week}, Training Max: ${record.trainingMax} lbs, AMRAP (Effective) Reps: ${record.amrapReps}</p>`;
+      // Update modal title
+      document.getElementById("history-title").textContent = `History for ${this.currentExercise}`;
+
+      let historyContent = '';
+
+      if (records.length === 0) {
+        historyContent = '<p style="text-align: center; color: #888; margin: 20px;">No history available for this exercise.</p>';
+      } else {
+        // Filter records that have actual workout data
+        const workoutRecords = records.filter(record => record.date && record.amrapReps !== null);
+
+        if (workoutRecords.length === 0) {
+          historyContent = '<p style="text-align: center; color: #888; margin: 20px;">No completed workouts found.</p>';
+        } else {
+          historyContent = '<div style="max-height: 400px; overflow-y: auto; padding: 10px 0;">';
+
+          // Show most recent first
+          workoutRecords.reverse().forEach(record => {
+            const date = new Date(record.date).toLocaleDateString();
+            historyContent += `
+              <div style="
+                padding: 8px 12px;
+                margin: 4px 0;
+                background-color: #404040;
+                border-radius: 6px;
+                border: 1px solid #555;
+                font-size: 0.85rem;
+              ">
+                <div style="font-weight: 600; color: #4da6ff; margin-bottom: 2px;">
+                  ${date}
+                </div>
+                <div style="color: #e0e0e0;">
+                  Cycle ${record.cycle}, Week ${record.week} •
+                  Training Max: ${record.trainingMax} lbs •
+                  AMRAP Reps: ${record.amrapReps}
+                </div>
+              </div>
+            `;
+          });
+
+          historyContent += '</div>';
         }
-      });
+      }
 
-      this.ui.updateHTML("history", historyHtml);
+      this.ui.updateHTML("history-content", historyContent);
+      this.ui.openModal("history-modal");
     } catch (error) {
       console.error('Error viewing history:', error);
       this.ui.showMessage('Error loading history', 'error');
@@ -1026,13 +1073,19 @@ class LiftTracker {
       const isAdjusted = this.isSetAdjusted(i);
       const adjustedClass = isAdjusted ? "adjusted-set" : "";
 
-      const repInfo = i === 2 ? ` (Target: ${Math.floor(this.currentPrescription.targetReps)})` : "";
+      // Special formatting for Set 3 (AMRAP set)
+      let repDisplay;
+      if (i === 2) {
+        repDisplay = `${weight} lbs x ${Math.floor(reps)} - ${Math.floor(this.currentPrescription.targetReps)} reps`;
+      } else {
+        repDisplay = `${weight} lbs x ${Math.floor(reps)} reps`;
+      }
 
       setsHtml += `
         <div class="set-container ${adjustedClass}">
           <div class="set-info">
             <span class="set-label">Set ${i + 1}:</span>
-            <span class="set-details">${weight} lbs x ${Math.floor(reps)} reps${repInfo}</span>
+            <span class="set-details">${repDisplay}</span>
           </div>
           <div class="set-controls">
             ${isAdjusted ? `<button class="reset-btn" data-set="${i}">↺</button>` : ''}

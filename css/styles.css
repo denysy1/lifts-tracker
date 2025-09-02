@@ -668,6 +668,15 @@ form#converter-form {
   font-size: 0.9rem;
 }
 
+/* Special styling for history button icon */
+.button-row-horizontal #view-history {
+  flex: 0 0 auto;
+  max-width: 50px;
+  min-width: 50px;
+  padding: 12px 8px;
+  font-size: 1.1rem;
+}
+
 .modal button {
   background: #007bff;
   color: #fff;

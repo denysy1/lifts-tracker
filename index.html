@@ -92,8 +92,9 @@
 
           <!-- Save and Clear Buttons -->
           <div class="button-row-horizontal">
-            <button id="save">Save Progress</button>
-            <button id="clear-last-entry">Clear Last Entry</button>
+            <button id="save">Save</button>
+            <button id="clear-last-entry">Clear</button>
+            <button id="view-history">🕘</button>
           </div>
         </div>
 
@@ -128,10 +129,6 @@
           <button id="converter-btn">Converter</button>
         </div>
 
-        <!-- History and Utility Buttons -->
-        <div class="tool-section">
-          <button id="view-history">View History</button>
-        </div>
 
         <!-- Full Backup/Restore Buttons -->
         <div class="tool-section">
@@ -222,6 +219,15 @@
 
       <div id="converter-result" class="readonly-output"></div>
       <div id="converter-error-message" style="color: red;"></div>
+    </div>
+  </div>
+
+  <!-- History Modal -->
+  <div id="history-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <span class="close" id="history-close">&times;</span>
+      <h1 id="history-title">Exercise History</h1>
+      <div id="history-content"></div>
     </div>
   </div>
 
