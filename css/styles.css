@@ -36,9 +36,9 @@ html, body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 16px;
+  padding: 8px 12px;
   text-align: center;
-  min-height: calc(100vh - 32px);
+  min-height: calc(100vh - 16px);
   box-sizing: border-box;
 }
 
@@ -110,17 +110,17 @@ html, body {
 .exercise-buttons {
   display: flex;
   justify-content: center;
-  gap: 8px;
-  margin-bottom: 16px;
+  gap: 4px;
+  margin-bottom: 8px;
   flex-wrap: wrap;
 }
 
 /* Tool Sections */
 .tool-section {
-  margin-bottom: 16px;
+  margin-bottom: 8px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
   width: 100%;
   max-width: 300px;
 }
@@ -139,17 +139,18 @@ html, body {
 
 /* Title and Headings */
 h1 {
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-weight: 600;
-  margin-bottom: 20px;
+  margin-bottom: 8px;
   letter-spacing: -0.02em;
 }
 
 h2,
 h3 {
-  margin: 10px 0;
+  margin: 4px 0;
   font-weight: 600;
   letter-spacing: -0.01em;
+  font-size: 1rem;
 }
 
 .input-column {
@@ -353,7 +354,7 @@ button:active {
 
 /* Accordion Styling */
 .accordion {
-  margin: 15px auto;
+  margin: 8px auto;
   width: 100%;
   max-width: 400px;
 }
@@ -361,11 +362,12 @@ button:active {
 .accordion-header {
   background-color: #404040;
   color: white;
-  padding: 10px 15px;
+  padding: 6px 12px;
   cursor: pointer;
   border-radius: 5px;
   transition: background-color 0.3s ease;
   user-select: none;
+  font-size: 0.9rem;
 }
 
 .accordion-header:hover {
@@ -585,20 +587,20 @@ form#converter-form {
 
 /* Stopwatch Styling */
 #stopwatch-section {
-  margin: 20px auto;
-  max-width: 400px;
+  margin: 8px auto;
+  max-width: 300px;
   text-align: center;
 }
 
 #stopwatch-display {
-  font-size: 2.5rem;
+  font-size: 1.5rem;
   font-weight: bold;
   color: #e0e0e0;
-  margin-bottom: 15px;
-  padding: 20px;
+  margin-bottom: 8px;
+  padding: 12px 16px;
   background: linear-gradient(135deg, #2d2d2d 0%, #404040 100%);
   border: 2px solid #555;
-  border-radius: 10px;
+  border-radius: 8px;
   font-family: 'Courier New', monospace;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
 }
@@ -606,15 +608,17 @@ form#converter-form {
 #stopwatch-controls {
   display: flex;
   justify-content: center;
-  gap: 10px;
+  gap: 4px;
   flex-wrap: wrap;
 }
 
 #stopwatch-start,
 #stopwatch-stop,
 #stopwatch-reset {
-  min-width: 80px;
+  min-width: 60px;
   font-weight: bold;
+  padding: 8px 12px;
+  font-size: 0.85rem;
 }
 
 #stopwatch-start {
@@ -656,7 +660,7 @@ form#converter-form {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 12px;
+  padding: 8px 10px;
   margin-bottom: 6px;
   background-color: #2d2d2d;
   border-radius: 8px;
@@ -664,6 +668,7 @@ form#converter-form {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
   animation: slideInUp 0.3s ease-out;
+  overflow: hidden;
 }
 
 @keyframes slideInUp {
@@ -712,8 +717,9 @@ form#converter-form {
 
 .set-controls {
   display: flex;
-  gap: 6px;
+  gap: 4px;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .weight-btn {
@@ -721,12 +727,12 @@ form#converter-form {
   color: white;
   border: none;
   border-radius: 6px;
-  padding: 6px 10px;
-  font-size: 12px;
+  padding: 5px 8px;
+  font-size: 11px;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  min-width: 30px;
+  min-width: 28px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 

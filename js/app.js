@@ -884,29 +884,29 @@ class LiftTracker {
   initPageNavigation() {
     this.currentPage = 1;
     this.isTransitioning = false;
-    
+
     // Touch/swipe variables
     this.startY = 0;
     this.currentY = 0;
     this.isScrolling = false;
-    
+
     // Get page elements
     this.workoutPage = document.getElementById('page1');
     this.toolsPage = document.getElementById('page2');
     this.indicators = document.querySelectorAll('.indicator');
-    
+
     // Bind touch events
     this.bindPageNavigation();
   }
 
   bindPageNavigation() {
     const appContainer = document.querySelector('.app-container');
-    
+
     // Touch events for swipe detection
     appContainer.addEventListener('touchstart', (e) => this.handleTouchStart(e), { passive: false });
     appContainer.addEventListener('touchmove', (e) => this.handleTouchMove(e), { passive: false });
     appContainer.addEventListener('touchend', (e) => this.handleTouchEnd(e), { passive: false });
-    
+
     // Page indicator clicks
     this.indicators.forEach(indicator => {
       indicator.addEventListener('click', (e) => {
@@ -914,7 +914,7 @@ class LiftTracker {
         this.goToPage(targetPage);
       });
     });
-    
+
     // Keyboard navigation (optional)
     document.addEventListener('keydown', (e) => {
       if (e.key === 'ArrowUp' && this.currentPage === 1) {
@@ -927,67 +927,56 @@ class LiftTracker {
 
   handleTouchStart(e) {
     if (this.isTransitioning) return;
-    
+
     this.startY = e.touches[0].clientY;
     this.currentY = this.startY;
     this.isScrolling = false;
-    
-    // Check if we're at the edge of scrollable content
-    const activePage = this.currentPage === 1 ? this.workoutPage : this.toolsPage;
-    const pageContent = activePage.querySelector('.page-content');
-    
-    this.canScrollUp = pageContent.scrollTop > 0;
-    this.canScrollDown = pageContent.scrollTop < (pageContent.scrollHeight - pageContent.clientHeight);
+
+    console.log('Touch start:', this.startY);
   }
 
   handleTouchMove(e) {
     if (this.isTransitioning) return;
-    
+
     this.currentY = e.touches[0].clientY;
     const deltaY = this.currentY - this.startY;
-    const threshold = 50; // Minimum swipe distance
-    
-    // Determine if this is a page swipe vs content scroll
+
+    // If we've moved more than 10px, start tracking direction
     if (Math.abs(deltaY) > 10 && !this.isScrolling) {
-      // Upward swipe (to tools page)
-      if (deltaY < -threshold && this.currentPage === 1 && !this.canScrollDown) {
-        e.preventDefault();
-        this.isScrolling = false;
-      }
-      // Downward swipe (to workout page) 
-      else if (deltaY > threshold && this.currentPage === 2 && !this.canScrollUp) {
-        e.preventDefault();
-        this.isScrolling = false;
-      }
-      // Content scrolling
-      else {
-        this.isScrolling = true;
-      }
+      this.isScrolling = true;
+      console.log('Touch move delta:', deltaY);
     }
   }
 
   handleTouchEnd(e) {
-    if (this.isTransitioning || this.isScrolling) return;
-    
+    if (this.isTransitioning) return;
+
     const deltaY = this.currentY - this.startY;
-    const threshold = 50;
-    
-    // Upward swipe - go to tools page
+    const threshold = 80; // Increased threshold for more reliable detection
+
+    console.log('Touch end delta:', deltaY, 'threshold:', threshold);
+
+    // Upward swipe - go to tools page (user swiped up)
     if (deltaY < -threshold && this.currentPage === 1) {
+      console.log('Swiping to page 2');
       this.goToPage(2);
     }
-    // Downward swipe - go to workout page
+    // Downward swipe - go to workout page (user swiped down)
     else if (deltaY > threshold && this.currentPage === 2) {
+      console.log('Swiping to page 1');
       this.goToPage(1);
     }
+
+    // Reset for next gesture
+    this.isScrolling = false;
   }
 
   goToPage(pageNumber) {
     if (this.isTransitioning || this.currentPage === pageNumber) return;
-    
+
     this.isTransitioning = true;
     this.currentPage = pageNumber;
-    
+
     // Update page classes
     if (pageNumber === 1) {
       this.workoutPage.classList.remove('slide-up');
@@ -996,7 +985,7 @@ class LiftTracker {
       this.workoutPage.classList.add('slide-up');
       this.toolsPage.classList.add('slide-up');
     }
-    
+
     // Update indicators
     this.indicators.forEach((indicator, index) => {
       if (index + 1 === pageNumber) {
@@ -1005,7 +994,7 @@ class LiftTracker {
         indicator.classList.remove('active');
       }
     });
-    
+
     // Reset transition flag after animation
     setTimeout(() => {
       this.isTransitioning = false;
