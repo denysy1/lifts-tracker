@@ -1,17 +1,128 @@
 /* General Page Layout */
-body {
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden; /* Prevent body scrolling */
   font-family: 'Inter', 'Segoe UI', 'system-ui', -apple-system, sans-serif;
+  background-color: #1a1a1a;
+  color: #e0e0e0;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+}
+
+/* App Container - Full viewport */
+.app-container {
+  position: relative;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+/* Page System */
+.page {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #1a1a1a;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.page-content {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin: 0;
-  padding: 20px;
-  background-color: #1a1a1a;
-  color: #e0e0e0;
+  padding: 16px;
   text-align: center;
-  line-height: 1.5;
-  letter-spacing: -0.01em;
-  animation: fadeIn 0.5s ease-out;
+  min-height: calc(100vh - 32px);
+  box-sizing: border-box;
+}
+
+/* Page Positioning */
+.workout-page {
+  transform: translateY(0);
+}
+
+.tools-page {
+  transform: translateY(100vh);
+}
+
+.workout-page.slide-up {
+  transform: translateY(-100vh);
+}
+
+.tools-page.slide-up {
+  transform: translateY(0);
+}
+
+/* Page Indicators */
+.page-indicators {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  z-index: 1000;
+}
+
+.indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: rgba(224, 224, 224, 0.3);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.indicator.active {
+  background-color: #4da6ff;
+  transform: scale(1.2);
+}
+
+/* Navigation Hints */
+.nav-hint {
+  margin-top: auto;
+  padding: 12px 0;
+  opacity: 0.6;
+  font-size: 0.85rem;
+  font-style: italic;
+  color: #888;
+  user-select: none;
+  animation: pulse 2s infinite;
+}
+
+.nav-hint.top {
+  margin-top: 0;
+  margin-bottom: 20px;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 0.9; }
+}
+
+/* Exercise Buttons Section */
+.exercise-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+/* Tool Sections */
+.tool-section {
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  max-width: 300px;
 }
 
 @keyframes fadeIn {

@@ -38,6 +38,7 @@ class LiftTracker {
 
       this.bindEventListeners();
       this.setupConverterModal();
+      this.initPageNavigation(); // Initialize two-page system
 
       console.log('Application initialized successfully');
     } catch (error) {
@@ -605,10 +606,6 @@ class LiftTracker {
       prescribedSetsElement.classList.remove("alternative-exercise");
     }
 
-    // Render supplement work
-    const bbbWeight = Math.round(this.trainingMax[this.currentExercise] * config.supplementWorkPercentage / 5) * 5;
-    const bbbHtml = `<h3>Supplement Work</h3><p>BBB: 5x10 @ ${bbbWeight} lbs</p>`;
-    this.ui.updateHTML("supplementWork", bbbHtml);
 
     // Update form inputs
     document.getElementById("amrap").value = reps[2];
@@ -881,6 +878,138 @@ class LiftTracker {
       reader.onerror = (e) => reject(new Error('Failed to read file'));
       reader.readAsText(file);
     });
+  }
+
+  // Two-Page Navigation System
+  initPageNavigation() {
+    this.currentPage = 1;
+    this.isTransitioning = false;
+    
+    // Touch/swipe variables
+    this.startY = 0;
+    this.currentY = 0;
+    this.isScrolling = false;
+    
+    // Get page elements
+    this.workoutPage = document.getElementById('page1');
+    this.toolsPage = document.getElementById('page2');
+    this.indicators = document.querySelectorAll('.indicator');
+    
+    // Bind touch events
+    this.bindPageNavigation();
+  }
+
+  bindPageNavigation() {
+    const appContainer = document.querySelector('.app-container');
+    
+    // Touch events for swipe detection
+    appContainer.addEventListener('touchstart', (e) => this.handleTouchStart(e), { passive: false });
+    appContainer.addEventListener('touchmove', (e) => this.handleTouchMove(e), { passive: false });
+    appContainer.addEventListener('touchend', (e) => this.handleTouchEnd(e), { passive: false });
+    
+    // Page indicator clicks
+    this.indicators.forEach(indicator => {
+      indicator.addEventListener('click', (e) => {
+        const targetPage = parseInt(e.target.dataset.page);
+        this.goToPage(targetPage);
+      });
+    });
+    
+    // Keyboard navigation (optional)
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowUp' && this.currentPage === 1) {
+        this.goToPage(2);
+      } else if (e.key === 'ArrowDown' && this.currentPage === 2) {
+        this.goToPage(1);
+      }
+    });
+  }
+
+  handleTouchStart(e) {
+    if (this.isTransitioning) return;
+    
+    this.startY = e.touches[0].clientY;
+    this.currentY = this.startY;
+    this.isScrolling = false;
+    
+    // Check if we're at the edge of scrollable content
+    const activePage = this.currentPage === 1 ? this.workoutPage : this.toolsPage;
+    const pageContent = activePage.querySelector('.page-content');
+    
+    this.canScrollUp = pageContent.scrollTop > 0;
+    this.canScrollDown = pageContent.scrollTop < (pageContent.scrollHeight - pageContent.clientHeight);
+  }
+
+  handleTouchMove(e) {
+    if (this.isTransitioning) return;
+    
+    this.currentY = e.touches[0].clientY;
+    const deltaY = this.currentY - this.startY;
+    const threshold = 50; // Minimum swipe distance
+    
+    // Determine if this is a page swipe vs content scroll
+    if (Math.abs(deltaY) > 10 && !this.isScrolling) {
+      // Upward swipe (to tools page)
+      if (deltaY < -threshold && this.currentPage === 1 && !this.canScrollDown) {
+        e.preventDefault();
+        this.isScrolling = false;
+      }
+      // Downward swipe (to workout page) 
+      else if (deltaY > threshold && this.currentPage === 2 && !this.canScrollUp) {
+        e.preventDefault();
+        this.isScrolling = false;
+      }
+      // Content scrolling
+      else {
+        this.isScrolling = true;
+      }
+    }
+  }
+
+  handleTouchEnd(e) {
+    if (this.isTransitioning || this.isScrolling) return;
+    
+    const deltaY = this.currentY - this.startY;
+    const threshold = 50;
+    
+    // Upward swipe - go to tools page
+    if (deltaY < -threshold && this.currentPage === 1) {
+      this.goToPage(2);
+    }
+    // Downward swipe - go to workout page
+    else if (deltaY > threshold && this.currentPage === 2) {
+      this.goToPage(1);
+    }
+  }
+
+  goToPage(pageNumber) {
+    if (this.isTransitioning || this.currentPage === pageNumber) return;
+    
+    this.isTransitioning = true;
+    this.currentPage = pageNumber;
+    
+    // Update page classes
+    if (pageNumber === 1) {
+      this.workoutPage.classList.remove('slide-up');
+      this.toolsPage.classList.remove('slide-up');
+    } else {
+      this.workoutPage.classList.add('slide-up');
+      this.toolsPage.classList.add('slide-up');
+    }
+    
+    // Update indicators
+    this.indicators.forEach((indicator, index) => {
+      if (index + 1 === pageNumber) {
+        indicator.classList.add('active');
+      } else {
+        indicator.classList.remove('active');
+      }
+    });
+    
+    // Reset transition flag after animation
+    setTimeout(() => {
+      this.isTransitioning = false;
+    }, 400);
   }
 
   renderInteractivePrescribedSets() {
