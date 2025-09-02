@@ -283,3 +283,194 @@ button:hover {
 .alternative-exercise h3 {
   color: #007bff;
 }
+
+/* Modal Styles */
+.modal {
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content {
+  background-color: #f8f9fa;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  position: relative;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 2em 1.5em 1.5em 1.5em;
+}
+
+.close {
+  position: absolute;
+  top: 15px;
+  right: 25px;
+  color: #aaa;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.close:hover,
+.close:focus {
+  color: #000;
+}
+
+/* Converter Form Styles (adapted from exercise-converter) */
+form#converter-form {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2em;
+  margin: 0 auto 1.5em auto;
+  max-width: 700px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+  padding: 1.5em 1em 1em 1em;
+}
+
+.modal .input-column {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7em;
+  min-width: 220px;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.modal .input-column h2 {
+  margin: 0 0 0.5em 0;
+  color: #444;
+  font-size: 1.1em;
+}
+
+.modal label {
+  font-weight: 500;
+  margin-bottom: 0.1em;
+}
+
+.modal input[type="number"],
+.modal select,
+.modal .dropdown-input {
+  padding: 0.4em 0.6em;
+  border: 1px solid #bbb;
+  border-radius: 5px;
+  font-size: 1em;
+  background: #f9f9f9;
+  margin-bottom: 0.2em;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.modal input[type="number"]:focus,
+.modal select:focus,
+.modal .dropdown-input:focus {
+  outline: 2px solid #007bff33;
+  border-color: #007bff;
+}
+
+.mode-toggle {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3em;
+  margin: 0.5em 0;
+  padding: 0.5em;
+  background: #f0f4f8;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+}
+
+.mode-toggle label {
+  display: flex;
+  align-items: center;
+  gap: 0.3em;
+  font-size: 0.9em;
+  font-weight: normal;
+  cursor: pointer;
+  margin: 0;
+}
+
+.mode-toggle input[type="radio"] {
+  margin: 0;
+  width: auto;
+}
+
+.button-row {
+  display: flex;
+  gap: 1em;
+  justify-content: center;
+  margin-top: 1.2em;
+  width: 100%;
+}
+
+.modal button {
+  background: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.modal button:hover,
+.modal button:focus {
+  background: #0056b3;
+}
+
+.readonly-output {
+  background: #e9f3ff;
+  border: 1px solid #b6d4fe;
+  border-radius: 8px;
+  max-width: 420px;
+  margin: 1.5em auto 0 auto;
+  padding: 1.2em 1em;
+  font-size: 1.1em;
+  color: #1a2a3a;
+  text-align: center;
+  word-break: break-word;
+}
+
+#converter-error-message {
+  text-align: center;
+  margin-top: 0.7em;
+  min-height: 1.2em;
+}
+
+/* Converter Button Styling */
+#converter-btn {
+  background-color: #17a2b8;
+  margin-top: 10px;
+}
+
+#converter-btn:hover {
+  background-color: #138496;
+}
+
+@media (max-width: 700px) {
+  form#converter-form {
+    flex-direction: column;
+    gap: 1.2em;
+    padding: 1em 0.5em 0.7em 0.5em;
+  }
+
+  .modal .input-column {
+    min-width: 0;
+  }
+
+  .modal-content {
+    padding: 1em;
+  }
+}
