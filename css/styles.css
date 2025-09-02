@@ -431,21 +431,21 @@ button:active {
 
 .modal-content {
   background-color: #2d2d2d;
-  border-radius: 12px;
+  border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   position: relative;
-  max-width: 90vw;
-  max-height: 90vh;
+  max-width: 95vw;
+  max-height: 95vh;
   overflow-y: auto;
-  padding: 2em 1.5em 1.5em 1.5em;
+  padding: 1em 1em 0.8em 1em;
 }
 
 .close {
   position: absolute;
-  top: 15px;
-  right: 25px;
+  top: 8px;
+  right: 15px;
   color: #aaa;
-  font-size: 28px;
+  font-size: 24px;
   font-weight: bold;
   cursor: pointer;
   transition: color 0.3s;
@@ -457,51 +457,59 @@ button:active {
   color: #e0e0e0;
 }
 
+/* Modal Title */
+.modal-content h1 {
+  font-size: 1.3rem;
+  margin-bottom: 0.6em;
+  text-align: center;
+}
+
 /* Converter Form Styles (adapted from exercise-converter) */
 form#converter-form {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 2em;
-  margin: 0 auto 1.5em auto;
+  gap: 1.2em;
+  margin: 0 auto 0.8em auto;
   max-width: 700px;
   background: #404040;
-  border-radius: 12px;
+  border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-  padding: 1.5em 1em 1em 1em;
+  padding: 0.8em 0.8em 0.6em 0.8em;
 }
 
 .modal .input-column {
   display: flex;
   flex-direction: column;
-  gap: 0.7em;
-  min-width: 220px;
+  gap: 0.4em;
+  min-width: 200px;
   align-items: flex-start;
   text-align: left;
 }
 
 .modal .input-column h2 {
-  margin: 0 0 0.5em 0;
+  margin: 0 0 0.3em 0;
   color: #e0e0e0;
-  font-size: 1.1em;
+  font-size: 1rem;
 }
 
 .modal label {
   font-weight: 500;
-  margin-bottom: 0.1em;
+  margin-bottom: 0.05em;
   color: #e0e0e0;
+  font-size: 0.9em;
 }
 
 .modal input[type="number"],
 .modal select,
 .modal .dropdown-input {
-  padding: 0.4em 0.6em;
+  padding: 0.3em 0.5em;
   border: 1px solid #555;
-  border-radius: 5px;
-  font-size: 1em;
+  border-radius: 4px;
+  font-size: 0.9em;
   background: #2d2d2d;
   color: #e0e0e0;
-  margin-bottom: 0.2em;
+  margin-bottom: 0.1em;
   width: 100%;
   box-sizing: border-box;
 }
@@ -516,19 +524,19 @@ form#converter-form {
 .mode-toggle {
   display: flex;
   flex-direction: column;
-  gap: 0.3em;
-  margin: 0.5em 0;
-  padding: 0.5em;
+  gap: 0.2em;
+  margin: 0.3em 0;
+  padding: 0.4em;
   background: #2d2d2d;
-  border-radius: 5px;
+  border-radius: 4px;
   border: 1px solid #555;
 }
 
 .mode-toggle label {
   display: flex;
   align-items: center;
-  gap: 0.3em;
-  font-size: 0.9em;
+  gap: 0.25em;
+  font-size: 0.8em;
   font-weight: normal;
   cursor: pointer;
   margin: 0;
@@ -542,9 +550,9 @@ form#converter-form {
 
 .button-row {
   display: flex;
-  gap: 1em;
+  gap: 0.8em;
   justify-content: center;
-  margin-top: 1.2em;
+  margin-top: 0.6em;
   width: 100%;
 }
 
@@ -552,9 +560,9 @@ form#converter-form {
   background: #007bff;
   color: #fff;
   border: none;
-  border-radius: 5px;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
+  border-radius: 4px;
+  padding: 0.5em 1em;
+  font-size: 0.9em;
   font-weight: 500;
   cursor: pointer;
   transition: background 0.15s;
@@ -568,11 +576,11 @@ form#converter-form {
 .readonly-output {
   background: #1a3d5c;
   border: 1px solid #4da6ff;
-  border-radius: 8px;
+  border-radius: 6px;
   max-width: 420px;
-  margin: 1.5em auto 0 auto;
-  padding: 1.2em 1em;
-  font-size: 1.1em;
+  margin: 0.8em auto 0 auto;
+  padding: 0.8em 0.8em;
+  font-size: 1rem;
   color: #e0e0e0;
   text-align: center;
   word-break: break-word;
@@ -580,9 +588,10 @@ form#converter-form {
 
 #converter-error-message {
   text-align: center;
-  margin-top: 0.7em;
-  min-height: 1.2em;
+  margin-top: 0.4em;
+  min-height: 1em;
   color: #e0e0e0;
+  font-size: 0.9em;
 }
 
 /* Stopwatch Styling */
@@ -841,9 +850,8 @@ form#converter-form {
 /* Input Container Styling (for AMRAP and Actual Weight) */
 .input-container {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 10px 12px;
+  padding: 8px 10px;
   margin-bottom: 6px;
   background-color: #2d2d2d;
   border-radius: 8px;
@@ -851,6 +859,8 @@ form#converter-form {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
   animation: slideInUp 0.3s ease-out;
+  overflow: hidden;
+  min-width: 0; /* Ensure container can shrink */
 }
 
 .input-container:hover {
@@ -861,29 +871,33 @@ form#converter-form {
 .input-info {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 8px;
   flex: 1;
-  justify-content: flex-start;
+  min-width: 0; /* Allow this section to shrink */
 }
 
 .input-label {
   font-weight: 700;
   color: #b0b0b0;
-  font-size: 1rem;
-  width: 140px;
+  font-size: 0.85rem;
+  flex: 0 1 auto;
   text-align: left;
-  flex-shrink: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
 }
 
 .input-info input {
   background-color: #404040;
   border: 2px solid #555;
   border-radius: 6px;
-  padding: 8px 12px;
+  padding: 6px 8px;
   color: #e0e0e0;
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 500;
-  width: 90px;
+  width: 70px;
+  flex-shrink: 0;
   text-align: center;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
@@ -905,8 +919,10 @@ form#converter-form {
 
 .input-controls {
   display: flex;
-  gap: 6px;
+  gap: 3px;
   align-items: center;
+  flex-shrink: 0;
+  margin-left: 8px;
 }
 
 .control-btn {
