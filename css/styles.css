@@ -449,6 +449,64 @@ form#converter-form {
   min-height: 1.2em;
 }
 
+/* Stopwatch Styling */
+#stopwatch-section {
+  margin: 20px auto;
+  max-width: 400px;
+  text-align: center;
+}
+
+#stopwatch-display {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 15px;
+  padding: 20px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border: 2px solid #dee2e6;
+  border-radius: 10px;
+  font-family: 'Courier New', monospace;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+#stopwatch-controls {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+#stopwatch-start,
+#stopwatch-stop,
+#stopwatch-reset {
+  min-width: 80px;
+  font-weight: bold;
+}
+
+#stopwatch-start {
+  background-color: #28a745;
+}
+
+#stopwatch-start:hover {
+  background-color: #218838;
+}
+
+#stopwatch-stop {
+  background-color: #dc3545;
+}
+
+#stopwatch-stop:hover {
+  background-color: #c82333;
+}
+
+#stopwatch-reset {
+  background-color: #6c757d;
+}
+
+#stopwatch-reset:hover {
+  background-color: #5a6268;
+}
+
 /* Converter Button Styling */
 #converter-btn {
   background-color: #17a2b8;

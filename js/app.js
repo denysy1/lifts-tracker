@@ -32,10 +32,84 @@ let config = {
   cyclesPerBlockType: {
     leader: 2,
     anchor: 1
+  },
+  // Exercise Converter Configuration
+  converter: {
+    "1rm_formula_k": 30,
+    "toBenchFactors": {
+      "bench_press": 1.0,
+      "incline_bench": 0.75,
+      "decline_bench": 1.05,
+      "dumbbell_bench_press": 0.85,
+      "incline_dumbbell_bench_press": 0.80,
+      "dumbbell_fly": 0.50,
+      "overhead_press": 0.65,
+      "dumbbell_overhead_press": 0.60,
+      "decline_dumbbell_overhead_press": 0.60
+    },
+    "toSquatFactors": {
+      "squat": 1.0,
+      "front_squat": 0.80,
+      "bulgarian_squat": 0.60,
+      "leg_press": 1.75,
+      "step_up": 0.45,
+      "deadlift": 1.0,
+      "stiff_legged_deadlift": 0.80,
+      "sumo_deadlift": 1.08,
+      "hex_bar_deadlift": 1.08,
+      "lunge": 0.65
+    }
   }
 };
 
 document.addEventListener("DOMContentLoaded", () => {
+  // Stopwatch class
+  class Stopwatch {
+    constructor() {
+      this.startTime = 0;
+      this.elapsedTime = 0;
+      this.isRunning = false;
+      this.intervalId = null;
+      this.display = document.getElementById('stopwatch-display');
+    }
+
+    start() {
+      if (!this.isRunning) {
+        this.startTime = Date.now() - this.elapsedTime;
+        this.intervalId = setInterval(() => this.updateDisplay(), 10);
+        this.isRunning = true;
+      }
+    }
+
+    stop() {
+      if (this.isRunning) {
+        clearInterval(this.intervalId);
+        this.isRunning = false;
+      }
+    }
+
+    reset() {
+      clearInterval(this.intervalId);
+      this.isRunning = false;
+      this.elapsedTime = 0;
+      this.startTime = 0;
+      this.updateDisplay();
+    }
+
+    updateDisplay() {
+      this.elapsedTime = this.isRunning ? Date.now() - this.startTime : this.elapsedTime;
+
+      const totalMilliseconds = this.elapsedTime;
+      const totalSeconds = Math.floor(totalMilliseconds / 1000);
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = totalSeconds % 60;
+      const centiseconds = Math.floor((totalMilliseconds % 1000) / 10);
+
+      const formattedTime = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${centiseconds.toString().padStart(2, '0')}`;
+      this.display.textContent = formattedTime;
+    }
+  }
+
   // Main application class
   class LiftTracker {
     constructor() {
@@ -98,6 +172,12 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("restore").onclick = () => this.importFullBackup();
       document.getElementById("import-config").onclick = () => this.loadConfigFile();
 
+      // Stopwatch event listeners
+      this.stopwatch = new Stopwatch();
+      document.getElementById("stopwatch-start").onclick = () => this.stopwatch.start();
+      document.getElementById("stopwatch-stop").onclick = () => this.stopwatch.stop();
+      document.getElementById("stopwatch-reset").onclick = () => this.stopwatch.reset();
+
       // Accordion event listeners
       document.getElementById("exerciseOptionsHeader").onclick = () => this.toggleAccordion();
       document.getElementById("exerciseSelect").onchange = () => this.onExerciseSelectionChange();
@@ -125,7 +205,7 @@ document.addEventListener("DOMContentLoaded", () => {
         reader.onload = function (ev) {
           try {
             const userConfig = JSON.parse(ev.target.result);
-            converterConfig = { ...DEFAULT_CONVERTER_CONFIG, ...userConfig };
+            converterConfig = { ...config.converter, ...userConfig };
             setupAwesompleteCombobox();
             showConverterError('Config loaded!');
           } catch (err) {
@@ -975,36 +1055,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const app = new LiftTracker();
 
   // Exercise Converter functionality
-  const DEFAULT_CONVERTER_CONFIG = {
-    "1rm_formula_k": 30,
-    "toBenchFactors": {
-      "bench_press": 1.0,
-      "incline_bench": 0.75,
-      "decline_bench": 1.05,
-      "dumbbell_bench_press": 0.85,
-      "incline_dumbbell_bench_press": 0.80,
-      "dumbbell_fly": 0.50,
-      "overhead_press": 0.65,
-      "dumbbell_overhead_press": 0.60,
-      "decline_dumbbell_overhead_press": 0.60
-    },
-    "toSquatFactors": {
-      "squat": 1.0,
-      "front_squat": 0.80,
-      "bulgarian_squat": 0.60,
-      "leg_press": 1.75,
-      "step_up": 0.45,
-      "deadlift": 1.0,
-      "stiff_legged_deadlift": 0.80,
-      "sumo_deadlift": 1.08,
-      "hex_bar_deadlift": 1.08,
-      "lunge": 0.65
-    }
-  };
-
-  let converterConfig = { ...DEFAULT_CONVERTER_CONFIG };
-  const upperBodyExercises = Object.keys(DEFAULT_CONVERTER_CONFIG.toBenchFactors);
-  const lowerBodyExercises = Object.keys(DEFAULT_CONVERTER_CONFIG.toSquatFactors);
+  let converterConfig = { ...config.converter };
+  const upperBodyExercises = Object.keys(config.converter.toBenchFactors);
+  const lowerBodyExercises = Object.keys(config.converter.toSquatFactors);
   const allExercises = [...upperBodyExercises, ...lowerBodyExercises];
 
   function formatExerciseName(key) {
