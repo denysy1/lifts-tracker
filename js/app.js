@@ -12,7 +12,7 @@ class LiftTracker {
     this.stopwatch = new Stopwatch();
     this.converter = null;
     this.ui = new UIManager();
-    
+
     this.currentExercise = null;
     this.trainingMax = {};
     this.consecutiveLowAMRAP = {
@@ -35,10 +35,10 @@ class LiftTracker {
       this.configManager = new ConfigManager(this.dbManager.getDB());
       await this.configManager.loadFromDB();
       this.converter = new ExerciseConverter(this.configManager.get('converter'));
-      
+
       this.bindEventListeners();
       this.setupConverterModal();
-      
+
       console.log('Application initialized successfully');
     } catch (error) {
       console.error('Failed to initialize application:', error);
@@ -92,7 +92,7 @@ class LiftTracker {
   setupConverterModal() {
     // Setup converter form
     document.getElementById('converter-form').addEventListener('submit', (e) => this.handleConverterSubmit(e));
-    
+
     // Setup converter config import
     document.getElementById('importConverterConfig').addEventListener('click', () => {
       this.ui.triggerFileInput('converterConfigFileInput', (e) => this.handleConverterConfigImport(e));
@@ -176,7 +176,7 @@ class LiftTracker {
 
   toggleConverterTargetMode() {
     const mode = document.querySelector('input[name="targetMode"]:checked').value;
-    
+
     if (mode === 'reps') {
       this.ui.showElement('targetRepsGroup');
       this.ui.hideElement('targetWeightGroup');
@@ -351,7 +351,7 @@ class LiftTracker {
 
     try {
       const records = await this.dbManager.getExerciseRecords(exercise);
-      
+
       if (records.length === 0) {
         this.ui.showElement("initialization");
         this.ui.hideElement("tracker");
@@ -441,7 +441,7 @@ class LiftTracker {
   getOriginalPrescribedWeight() {
     const config = this.configManager.getAll();
     let weightPercents;
-    
+
     if (this.blockType === "leader") {
       weightPercents = config.setPercentagesLeader;
     } else {
@@ -479,7 +479,7 @@ class LiftTracker {
 
   displayCurrentWorkout(initialData) {
     const config = this.configManager.getAll();
-    
+
     try {
       const lastWorkout = initialData;
       this.trainingMax[this.currentExercise] = lastWorkout.trainingMax;
@@ -531,14 +531,14 @@ class LiftTracker {
 
   getWorkoutParameters(week, isDeloadWeek) {
     const config = this.configManager.getAll();
-    const weightPercents = this.blockType === "leader" ? 
-      config.setPercentagesLeader : 
+    const weightPercents = this.blockType === "leader" ?
+      config.setPercentagesLeader :
       config.setPercentagesAnchor[week];
-    const reps = this.blockType === "leader" ? 
-      config.setRepsLeader : 
+    const reps = this.blockType === "leader" ?
+      config.setRepsLeader :
       config.setRepsAnchor[week];
-    const targetReps = this.blockType === "anchor" ? 
-      config.targetRepsAnchor[week] : 
+    const targetReps = this.blockType === "anchor" ?
+      config.targetRepsAnchor[week] :
       reps[2];
 
     return { weightPercents, reps, targetReps };
@@ -547,13 +547,13 @@ class LiftTracker {
   calculateDeloadAdjustments(reps, weightPercents, isDeloadWeek) {
     const config = this.configManager.getAll();
     let deloadReps = reps;
-    let deloadWeights = weightPercents.map(percent => 
+    let deloadWeights = weightPercents.map(percent =>
       Math.round(this.trainingMax[this.currentExercise] * percent)
     );
 
     if (isDeloadWeek) {
       deloadReps = reps.map(r => Math.ceil(r * config.deloadPercentage));
-      deloadWeights = deloadWeights.map(weight => 
+      deloadWeights = deloadWeights.map(weight =>
         Math.round(weight * config.deloadPercentage)
       );
     }
@@ -563,7 +563,7 @@ class LiftTracker {
 
   renderWorkoutDisplay(weights, reps, targetReps, cycle, week, isDeloadWeek) {
     const config = this.configManager.getAll();
-    
+
     // Update deload notice
     if (isDeloadWeek) {
       this.ui.updateText("deloadNotice", "Deload Week: Reduced volume for recovery");
@@ -571,25 +571,39 @@ class LiftTracker {
       this.ui.updateText("deloadNotice", "");
     }
 
-    // Render prescribed sets
-    let setsHtml = "<h3>Prescribed Sets</h3>";
-    weights.forEach((weight, i) => {
-      weight = Math.round(weight / 5) * 5;
-      const repInfo = i === 2 ? ` (Target: ${targetReps} reps)` : "";
-      setsHtml += `<p>Set ${i + 1}: ${weight} lbs x ${reps[i]} reps${repInfo}</p>`;
-    });
+    // Store original values for reset functionality
+    this.originalPrescription = {
+      weights: weights.map(w => Math.round(w / 5) * 5),
+      reps: [...reps],
+      targetReps: targetReps
+    };
+
+    // Initialize current prescription (will be modified by user interactions)
+    if (!this.currentPrescription) {
+      this.currentPrescription = {
+        weights: [...this.originalPrescription.weights],
+        reps: [...this.originalPrescription.reps],
+        targetReps: this.originalPrescription.targetReps
+      };
+    } else {
+      // Update to new original values but preserve any ongoing adjustments proportionally
+      this.currentPrescription = {
+        weights: [...this.originalPrescription.weights],
+        reps: [...this.originalPrescription.reps],
+        targetReps: this.originalPrescription.targetReps
+      };
+    }
+
+    // Render prescribed sets with interactive controls
+    this.renderInteractivePrescribedSets();
 
     // Handle alternative exercise styling
     const prescribedSetsElement = document.getElementById("prescribedSets");
     if (this.selectedAlternativeExercise) {
       prescribedSetsElement.classList.add("alternative-exercise");
-      setsHtml = setsHtml.replace("<h3>Prescribed Sets</h3>", 
-        `<h3>Prescribed Sets (${this.selectedAlternativeExercise})</h3>`);
     } else {
       prescribedSetsElement.classList.remove("alternative-exercise");
     }
-
-    this.ui.updateHTML("prescribedSets", setsHtml);
 
     // Render supplement work
     const bbbWeight = Math.round(this.trainingMax[this.currentExercise] * config.supplementWorkPercentage / 5) * 5;
@@ -605,7 +619,7 @@ class LiftTracker {
     // Update display info
     this.ui.updateText("cycleNumber", cycle || "N/A");
     this.ui.updateText("weekNumber", week || "N/A");
-    this.ui.updateText("blockType", this.blockType ? 
+    this.ui.updateText("blockType", this.blockType ?
       this.blockType.charAt(0).toUpperCase() + this.blockType.slice(1) : "N/A");
 
     console.log(`Workout displayed: Cycle ${cycle}, Week ${week}, Block ${this.blockType}, Scale: ${this.currentScaleFactor}`);
@@ -718,10 +732,10 @@ class LiftTracker {
 
   async handleDeloadWeek(records) {
     this.ui.showMessage("Deload week complete. Progress entry will not be recorded.", 'info');
-    
+
     // Clear the deload flag
     this.consecutiveLowAMRAP[this.currentExercise] = 0;
-    
+
     // Update the last record in the database
     const lastRecord = records[records.length - 1];
     const updatedRecord = {
@@ -753,13 +767,13 @@ class LiftTracker {
     try {
       const records = await this.dbManager.getExerciseRecords(this.currentExercise);
       let historyHtml = `<h2>History for ${this.currentExercise}</h2>`;
-      
+
       records.forEach(record => {
         if (record.date && record.amrapReps !== null) {
           historyHtml += `<p>${record.date}: Cycle ${record.cycle}, Week ${record.week}, Training Max: ${record.trainingMax} lbs, AMRAP (Effective) Reps: ${record.amrapReps}</p>`;
         }
       });
-      
+
       this.ui.updateHTML("history", historyHtml);
     } catch (error) {
       console.error('Error viewing history:', error);
@@ -772,10 +786,10 @@ class LiftTracker {
       const backupData = await this.dbManager.exportFullBackup();
       const backupJson = JSON.stringify(backupData, null, 2);
       const filename = `lifts-tracker-backup-${new Date().toISOString().split('T')[0]}.json`;
-      
+
       this.ui.downloadFile(backupJson, filename);
       this.ui.showMessage('Complete backup exported successfully!', 'success');
-      
+
       console.log('Full backup exported:', backupData);
     } catch (error) {
       console.error('Error exporting full backup:', error);
@@ -867,6 +881,121 @@ class LiftTracker {
       reader.onerror = (e) => reject(new Error('Failed to read file'));
       reader.readAsText(file);
     });
+  }
+
+  renderInteractivePrescribedSets() {
+    const titleText = this.selectedAlternativeExercise ?
+      `Prescribed Sets (${this.selectedAlternativeExercise})` :
+      "Prescribed Sets";
+
+    let setsHtml = `<h3>${titleText}</h3>`;
+
+    this.currentPrescription.weights.forEach((weight, i) => {
+      const reps = this.currentPrescription.reps[i];
+      const isAdjusted = this.isSetAdjusted(i);
+      const adjustedClass = isAdjusted ? "adjusted-set" : "";
+
+      const repInfo = i === 2 ? ` (Target: ${Math.floor(this.currentPrescription.targetReps)} reps)` : "";
+      const adjustedIndicator = isAdjusted ? " *" : "";
+
+      setsHtml += `
+        <div class="set-container ${adjustedClass}">
+          <div class="set-info">
+            <span class="set-label">Set ${i + 1}:</span>
+            <span class="set-details">${weight} lbs x ${Math.floor(reps)} reps${repInfo}${adjustedIndicator}</span>
+          </div>
+          <div class="set-controls">
+            ${isAdjusted ? `<button class="reset-btn" data-set="${i}">↺</button>` : ''}
+            <button class="weight-btn minus" data-set="${i}" data-action="minus">-</button>
+            <button class="weight-btn plus" data-set="${i}" data-action="plus">+</button>
+          </div>
+        </div>
+      `;
+    });
+
+
+    this.ui.updateHTML("prescribedSets", setsHtml);
+    this.bindSetControls();
+  }
+
+  bindSetControls() {
+    // Bind weight adjustment buttons
+    document.querySelectorAll('.weight-btn').forEach(btn => {
+      btn.onclick = (e) => {
+        const setIndex = parseInt(e.target.dataset.set);
+        const action = e.target.dataset.action;
+        this.adjustSetWeight(setIndex, action === 'plus' ? 5 : -5);
+      };
+    });
+
+    // Bind individual reset buttons
+    document.querySelectorAll('.reset-btn').forEach(btn => {
+      btn.onclick = (e) => {
+        const setIndex = parseInt(e.target.dataset.set);
+        this.resetSet(setIndex);
+      };
+    });
+  }
+
+  adjustSetWeight(setIndex, weightChange) {
+    const newWeight = Math.max(0, this.currentPrescription.weights[setIndex] + weightChange);
+    this.currentPrescription.weights[setIndex] = Math.round(newWeight / 5) * 5;
+
+    // Calculate equivalent reps using 1RM formula
+    const newReps = this.calculateEquivalentReps(
+      this.originalPrescription.weights[setIndex],
+      this.originalPrescription.reps[setIndex],
+      this.currentPrescription.weights[setIndex]
+    );
+
+    this.currentPrescription.reps[setIndex] = newReps;
+
+    // For the AMRAP set (set 3), also update target reps
+    if (setIndex === 2) {
+      this.currentPrescription.targetReps = this.calculateEquivalentReps(
+        this.originalPrescription.weights[2],
+        this.originalPrescription.targetReps,
+        this.currentPrescription.weights[2]
+      );
+    }
+
+    this.renderInteractivePrescribedSets();
+  }
+
+  calculateEquivalentReps(originalWeight, originalReps, newWeight) {
+    if (newWeight <= 0 || originalWeight <= 0) return originalReps;
+
+    const config = this.configManager.getAll();
+
+    // Calculate 1RM from original prescription
+    const oneRM = originalWeight / (config.oneRM_correction_factor * (1.0278 - 0.0278 * originalReps));
+
+    // Calculate equivalent reps for new weight
+    const equivalentReps = (1.0278 - (newWeight / oneRM)) / 0.0278;
+
+    // Ensure reasonable bounds (minimum 1 rep, maximum 50 reps)
+    return Math.max(1, Math.min(50, equivalentReps));
+  }
+
+  resetSet(setIndex) {
+    this.currentPrescription.weights[setIndex] = this.originalPrescription.weights[setIndex];
+    this.currentPrescription.reps[setIndex] = this.originalPrescription.reps[setIndex];
+
+    if (setIndex === 2) {
+      this.currentPrescription.targetReps = this.originalPrescription.targetReps;
+    }
+
+    this.renderInteractivePrescribedSets();
+  }
+
+  isSetAdjusted(setIndex) {
+    const weightAdjusted = this.currentPrescription.weights[setIndex] !== this.originalPrescription.weights[setIndex];
+    const repsAdjusted = Math.abs(this.currentPrescription.reps[setIndex] - this.originalPrescription.reps[setIndex]) > 0.1;
+    return weightAdjusted || repsAdjusted;
+  }
+
+  hasAnyAdjustedSets() {
+    return this.currentPrescription.weights.some((_, i) => this.isSetAdjusted(i));
   }
 }
 

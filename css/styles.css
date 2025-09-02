@@ -318,6 +318,7 @@ button:hover {
   font-weight: bold;
   cursor: pointer;
   transition: color 0.3s;
+  z-index: 1001;
 }
 
 .close:hover,
@@ -517,6 +518,137 @@ form#converter-form {
   background-color: #138496;
 }
 
+/* Interactive Set Controls */
+.set-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 8px;
+  margin-bottom: 4px;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.set-container.adjusted-set {
+  background-color: #e3f2fd;
+  border-color: #2196f3;
+}
+
+.set-info {
+  flex: 1;
+  text-align: left;
+  font-size: 1rem;
+}
+
+.set-label {
+  font-weight: bold;
+  margin-right: 8px;
+}
+
+.set-details {
+  color: #333;
+}
+
+.set-controls {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.weight-btn {
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 3px;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.15s;
+  min-width: 28px;
+}
+
+.weight-btn:hover {
+  background-color: #5a6268;
+}
+
+.weight-btn.plus {
+  background-color: #28a745;
+}
+
+.weight-btn.plus:hover {
+  background-color: #218838;
+}
+
+.weight-btn.minus {
+  background-color: #dc3545;
+}
+
+.weight-btn.minus:hover {
+  background-color: #c82333;
+}
+
+.reset-btn {
+  background-color: #ffc107;
+  color: #212529;
+  border: none;
+  border-radius: 3px;
+  padding: 4px 6px;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.15s;
+  min-width: 24px;
+}
+
+.reset-btn:hover {
+  background-color: #e0a800;
+}
+
+.global-controls {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid #dee2e6;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.reset-all-btn {
+  background-color: #17a2b8;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.reset-all-btn:hover {
+  background-color: #138496;
+}
+
+.adjusted-note {
+  font-size: 11px;
+  color: #6c757d;
+  font-style: italic;
+  text-align: center;
+}
+
+/* Ensure prescribed sets section has proper spacing */
+#prescribedSets {
+  margin-bottom: 15px;
+}
+
+#prescribedSets h3 {
+  margin-bottom: 8px;
+}
+
 @media (max-width: 700px) {
   form#converter-form {
     flex-direction: column;
@@ -530,5 +662,25 @@ form#converter-form {
 
   .modal-content {
     padding: 1em;
+  }
+
+  /* Mobile adjustments for set controls */
+  .set-container {
+    padding: 8px 6px;
+  }
+
+  .set-info {
+    font-size: 0.9rem;
+  }
+
+  .weight-btn,
+  .reset-btn {
+    padding: 6px 8px;
+    font-size: 11px;
+    min-width: 30px;
+  }
+
+  .reset-btn {
+    min-width: 26px;
   }
 }
