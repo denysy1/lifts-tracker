@@ -1,9 +1,11 @@
 /* General Page Layout */
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
   height: 100%;
-  overflow: hidden; /* Prevent body scrolling */
+  overflow: hidden;
+  /* Prevent body scrolling */
   font-family: 'Inter', 'Segoe UI', 'system-ui', -apple-system, sans-serif;
   background-color: #1a1a1a;
   color: #e0e0e0;
@@ -36,9 +38,9 @@ html, body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 8px 12px;
+  padding: 2px 10px;
   text-align: center;
-  min-height: calc(100vh - 16px);
+  min-height: calc(100vh - 4px);
   box-sizing: border-box;
 }
 
@@ -102,16 +104,23 @@ html, body {
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 0.6; }
-  50% { opacity: 0.9; }
+
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+
+  50% {
+    opacity: 0.9;
+  }
 }
 
 /* Exercise Buttons Section */
 .exercise-buttons {
   display: flex;
   justify-content: center;
-  gap: 4px;
-  margin-bottom: 8px;
+  gap: 3px;
+  margin-bottom: 2px;
   flex-wrap: wrap;
 }
 
@@ -139,18 +148,18 @@ html, body {
 
 /* Title and Headings */
 h1 {
-  font-size: 1.5rem;
+  font-size: 1.1rem;
   font-weight: 600;
-  margin-bottom: 8px;
+  margin-bottom: 1px;
   letter-spacing: -0.02em;
 }
 
 h2,
 h3 {
-  margin: 4px 0;
+  margin: 0px 0 1px 0;
   font-weight: 600;
   letter-spacing: -0.01em;
-  font-size: 1rem;
+  font-size: 0.8rem;
 }
 
 .input-column {
@@ -337,8 +346,8 @@ button:active {
 #deloadNotice {
   color: #ff6b4a;
   font-weight: bold;
-  font-size: 1.1rem;
-  margin-bottom: 10px;
+  font-size: 0.85rem;
+  margin-bottom: 4px;
 }
 
 /* Force Vertical Stacking of Elements in Tracker */
@@ -352,56 +361,39 @@ button:active {
 }
 
 
-/* Accordion Styling */
-.accordion {
-  margin: 8px auto;
-  width: 100%;
-  max-width: 400px;
-}
-
-.accordion-header {
-  background-color: #404040;
-  color: white;
-  padding: 6px 12px;
-  cursor: pointer;
-  border-radius: 5px;
-  transition: background-color 0.3s ease;
-  user-select: none;
-  font-size: 0.9rem;
-}
-
-.accordion-header:hover {
-  background-color: #505050;
-}
-
-.accordion-content {
+/* Exercise Selector */
+.exercise-selector {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  padding: 4px 8px;
   background-color: #2d2d2d;
-  padding: 15px;
-  border: 1px solid #555;
-  border-top: none;
-  border-radius: 0 0 5px 5px;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
-.accordion-content label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: bold;
-  color: #e0e0e0;
+.exercise-label {
+  font-weight: 700;
+  color: #b0b0b0;
+  font-size: 0.8rem;
+  flex-shrink: 0;
 }
 
-.accordion-content select {
-  width: 100%;
-  padding: 8px;
+.exercise-selector select {
+  flex: 1;
+  padding: 4px 6px;
   border: 1px solid #555;
   border-radius: 4px;
-  font-size: 14px;
-  background-color: #2d2d2d;
+  font-size: 0.8rem;
+  background-color: #404040;
   color: #e0e0e0;
   text-align: center;
+  min-width: 0;
 }
 
-.accordion-content select:focus {
-  border-color: #007bff;
+.exercise-selector select:focus {
+  border-color: #4da6ff;
   outline: none;
 }
 
@@ -596,38 +588,54 @@ form#converter-form {
 
 /* Stopwatch Styling */
 #stopwatch-section {
-  margin: 8px auto;
-  max-width: 300px;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 6px auto;
+  max-width: 320px;
+  padding: 4px 8px;
+  background-color: #2d2d2d;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 #stopwatch-display {
-  font-size: 1.5rem;
+  font-size: 1rem;
   font-weight: bold;
   color: #e0e0e0;
-  margin-bottom: 8px;
-  padding: 12px 16px;
-  background: linear-gradient(135deg, #2d2d2d 0%, #404040 100%);
-  border: 2px solid #555;
-  border-radius: 8px;
+  padding: 6px 10px;
+  background: linear-gradient(135deg, #404040 0%, #505050 100%);
+  border: 1px solid #666;
+  border-radius: 4px;
   font-family: 'Courier New', monospace;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+  flex-shrink: 0;
+  min-width: 80px;
+  text-align: center;
 }
 
 #stopwatch-controls {
   display: flex;
-  justify-content: center;
-  gap: 4px;
-  flex-wrap: wrap;
+  gap: 3px;
+  align-items: center;
 }
 
 #stopwatch-start,
 #stopwatch-stop,
 #stopwatch-reset {
-  min-width: 60px;
+  min-width: 28px;
   font-weight: bold;
-  padding: 8px 12px;
-  font-size: 0.85rem;
+  padding: 6px 8px;
+  font-size: 0.9rem;
+  border-radius: 4px;
+  background-color: #6c757d;
+}
+
+#stopwatch-start:hover,
+#stopwatch-stop:hover,
+#stopwatch-reset:hover {
+  background-color: #5a6268;
 }
 
 #stopwatch-start {
@@ -669,10 +677,10 @@ form#converter-form {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 10px;
-  margin-bottom: 6px;
+  padding: 3px 6px;
+  margin-bottom: 2px;
   background-color: #2d2d2d;
-  border-radius: 8px;
+  border-radius: 6px;
   border: 1px solid transparent;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
@@ -710,13 +718,13 @@ form#converter-form {
 .set-info {
   flex: 1;
   text-align: left;
-  font-size: 1rem;
+  font-size: 0.85rem;
   font-weight: 500;
 }
 
 .set-label {
   font-weight: 700;
-  margin-right: 8px;
+  margin-right: 6px;
   color: #b0b0b0;
 }
 
@@ -832,17 +840,17 @@ form#converter-form {
 
 /* Ensure prescribed sets section has proper spacing */
 #prescribedSets {
-  margin-bottom: 18px;
-  padding: 16px;
+  margin-bottom: 8px;
+  padding: 8px 12px;
   background: rgba(45, 45, 45, 0.3);
-  border-radius: 10px;
+  border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 #prescribedSets h3 {
-  margin-bottom: 12px;
-  font-size: 1.2rem;
+  margin-bottom: 6px;
+  font-size: 0.9rem;
   font-weight: 700;
   color: #e0e0e0;
 }
@@ -851,16 +859,16 @@ form#converter-form {
 .input-container {
   display: flex;
   align-items: center;
-  padding: 8px 10px;
-  margin-bottom: 6px;
+  padding: 3px 6px;
+  margin-bottom: 2px;
   background-color: #2d2d2d;
-  border-radius: 8px;
+  border-radius: 6px;
   border: 1px solid transparent;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
   animation: slideInUp 0.3s ease-out;
   overflow: hidden;
-  min-width: 0; /* Ensure container can shrink */
+  min-width: 0;
 }
 
 .input-container:hover {
@@ -871,15 +879,15 @@ form#converter-form {
 .input-info {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   flex: 1;
-  min-width: 0; /* Allow this section to shrink */
+  min-width: 0;
 }
 
 .input-label {
   font-weight: 700;
   color: #b0b0b0;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   flex: 0 1 auto;
   text-align: left;
   white-space: nowrap;
@@ -891,12 +899,12 @@ form#converter-form {
 .input-info input {
   background-color: #404040;
   border: 2px solid #555;
-  border-radius: 6px;
-  padding: 6px 8px;
+  border-radius: 4px;
+  padding: 4px 6px;
   color: #e0e0e0;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 500;
-  width: 70px;
+  width: 60px;
   flex-shrink: 0;
   text-align: center;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -919,21 +927,21 @@ form#converter-form {
 
 .input-controls {
   display: flex;
-  gap: 3px;
+  gap: 2px;
   align-items: center;
   flex-shrink: 0;
-  margin-left: 8px;
+  margin-left: 6px;
 }
 
 .control-btn {
   border: none;
-  border-radius: 6px;
-  padding: 6px 10px;
-  font-size: 12px;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 11px;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  min-width: 30px;
+  min-width: 26px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
   color: white;
 }

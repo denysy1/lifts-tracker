@@ -58,17 +58,12 @@
           <!-- Prescribed Sets -->
           <div id="prescribedSets"></div>
 
-          <!-- Exercise Options Accordion -->
-          <div class="accordion">
-            <div class="accordion-header" id="exerciseOptionsHeader">
-              <span>▶ Exercise Options</span>
-            </div>
-            <div class="accordion-content" id="exerciseOptionsContent" style="display: none;">
-              <label for="exerciseSelect">Select Exercise:</label>
-              <select id="exerciseSelect">
-                <!-- Options will be populated dynamically -->
-              </select>
-            </div>
+          <!-- Exercise Selector -->
+          <div class="exercise-selector">
+            <span class="exercise-label">Exercise:</span>
+            <select id="exerciseSelect">
+              <!-- Options will be populated dynamically -->
+            </select>
           </div>
 
           <!-- AMRAP Section -->
@@ -103,9 +98,9 @@
         <div id="stopwatch-section">
           <div id="stopwatch-display">00:00.00</div>
           <div id="stopwatch-controls">
-            <button id="stopwatch-start">Start</button>
-            <button id="stopwatch-stop">Stop</button>
-            <button id="stopwatch-reset">Reset</button>
+            <button id="stopwatch-start">▶</button>
+            <button id="stopwatch-stop">⏸</button>
+            <button id="stopwatch-reset">↻</button>
           </div>
         </div>
 

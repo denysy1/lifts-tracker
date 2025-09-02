@@ -76,8 +76,7 @@ class LiftTracker {
     document.getElementById("stopwatch-stop").onclick = () => this.stopwatch.stop();
     document.getElementById("stopwatch-reset").onclick = () => this.stopwatch.reset();
 
-    // Accordion functionality
-    document.getElementById("exerciseOptionsHeader").onclick = () => this.toggleExerciseOptions();
+    // Exercise dropdown functionality
     document.getElementById("exerciseSelect").onchange = () => this.onExerciseSelectionChange();
 
     // Modal functionality
@@ -619,6 +618,9 @@ class LiftTracker {
     this.ui.updateText("blockType", this.blockType ?
       this.blockType.charAt(0).toUpperCase() + this.blockType.slice(1) : "N/A");
 
+    // Populate exercise dropdown
+    this.populateExerciseDropdown();
+
     console.log(`Workout displayed: Cycle ${cycle}, Week ${week}, Block ${this.blockType}, Scale: ${this.currentScaleFactor}`);
   }
 
@@ -658,7 +660,7 @@ class LiftTracker {
       // Easter egg logic
       if (this.currentExercise === "Squat" && effectiveRepsRounded >= 20) {
         const audio = new Audio("img/yb.mp3");
-        audio.play().catch(() => {}); // Ignore audio errors
+        audio.play().catch(() => { }); // Ignore audio errors
       }
 
       this.ui.showMessage("Progress saved!", 'success');
@@ -1013,7 +1015,7 @@ class LiftTracker {
       const isAdjusted = this.isSetAdjusted(i);
       const adjustedClass = isAdjusted ? "adjusted-set" : "";
 
-      const repInfo = i === 2 ? ` (Target: ${Math.floor(this.currentPrescription.targetReps)} reps)` : "";
+      const repInfo = i === 2 ? ` (Target: ${Math.floor(this.currentPrescription.targetReps)})` : "";
       const adjustedIndicator = isAdjusted ? " *" : "";
 
       setsHtml += `
