@@ -473,10 +473,11 @@ form#converter-form {
 .modal .input-column {
   display: flex;
   flex-direction: column;
-  gap: 0.4em;
+  gap: 0.6em;
   min-width: 200px;
-  align-items: flex-start;
+  align-items: stretch;
   text-align: left;
+  flex: 1;
 }
 
 .modal .input-column h2 {
@@ -485,32 +486,126 @@ form#converter-form {
   font-size: 1rem;
 }
 
+/* Create input groups that mimic the main app layout */
+.modal .input-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background-color: #2d2d2d;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.modal .input-group:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+.modal .input-group label {
+  font-weight: 700;
+  color: #b0b0b0;
+  font-size: 0.8rem;
+  flex: 1;
+  margin: 0;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.modal .input-group input[type="number"],
+.modal .input-group select,
+.modal .input-group .dropdown-input {
+  background-color: #404040;
+  border: 2px solid #555;
+  border-radius: 4px;
+  padding: 6px 8px;
+  color: #e0e0e0;
+  font-size: 0.85rem;
+  font-weight: 500;
+  width: 100px;
+  flex-shrink: 0;
+  text-align: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+  margin: 0;
+}
+
+.modal .input-group select,
+.modal .input-group .dropdown-input {
+  text-align: left;
+  padding-left: 8px;
+  width: 140px;
+}
+
+.modal .input-group input[type="number"]:focus,
+.modal .input-group select:focus,
+.modal .input-group .dropdown-input:focus {
+  border-color: #4da6ff;
+  outline: none;
+  box-shadow:
+    inset 0 1px 3px rgba(0, 0, 0, 0.2),
+    0 0 0 3px rgba(77, 166, 255, 0.15);
+  transform: translateY(-1px);
+}
+
+.modal .input-group input[type="number"]:hover,
+.modal .input-group select:hover,
+.modal .input-group .dropdown-input:hover {
+  border-color: #666;
+}
+
+/* Keep original styles for inputs not in input-group */
 .modal label {
   font-weight: 500;
-  margin-bottom: 0.05em;
+  margin-bottom: 0.2em;
   color: #e0e0e0;
   font-size: 0.9em;
+  align-self: flex-start;
 }
 
 .modal input[type="number"],
 .modal select,
 .modal .dropdown-input {
-  padding: 0.3em 0.5em;
-  border: 1px solid #555;
-  border-radius: 4px;
-  font-size: 0.9em;
-  background: #2d2d2d;
+  padding: 8px 12px;
+  border: 2px solid #555;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  background: #404040;
   color: #e0e0e0;
-  margin-bottom: 0.1em;
   width: 100%;
   box-sizing: border-box;
+  text-align: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+.modal select,
+.modal .dropdown-input {
+  text-align: left;
+  padding-left: 12px;
 }
 
 .modal input[type="number"]:focus,
 .modal select:focus,
 .modal .dropdown-input:focus {
-  outline: 2px solid #007bff33;
-  border-color: #007bff;
+  border-color: #4da6ff;
+  outline: none;
+  box-shadow:
+    inset 0 1px 3px rgba(0, 0, 0, 0.2),
+    0 0 0 3px rgba(77, 166, 255, 0.15);
+  transform: translateY(-1px);
+}
+
+.modal input[type="number"]:hover,
+.modal select:hover,
+.modal .dropdown-input:hover {
+  border-color: #666;
 }
 
 .mode-toggle {
@@ -544,8 +639,9 @@ form#converter-form {
   display: flex;
   gap: 0.8em;
   justify-content: center;
-  margin-top: 0.6em;
+  margin-top: 1em;
   width: 100%;
+  grid-column: 1 / -1;
 }
 
 .modal button {

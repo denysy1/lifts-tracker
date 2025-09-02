@@ -172,17 +172,25 @@
       <form id="converter-form" autocomplete="off">
         <div class="input-column">
           <h2>Reference Exercise</h2>
-          <label for="refExerciseInput">Exercise:</label>
-          <input id="refExerciseInput" class="dropdown-input" autocomplete="off" placeholder="Type to search...">
-          <label for="refWeight">Weight:</label>
-          <input type="number" id="refWeight" min="1" required>
-          <label for="refReps">Reps:</label>
-          <input type="number" id="refReps" min="1" required>
+          <div class="input-group">
+            <label for="refExerciseInput">Exercise:</label>
+            <input id="refExerciseInput" class="dropdown-input" autocomplete="off" placeholder="Type to search...">
+          </div>
+          <div class="input-group">
+            <label for="refWeight">Weight:</label>
+            <input type="number" id="refWeight" min="1" required>
+          </div>
+          <div class="input-group">
+            <label for="refReps">Reps:</label>
+            <input type="number" id="refReps" min="1" required>
+          </div>
         </div>
         <div class="input-column">
           <h2>Target Exercise</h2>
-          <label for="targetExerciseInput">Exercise:</label>
-          <input id="targetExerciseInput" class="dropdown-input" autocomplete="off" placeholder="Type to search...">
+          <div class="input-group">
+            <label for="targetExerciseInput">Exercise:</label>
+            <input id="targetExerciseInput" class="dropdown-input" autocomplete="off" placeholder="Type to search...">
+          </div>
 
           <!-- Mode toggle -->
           <div class="mode-toggle">
@@ -195,13 +203,13 @@
           </div>
 
           <!-- Target reps input (default mode) -->
-          <div id="targetRepsGroup">
+          <div id="targetRepsGroup" class="input-group">
             <label for="targetReps">Target Reps:</label>
             <input type="number" id="targetReps" min="1">
           </div>
 
           <!-- Target weight input (reverse mode) -->
-          <div id="targetWeightGroup" style="display: none;">
+          <div id="targetWeightGroup" class="input-group" style="display: none;">
             <label for="targetWeight">Target Weight:</label>
             <input type="number" id="targetWeight" min="1">
           </div>
