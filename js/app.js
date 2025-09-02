@@ -72,9 +72,8 @@ class LiftTracker {
     document.getElementById("import-config").onclick = () => this.loadConfigFile();
 
     // Stopwatch controls
-    document.getElementById("stopwatch-start").onclick = () => this.stopwatch.start();
-    document.getElementById("stopwatch-stop").onclick = () => this.stopwatch.stop();
-    document.getElementById("stopwatch-reset").onclick = () => this.stopwatch.reset();
+    document.getElementById("stopwatch-toggle").onclick = () => this.toggleStopwatch();
+    document.getElementById("stopwatch-reset").onclick = () => this.resetStopwatch();
 
     // Exercise dropdown functionality
     document.getElementById("exerciseSelect").onchange = () => this.onExerciseSelectionChange();
@@ -92,11 +91,6 @@ class LiftTracker {
   setupConverterModal() {
     // Setup converter form
     document.getElementById('converter-form').addEventListener('submit', (e) => this.handleConverterSubmit(e));
-
-    // Setup converter config import
-    document.getElementById('importConverterConfig').addEventListener('click', () => {
-      this.ui.triggerFileInput('converterConfigFileInput', (e) => this.handleConverterConfigImport(e));
-    });
 
     // Setup mode toggle
     const modeRadios = document.querySelectorAll('input[name="targetMode"]');
@@ -233,25 +227,12 @@ class LiftTracker {
   }
 
   showConverterResult(result, ref, target) {
-    let resultHTML = `
-      <div><strong>Reference 1RM:</strong> ${result.ref1RM.toFixed(1)} lbs</div>
-      <div><strong>Target 1RM:</strong> ${result.target1RM.toFixed(1)} lbs</div>
-    `;
+    let resultHTML;
 
     if (result.mode === 'reps') {
-      resultHTML += `
-        <div style="font-size:1.3em;margin-top:10px;">
-          <strong>Recommended Weight for ${result.targetReps} reps of ${this.converter.formatExerciseName(target.targetExercise)}:</strong><br>
-          <span style="color:#007bff;font-weight:bold;">${result.targetWeight.toFixed(1)} lbs</span>
-        </div>
-      `;
+      resultHTML = `Recommend: ${result.targetWeight.toFixed(1)} lbs x ${result.targetReps} reps`;
     } else {
-      resultHTML += `
-        <div style="font-size:1.3em;margin-top:10px;">
-          <strong>Predicted Reps for ${result.targetWeight.toFixed(1)} lbs of ${this.converter.formatExerciseName(target.targetExercise)}:</strong><br>
-          <span style="color:#007bff;font-weight:bold;">${result.targetReps.toFixed(0)} reps</span>
-        </div>
-      `;
+      resultHTML = `Recommend: ${result.targetWeight.toFixed(1)} lbs x ${result.targetReps.toFixed(0)} reps`;
     }
 
     this.ui.updateHTML('converter-result', resultHTML);
@@ -264,24 +245,6 @@ class LiftTracker {
   clearConverterMessages() {
     this.ui.updateHTML('converter-result', '');
     this.ui.updateHTML('converter-error-message', '');
-  }
-
-  handleConverterConfigImport(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      try {
-        const userConfig = JSON.parse(ev.target.result);
-        this.converter.updateConfig({ ...this.configManager.get('converter'), ...userConfig });
-        this.setupAwesompleteDropdowns();
-        this.showConverterError('Config loaded!');
-      } catch (err) {
-        this.showConverterError('Invalid config file.');
-      }
-    };
-    reader.readAsText(file);
   }
 
   toggleExerciseOptions() {
@@ -303,7 +266,16 @@ class LiftTracker {
       options.push({ value: alt.name, text: alt.name });
     });
 
-    this.ui.populateSelect("exerciseSelect", options, "original");
+    // Determine the correct selected value
+    const selectedValue = this.selectedAlternativeExercise || "original";
+
+    this.ui.populateSelect("exerciseSelect", options, selectedValue);
+
+    // Re-bind the event listener after populating the dropdown
+    const selectElement = document.getElementById("exerciseSelect");
+    if (selectElement) {
+      selectElement.onchange = () => this.onExerciseSelectionChange();
+    }
   }
 
   onExerciseSelectionChange() {
@@ -353,9 +325,14 @@ class LiftTracker {
       const records = await this.dbManager.getExerciseRecords(exercise);
 
       if (records.length === 0) {
+        // Hide stopwatch in initialization mode
+        document.getElementById("stopwatch-section").classList.remove("show");
         this.ui.showElement("initialization");
         this.ui.hideElement("tracker");
       } else {
+        // Show stopwatch when in tracker mode and update button state
+        document.getElementById("stopwatch-section").classList.add("show");
+        this.updateStopwatchButton();
         this.ui.hideElement("initialization");
         this.ui.showElement("tracker");
         const lastEntry = records[records.length - 1];
@@ -399,6 +376,9 @@ class LiftTracker {
 
     try {
       await this.dbManager.addLiftRecord(newEntry);
+      // Show stopwatch when transitioning to tracker mode
+      document.getElementById("stopwatch-section").classList.add("show");
+      this.updateStopwatchButton();
       this.ui.hideElement("initialization");
       this.ui.showElement("tracker");
       this.displayCurrentWorkout(newEntry);
@@ -601,16 +581,17 @@ class LiftTracker {
     const prescribedSetsElement = document.getElementById("prescribedSets");
     if (this.selectedAlternativeExercise) {
       prescribedSetsElement.classList.add("alternative-exercise");
+      console.log('Added alternative-exercise class to:', prescribedSetsElement);
     } else {
       prescribedSetsElement.classList.remove("alternative-exercise");
+      console.log('Removed alternative-exercise class from:', prescribedSetsElement);
     }
 
 
     // Update form inputs
     document.getElementById("amrap").value = reps[2];
-    const baseActualWeight = Math.round((this.trainingMax[this.currentExercise] * weights[2] / this.trainingMax[this.currentExercise]) / 5) * 5;
-    const scaledActualWeight = Math.round((baseActualWeight * this.currentScaleFactor) / 5) * 5;
-    document.getElementById("actualWeight").value = scaledActualWeight;
+    const actualWeight = Math.round(weights[2] / 5) * 5; // Round to nearest 5 lbs to match prescribed sets
+    document.getElementById("actualWeight").value = actualWeight;
 
     // Update display info
     this.ui.updateText("cycleNumber", cycle || "N/A");
@@ -882,6 +863,36 @@ class LiftTracker {
     });
   }
 
+  // Stopwatch Control Methods
+  toggleStopwatch() {
+    if (this.stopwatch.isRunning) {
+      this.stopwatch.stop();
+    } else {
+      this.stopwatch.start();
+    }
+    this.updateStopwatchButton();
+  }
+
+  resetStopwatch() {
+    this.stopwatch.reset();
+    this.updateStopwatchButton();
+  }
+
+  updateStopwatchButton() {
+    const toggleButton = document.getElementById('stopwatch-toggle');
+    if (toggleButton) {
+      if (this.stopwatch.isRunning) {
+        toggleButton.textContent = '⏸';
+        toggleButton.classList.remove('stopwatch-stopped');
+        toggleButton.classList.add('stopwatch-running');
+      } else {
+        toggleButton.textContent = '▶';
+        toggleButton.classList.remove('stopwatch-running');
+        toggleButton.classList.add('stopwatch-stopped');
+      }
+    }
+  }
+
   // Two-Page Navigation System
   initPageNavigation() {
     this.currentPage = 1;
@@ -1016,13 +1027,12 @@ class LiftTracker {
       const adjustedClass = isAdjusted ? "adjusted-set" : "";
 
       const repInfo = i === 2 ? ` (Target: ${Math.floor(this.currentPrescription.targetReps)})` : "";
-      const adjustedIndicator = isAdjusted ? " *" : "";
 
       setsHtml += `
         <div class="set-container ${adjustedClass}">
           <div class="set-info">
             <span class="set-label">Set ${i + 1}:</span>
-            <span class="set-details">${weight} lbs x ${Math.floor(reps)} reps${repInfo}${adjustedIndicator}</span>
+            <span class="set-details">${weight} lbs x ${Math.floor(reps)} reps${repInfo}</span>
           </div>
           <div class="set-controls">
             ${isAdjusted ? `<button class="reset-btn" data-set="${i}">↺</button>` : ''}
@@ -1070,13 +1080,16 @@ class LiftTracker {
 
     this.currentPrescription.reps[setIndex] = newReps;
 
-    // For the AMRAP set (set 3), also update target reps
+    // For the AMRAP set (set 3), also update target reps and actual weight field
     if (setIndex === 2) {
       this.currentPrescription.targetReps = this.calculateEquivalentReps(
         this.originalPrescription.weights[2],
         this.originalPrescription.targetReps,
         this.currentPrescription.weights[2]
       );
+
+      // Update the actual weight input field to match set 3
+      document.getElementById("actualWeight").value = this.currentPrescription.weights[2];
     }
 
     this.renderInteractivePrescribedSets();
@@ -1103,6 +1116,8 @@ class LiftTracker {
 
     if (setIndex === 2) {
       this.currentPrescription.targetReps = this.originalPrescription.targetReps;
+      // Also reset the actual weight input field to match set 3
+      document.getElementById("actualWeight").value = this.originalPrescription.weights[2];
     }
 
     this.renderInteractivePrescribedSets();

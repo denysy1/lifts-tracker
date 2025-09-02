@@ -90,16 +90,18 @@
             </div>
           </div>
 
-          <!-- Save Progress -->
-          <button id="save">Save Progress</button>
+          <!-- Save and Clear Buttons -->
+          <div class="button-row-horizontal">
+            <button id="save">Save Progress</button>
+            <button id="clear-last-entry">Clear Last Entry</button>
+          </div>
         </div>
 
         <!-- Stopwatch Section -->
         <div id="stopwatch-section">
           <div id="stopwatch-display">00:00.00</div>
           <div id="stopwatch-controls">
-            <button id="stopwatch-start">▶</button>
-            <button id="stopwatch-stop">⏸</button>
+            <button id="stopwatch-toggle">▶</button>
             <button id="stopwatch-reset">↻</button>
           </div>
         </div>
@@ -129,7 +131,6 @@
         <!-- History and Utility Buttons -->
         <div class="tool-section">
           <button id="view-history">View History</button>
-          <button id="clear-last-entry">Clear Last Entry</button>
         </div>
 
         <!-- Full Backup/Restore Buttons -->
@@ -216,14 +217,11 @@
         </div>
         <div class="button-row">
           <button type="submit">Convert</button>
-          <button type="button" id="importConverterConfig">Import Config</button>
         </div>
       </form>
 
       <div id="converter-result" class="readonly-output"></div>
       <div id="converter-error-message" style="color: red;"></div>
-
-      <input type="file" id="converterConfigFileInput" style="display: none;" accept=".json">
     </div>
   </div>
 
