@@ -6,8 +6,8 @@ body {
   align-items: center;
   margin: 0;
   padding: 20px;
-  background-color: #f4f4f9;
-  color: #333;
+  background-color: #1a1a1a;
+  color: #e0e0e0;
   text-align: center;
 }
 
@@ -43,9 +43,16 @@ h3 {
   width: 100%;
   padding: 8px;
   margin-top: 5px;
-  border: 1px solid #ccc;
+  border: 1px solid #555;
   border-radius: 5px;
   text-align: center;
+  background-color: #2d2d2d;
+  color: #e0e0e0;
+}
+
+.input-column input:focus {
+  border-color: #007bff;
+  outline: none;
 }
 
 
@@ -167,14 +174,14 @@ button:hover {
   margin-top: 10px;
   font-size: 1rem;
   line-height: 1.5;
-  color: #333;
+  color: #e0e0e0;
   font-style: normal;
   /* Regular font style */
 }
 
 /* Deload Notification Styling */
 #deloadNotice {
-  color: #ff4500;
+  color: #ff6b4a;
   font-weight: bold;
   font-size: 1.1rem;
   margin-bottom: 10px;
@@ -225,7 +232,7 @@ button:hover {
   font-size: 1rem;
   line-height: 1.5;
   text-align: center;
-  color: #333;
+  color: #e0e0e0;
 }
 
 /* Accordion Styling */
@@ -236,7 +243,7 @@ button:hover {
 }
 
 .accordion-header {
-  background-color: #6c757d;
+  background-color: #404040;
   color: white;
   padding: 10px 15px;
   cursor: pointer;
@@ -246,13 +253,13 @@ button:hover {
 }
 
 .accordion-header:hover {
-  background-color: #5a6268;
+  background-color: #505050;
 }
 
 .accordion-content {
-  background-color: #f8f9fa;
+  background-color: #2d2d2d;
   padding: 15px;
-  border: 1px solid #dee2e6;
+  border: 1px solid #555;
   border-top: none;
   border-radius: 0 0 5px 5px;
 }
@@ -261,27 +268,33 @@ button:hover {
   display: block;
   margin-bottom: 5px;
   font-weight: bold;
-  color: #495057;
+  color: #e0e0e0;
 }
 
 .accordion-content select {
   width: 100%;
   padding: 8px;
-  border: 1px solid #ced4da;
+  border: 1px solid #555;
   border-radius: 4px;
   font-size: 14px;
-  background-color: white;
+  background-color: #2d2d2d;
+  color: #e0e0e0;
   text-align: center;
+}
+
+.accordion-content select:focus {
+  border-color: #007bff;
+  outline: none;
 }
 
 /* Alternative Exercise Indication */
 .alternative-exercise {
-  color: #007bff !important;
+  color: #4da6ff !important;
   font-weight: 500;
 }
 
 .alternative-exercise h3 {
-  color: #007bff;
+  color: #4da6ff;
 }
 
 /* Modal Styles */
@@ -299,9 +312,9 @@ button:hover {
 }
 
 .modal-content {
-  background-color: #f8f9fa;
+  background-color: #2d2d2d;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   position: relative;
   max-width: 90vw;
   max-height: 90vh;
@@ -323,7 +336,7 @@ button:hover {
 
 .close:hover,
 .close:focus {
-  color: #000;
+  color: #e0e0e0;
 }
 
 /* Converter Form Styles (adapted from exercise-converter) */
@@ -334,9 +347,9 @@ form#converter-form {
   gap: 2em;
   margin: 0 auto 1.5em auto;
   max-width: 700px;
-  background: #fff;
+  background: #404040;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   padding: 1.5em 1em 1em 1em;
 }
 
@@ -351,23 +364,25 @@ form#converter-form {
 
 .modal .input-column h2 {
   margin: 0 0 0.5em 0;
-  color: #444;
+  color: #e0e0e0;
   font-size: 1.1em;
 }
 
 .modal label {
   font-weight: 500;
   margin-bottom: 0.1em;
+  color: #e0e0e0;
 }
 
 .modal input[type="number"],
 .modal select,
 .modal .dropdown-input {
   padding: 0.4em 0.6em;
-  border: 1px solid #bbb;
+  border: 1px solid #555;
   border-radius: 5px;
   font-size: 1em;
-  background: #f9f9f9;
+  background: #2d2d2d;
+  color: #e0e0e0;
   margin-bottom: 0.2em;
   width: 100%;
   box-sizing: border-box;
@@ -386,9 +401,9 @@ form#converter-form {
   gap: 0.3em;
   margin: 0.5em 0;
   padding: 0.5em;
-  background: #f0f4f8;
+  background: #2d2d2d;
   border-radius: 5px;
-  border: 1px solid #ddd;
+  border: 1px solid #555;
 }
 
 .mode-toggle label {
@@ -399,6 +414,7 @@ form#converter-form {
   font-weight: normal;
   cursor: pointer;
   margin: 0;
+  color: #e0e0e0;
 }
 
 .mode-toggle input[type="radio"] {
@@ -432,14 +448,14 @@ form#converter-form {
 }
 
 .readonly-output {
-  background: #e9f3ff;
-  border: 1px solid #b6d4fe;
+  background: #1a3d5c;
+  border: 1px solid #4da6ff;
   border-radius: 8px;
   max-width: 420px;
   margin: 1.5em auto 0 auto;
   padding: 1.2em 1em;
   font-size: 1.1em;
-  color: #1a2a3a;
+  color: #e0e0e0;
   text-align: center;
   word-break: break-word;
 }
@@ -448,6 +464,7 @@ form#converter-form {
   text-align: center;
   margin-top: 0.7em;
   min-height: 1.2em;
+  color: #e0e0e0;
 }
 
 /* Stopwatch Styling */
@@ -460,14 +477,14 @@ form#converter-form {
 #stopwatch-display {
   font-size: 2.5rem;
   font-weight: bold;
-  color: #333;
+  color: #e0e0e0;
   margin-bottom: 15px;
   padding: 20px;
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  border: 2px solid #dee2e6;
+  background: linear-gradient(135deg, #2d2d2d 0%, #404040 100%);
+  border: 2px solid #555;
   border-radius: 10px;
   font-family: 'Courier New', monospace;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 #stopwatch-controls {
@@ -525,15 +542,15 @@ form#converter-form {
   align-items: center;
   padding: 6px 8px;
   margin-bottom: 4px;
-  background-color: #f8f9fa;
+  background-color: #2d2d2d;
   border-radius: 4px;
   border: 1px solid transparent;
   transition: all 0.2s ease;
 }
 
 .set-container.adjusted-set {
-  background-color: #e3f2fd;
-  border-color: #2196f3;
+  background-color: #1a3d5c;
+  border-color: #4da6ff;
 }
 
 .set-info {
@@ -548,7 +565,7 @@ form#converter-form {
 }
 
 .set-details {
-  color: #333;
+  color: #e0e0e0;
 }
 
 .set-controls {
