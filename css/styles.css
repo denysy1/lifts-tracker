@@ -1205,9 +1205,12 @@ form#converter-form {
 }
 
 .modal .awesomplete li {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  /* Allow text to wrap to multiple lines */
+  overflow: visible;
+  /* Allow text to be fully visible */
+  word-wrap: break-word;
+  /* Break long words if necessary */
   padding: 8px 12px;
   /* More comfortable padding */
   color: #e0e0e0 !important;
@@ -1220,6 +1223,10 @@ form#converter-form {
   -webkit-mask: none !important;
   opacity: 1 !important;
   /* Ensure full opacity */
+  line-height: 1.3;
+  /* Better line spacing for wrapped text */
+  min-height: auto;
+  /* Allow height to adjust to content */
 }
 
 .modal .awesomplete li:hover,
