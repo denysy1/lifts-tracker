@@ -619,6 +619,29 @@ class LiftTracker {
     this.ui.updateText("blockType", this.blockType ?
       this.blockType.charAt(0).toUpperCase() + this.blockType.slice(1) : "N/A");
 
+    // Handle deload week UI changes
+    if (isDeloadWeek) {
+      // Hide AMRAP and weight input sections during deload week
+      const amrapContainer = document.getElementById("amrap").closest('.input-container');
+      const weightContainer = document.getElementById("actualWeight").closest('.input-container');
+
+      if (amrapContainer) amrapContainer.style.display = 'none';
+      if (weightContainer) weightContainer.style.display = 'none';
+
+      // Change Save button to Continue
+      document.getElementById("save").textContent = "Continue";
+    } else {
+      // Show AMRAP and weight input sections for normal weeks
+      const amrapContainer = document.getElementById("amrap").closest('.input-container');
+      const weightContainer = document.getElementById("actualWeight").closest('.input-container');
+
+      if (amrapContainer) amrapContainer.style.display = '';
+      if (weightContainer) weightContainer.style.display = '';
+
+      // Reset Save button text
+      document.getElementById("save").textContent = "Save";
+    }
+
     // Populate exercise dropdown
     this.populateExerciseDropdown();
 
