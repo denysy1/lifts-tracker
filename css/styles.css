@@ -434,7 +434,12 @@ button:active {
   max-width: 95vw;
   max-height: 95vh;
   overflow-y: auto;
+  overflow-x: visible;
+  /* Allow dropdown to extend horizontally outside modal */
   padding: 0.5em 0.8em 0.4em 0.8em;
+  /* Remove stacking context that might interfere with dropdowns */
+  transform: none;
+  z-index: auto;
 }
 
 .close {
@@ -718,7 +723,8 @@ form#converter-form {
 
 /* Stopwatch Styling */
 #stopwatch-section {
-  display: none; /* Hidden by default, shown when exercise is selected */
+  display: none;
+  /* Hidden by default, shown when exercise is selected */
   flex-direction: row !important;
   align-items: center !important;
   justify-content: center !important;
@@ -738,7 +744,7 @@ form#converter-form {
 }
 
 /* Force horizontal layout for stopwatch children */
-#stopwatch-section > * {
+#stopwatch-section>* {
   display: inline-block !important;
   vertical-align: middle !important;
 }
@@ -1124,6 +1130,77 @@ form#converter-form {
   background-color: #c82333;
 }
 
+/* Awesomplete dropdown constraints within modal */
+.modal .input-group {
+  position: relative;
+  /* Make input-group the positioning context */
+  z-index: 1100;
+  /* Higher than modal content but reasonable */
+  overflow: visible !important;
+  /* Ensure dropdown isn't clipped */
+}
+
+.modal .input-group:has(.awesomplete > ul:not([hidden])) {
+  z-index: 1200;
+  /* Even higher when dropdown is open */
+}
+
+.modal .awesomplete {
+  position: relative !important;
+  /* Use relative positioning for awesomplete wrapper */
+  overflow: visible !important;
+  /* Ensure dropdown isn't clipped */
+  z-index: inherit;
+  /* Inherit from parent */
+}
+
+.modal .awesomplete>ul {
+  position: absolute !important;
+  /* Use absolute positioning within the modal context */
+  z-index: 1200 !important;
+  /* High z-index for the dropdown list */
+  max-height: 200px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  border-radius: 6px;
+  /* Match input-group border-radius */
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5) !important;
+  /* Strong shadow for visibility */
+  background-color: #2d2d2d !important;
+  /* Ensure dropdown has background */
+  border: 2px solid #4da6ff !important;
+  /* Prominent border for better definition */
+  min-width: 200px !important;
+  /* Set a reasonable minimum width for exercise names */
+  width: 230px !important;
+  /* Fixed width that should align with input group edges */
+  top: 100% !important;
+  /* Position directly below the input */
+  left: -100px !important;
+  /* Shift left by ~72px to align with the input group container left edge */
+  margin-top: 2px !important;
+  /* Small gap below the input */
+}
+
+.modal .awesomplete mark {
+  background: #4da6ff;
+}
+
+.modal .awesomplete li {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 8px 12px;
+  /* More comfortable padding */
+}
+
+/* Ensure dropdown inputs don't expand beyond their container */
+.modal .input-group .dropdown-input {
+  max-width: 140px;
+  min-width: 100px;
+}
+
 @media (max-width: 700px) {
   form#converter-form {
     flex-direction: column;
@@ -1157,5 +1234,11 @@ form#converter-form {
 
   .reset-btn {
     min-width: 26px;
+  }
+
+  /* Mobile adjustments for dropdowns */
+  .modal .input-group .dropdown-input {
+    max-width: 120px;
+    min-width: 90px;
   }
 }
