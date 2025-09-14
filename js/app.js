@@ -325,6 +325,9 @@ class LiftTracker {
     this.currentExercise = exercise;
     this.ui.updateText("exerciseName", exercise);
 
+    // Update exercise button visual states
+    this.updateExerciseButtonStates(exercise);
+
     // Reset alternative exercise selection
     this.selectedAlternativeExercise = null;
     this.currentScaleFactor = 1.0;
@@ -1286,6 +1289,33 @@ class LiftTracker {
 
   hasAnyAdjustedSets() {
     return this.currentPrescription.weights.some((_, i) => this.isSetAdjusted(i));
+  }
+
+  updateExerciseButtonStates(selectedExercise) {
+    // Map exercise names to button IDs
+    const exerciseButtonMap = {
+      "Overhead Press": "overhead-press-btn",
+      "Bench Press": "bench-press-btn",
+      "Squat": "squat-btn",
+      "Deadlift": "deadlift-btn"
+    };
+
+    // Remove active class from all exercise buttons
+    Object.values(exerciseButtonMap).forEach(buttonId => {
+      const button = document.getElementById(buttonId);
+      if (button) {
+        button.classList.remove('active');
+      }
+    });
+
+    // Add active class to the selected exercise button
+    const selectedButtonId = exerciseButtonMap[selectedExercise];
+    if (selectedButtonId) {
+      const selectedButton = document.getElementById(selectedButtonId);
+      if (selectedButton) {
+        selectedButton.classList.add('active');
+      }
+    }
   }
 }
 

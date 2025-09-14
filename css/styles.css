@@ -256,6 +256,23 @@ button:active {
   background-color: #0056b3;
 }
 
+/* Active state for selected exercise button */
+#overhead-press-btn.active,
+#bench-press-btn.active,
+#squat-btn.active,
+#deadlift-btn.active {
+  background-color: #28a745;
+  box-shadow: 0 0 0 2px #28a745, 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+#overhead-press-btn.active:hover,
+#bench-press-btn.active:hover,
+#squat-btn.active:hover,
+#deadlift-btn.active:hover {
+  background-color: #218838;
+  box-shadow: 0 0 0 2px #218838, 0 4px 12px rgba(33, 136, 56, 0.4);
+}
+
 /* Exercise Icon Styling */
 .exercise-icon {
   width: 40px;
