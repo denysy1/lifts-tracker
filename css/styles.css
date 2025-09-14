@@ -241,6 +241,12 @@ button:active {
 #deadlift-btn {
   background-color: #007bff;
   margin: 0 5px;
+  padding: 2px;
+  width: 60px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 #overhead-press-btn:hover,
@@ -248,6 +254,14 @@ button:active {
 #squat-btn:hover,
 #deadlift-btn:hover {
   background-color: #0056b3;
+}
+
+/* Exercise Icon Styling */
+.exercise-icon {
+  width: 40px;
+  height: 40px;
+  display: block;
+  filter: brightness(0) invert(1);
 }
 
 /* Save and Clear Buttons */
