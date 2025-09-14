@@ -52,28 +52,36 @@ export class ExerciseConverter {
   convert({ refExercise, refWeight, refReps, targetExercise, targetReps, targetWeight, mode }) {
     const k = this.config["1rm_formula_k"] || 30;
     let ref1RM = this.calculate1RM(refWeight, refReps, k);
-    let base1RM, refFactor, targetFactor;
+    let base1RM;
 
-    // Validate exercise compatibility
-    if ((this.isUpperBody(refExercise) && !this.isUpperBody(targetExercise)) ||
-        (this.isLowerBody(refExercise) && !this.isLowerBody(targetExercise))) {
-      throw new Error('Cannot convert between upper and lower body exercises.');
-    }
-
-    if (this.isUpperBody(refExercise)) {
+    // Handle no-exercise mode (conversion factor of 1)
+    if (!refExercise || !targetExercise) {
+      // When no exercises are selected, use no conversion factor (same exercise assumed)
       base1RM = ref1RM;
-      refFactor = this.getFactor(refExercise, 'bench');
-      targetFactor = this.getFactor(targetExercise, 'bench');
-      if (refExercise !== 'bench_press') base1RM = ref1RM / refFactor;
-      if (targetExercise !== 'bench_press') base1RM = base1RM * targetFactor;
-    } else if (this.isLowerBody(refExercise)) {
-      base1RM = ref1RM;
-      refFactor = this.getFactor(refExercise, 'squat');
-      targetFactor = this.getFactor(targetExercise, 'squat');
-      if (refExercise !== 'squat') base1RM = ref1RM / refFactor;
-      if (targetExercise !== 'squat') base1RM = base1RM * targetFactor;
     } else {
-      throw new Error('Unknown exercise type');
+      // Validate exercise compatibility for cross-exercise conversions
+      if ((this.isUpperBody(refExercise) && !this.isUpperBody(targetExercise)) ||
+          (this.isLowerBody(refExercise) && !this.isLowerBody(targetExercise))) {
+        throw new Error('Cannot convert between upper and lower body exercises.');
+      }
+
+      let refFactor, targetFactor;
+
+      if (this.isUpperBody(refExercise)) {
+        base1RM = ref1RM;
+        refFactor = this.getFactor(refExercise, 'bench');
+        targetFactor = this.getFactor(targetExercise, 'bench');
+        if (refExercise !== 'bench_press') base1RM = ref1RM / refFactor;
+        if (targetExercise !== 'bench_press') base1RM = base1RM * targetFactor;
+      } else if (this.isLowerBody(refExercise)) {
+        base1RM = ref1RM;
+        refFactor = this.getFactor(refExercise, 'squat');
+        targetFactor = this.getFactor(targetExercise, 'squat');
+        if (refExercise !== 'squat') base1RM = ref1RM / refFactor;
+        if (targetExercise !== 'squat') base1RM = base1RM * targetFactor;
+      } else {
+        throw new Error('Unknown exercise type');
+      }
     }
 
     if (mode === 'reps') {

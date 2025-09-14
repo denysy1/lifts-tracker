@@ -191,14 +191,25 @@ class LiftTracker {
     this.clearConverterMessages();
 
     try {
-      const refExercise = this.converter.getExerciseKeyFromName(document.getElementById('refExerciseInput').value);
+      const refExerciseInput = document.getElementById('refExerciseInput').value.trim();
+      const targetExerciseInput = document.getElementById('targetExerciseInput').value.trim();
+
+      // Get exercise keys if provided, otherwise use null for no-exercise mode
+      const refExercise = refExerciseInput ? this.converter.getExerciseKeyFromName(refExerciseInput) : null;
+      const targetExercise = targetExerciseInput ? this.converter.getExerciseKeyFromName(targetExerciseInput) : null;
+
       const refWeight = parseFloat(document.getElementById('refWeight').value);
       const refReps = parseInt(document.getElementById('refReps').value, 10);
-      const targetExercise = this.converter.getExerciseKeyFromName(document.getElementById('targetExerciseInput').value);
       const mode = document.querySelector('input[name="targetMode"]:checked').value;
 
-      if (!refExercise || !targetExercise) {
-        this.showConverterError('Please select valid exercises from the dropdown.');
+      // Check if exercises are provided but invalid
+      if (refExerciseInput && !refExercise) {
+        this.showConverterError('Please select a valid reference exercise from the dropdown, or leave blank for same-exercise conversion.');
+        return;
+      }
+
+      if (targetExerciseInput && !targetExercise) {
+        this.showConverterError('Please select a valid target exercise from the dropdown, or leave blank for same-exercise conversion.');
         return;
       }
 
@@ -224,13 +235,13 @@ class LiftTracker {
         result = this.converter.convert({ refExercise, refWeight, refReps, targetExercise, targetWeight, mode: 'weight' });
       }
 
-      this.showConverterResult(result, { refExercise, refWeight, refReps }, { targetExercise });
+      this.showConverterResult(result, { refExercise: refExercise || 'Same Exercise', refWeight, refReps }, { targetExercise: targetExercise || 'Same Exercise' });
     } catch (err) {
       this.showConverterError(err.message);
     }
   }
 
-  showConverterResult(result, ref, target) {
+  showConverterResult(result, _ref, _target) {
     let resultHTML;
 
     if (result.mode === 'reps') {
