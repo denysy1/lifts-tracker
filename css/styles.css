@@ -1192,10 +1192,16 @@ form#converter-form {
   /* Align with the right edge of the input-group container */
   margin-top: 2px !important;
   /* Small gap below the input-group */
+  /* Fix for gradient/fade issue - override any default Awesomplete styles */
+  background-image: none !important;
+  mask: none !important;
+  -webkit-mask: none !important;
+  background-clip: padding-box !important;
 }
 
 .modal .awesomplete mark {
   background: #4da6ff;
+  color: #fff !important;
 }
 
 .modal .awesomplete li {
@@ -1204,6 +1210,27 @@ form#converter-form {
   text-overflow: ellipsis;
   padding: 8px 12px;
   /* More comfortable padding */
+  color: #e0e0e0 !important;
+  /* Ensure text is visible */
+  background-color: transparent !important;
+  /* Remove any background that might cause fade */
+  background-image: none !important;
+  /* Remove any gradient backgrounds */
+  mask: none !important;
+  -webkit-mask: none !important;
+  opacity: 1 !important;
+  /* Ensure full opacity */
+}
+
+.modal .awesomplete li:hover,
+.modal .awesomplete li[aria-selected="true"] {
+  background-color: #404040 !important;
+  color: #ffffff !important;
+  background-image: none !important;
+  /* Remove any gradient backgrounds on hover */
+  mask: none !important;
+  -webkit-mask: none !important;
+  opacity: 1 !important;
 }
 
 /* Ensure dropdown inputs don't expand beyond their container */
