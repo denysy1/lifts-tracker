@@ -1133,7 +1133,7 @@ form#converter-form {
 /* Awesomplete dropdown constraints within modal */
 .modal .input-group {
   position: relative;
-  /* Make input-group the positioning context */
+  /* Make input-group the positioning context for the dropdown */
   z-index: 1100;
   /* Higher than modal content but reasonable */
   overflow: visible !important;
@@ -1146,17 +1146,15 @@ form#converter-form {
 }
 
 .modal .awesomplete {
-  position: relative !important;
-  /* Use relative positioning for awesomplete wrapper */
+  position: static !important;
+  /* Remove positioning context from awesomplete wrapper */
   overflow: visible !important;
   /* Ensure dropdown isn't clipped */
-  z-index: inherit;
-  /* Inherit from parent */
 }
 
 .modal .awesomplete>ul {
   position: absolute !important;
-  /* Use absolute positioning within the modal context */
+  /* Position relative to the input-group container instead of input field */
   z-index: 1200 !important;
   /* High z-index for the dropdown list */
   max-height: 200px;
@@ -1171,16 +1169,16 @@ form#converter-form {
   /* Ensure dropdown has background */
   border: 2px solid #4da6ff !important;
   /* Prominent border for better definition */
-  min-width: 200px !important;
-  /* Set a reasonable minimum width for exercise names */
-  width: 230px !important;
-  /* Fixed width that should align with input group edges */
+  width: 100% !important;
+  /* Automatically match the full width of the input-group container */
   top: 100% !important;
-  /* Position directly below the input */
-  left: -100px !important;
-  /* Shift left by ~72px to align with the input group container left edge */
+  /* Position directly below the input-group container */
+  left: 0 !important;
+  /* Align with the left edge of the input-group container */
+  right: 0 !important;
+  /* Align with the right edge of the input-group container */
   margin-top: 2px !important;
-  /* Small gap below the input */
+  /* Small gap below the input-group */
 }
 
 .modal .awesomplete mark {
