@@ -30,6 +30,12 @@ export const defaultConfig = {
   deloadTriggerConsecutiveLowAMRAP: 1,
   supplementWorkPercentage: 0.5,
   trainingMaxInitializationFactor: 0.9,
+  performanceWindowSize: 3,
+  decThreshold: 2,
+  accThreshold: 3,
+  adjustFactor: 0.50,
+  minIncrement: 2.5,
+  maxIncrement: 20,
   cyclesPerBlockType: {
     leader: 2,
     anchor: 1

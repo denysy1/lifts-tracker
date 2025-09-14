@@ -557,7 +557,6 @@ class LiftTracker {
   }
 
   renderWorkoutDisplay(weights, reps, targetReps, cycle, week, isDeloadWeek) {
-    const config = this.configManager.getAll();
 
     // Update deload notice
     if (isDeloadWeek) {
@@ -720,9 +719,101 @@ class LiftTracker {
         }
         this.consecutiveLowAMRAP[this.currentExercise] = 0;
       }
+
+      // Apply adaptive increment tuning after Week 3 saves
+      this.applyAdaptiveIncrementTuning().catch(error => {
+        console.error('Error applying adaptive increment tuning:', error);
+      });
     }
 
     return newTrainingMax;
+  }
+
+  async applyAdaptiveIncrementTuning() {
+    try {
+      const config = this.configManager.getAll();
+
+      // Get all records for the current exercise
+      const allRecords = await this.dbManager.getExerciseRecords(this.currentExercise);
+
+      // Filter to only Week 3 entries (AMRAP weeks) and exclude initialization entries
+      const week3Records = allRecords.filter(record =>
+        record.week === 3 && record.amrapReps !== null
+      );
+
+      // If we don't have enough data, skip adaptive tuning
+      if (week3Records.length < 2) {
+        console.log('Not enough Week 3 data for adaptive increment tuning');
+        return;
+      }
+
+      // Take the last N entries based on performanceWindowSize
+      const windowSize = Math.min(config.performanceWindowSize, week3Records.length);
+      const recentRecords = week3Records.slice(-windowSize);
+
+      console.log(`Analyzing last ${windowSize} Week 3 records for ${this.currentExercise}:`,
+        recentRecords.map(r => ({ cycle: r.cycle, amrapReps: r.amrapReps })));
+
+      // Count performances for acceleration and deceleration logic
+      const zeroRepCounts = recentRecords.filter(record => record.amrapReps === 0).length;
+      const highRepCounts = recentRecords.filter(record =>
+        record.amrapReps >= config.amrapProgressionThresholds[0]
+      ).length;
+
+      let currentIncrement = config.incrementValues[this.currentExercise];
+      let newIncrement = currentIncrement;
+      let adjustmentMade = false;
+      let adjustmentType = '';
+
+      // Acceleration logic: If too many high-rep performances, increase increment
+      if (highRepCounts >= config.accThreshold) {
+        newIncrement = currentIncrement / config.adjustFactor;
+        adjustmentMade = true;
+        adjustmentType = 'acceleration';
+        console.log(`Acceleration triggered: ${highRepCounts} high-rep performances >= ${config.accThreshold} threshold`);
+      }
+      // Deceleration logic: If too many zero-rep performances, decrease increment
+      else if (zeroRepCounts >= config.decThreshold) {
+        newIncrement = currentIncrement * config.adjustFactor;
+        adjustmentMade = true;
+        adjustmentType = 'deceleration';
+        console.log(`Deceleration triggered: ${zeroRepCounts} zero-rep performances >= ${config.decThreshold} threshold`);
+      }
+
+      if (adjustmentMade) {
+        // Clamp the new increment between min and max values
+        newIncrement = Math.max(config.minIncrement, Math.min(config.maxIncrement, newIncrement));
+
+        // Round to reasonable precision (0.5 lb increments)
+        newIncrement = Math.round(newIncrement * 2) / 2;
+
+        // Only update if the increment actually changed after clamping and rounding
+        if (newIncrement !== currentIncrement) {
+          // Update the config
+          const updatedIncrementValues = { ...config.incrementValues };
+          updatedIncrementValues[this.currentExercise] = newIncrement;
+
+          await this.configManager.saveToDB({
+            ...config,
+            incrementValues: updatedIncrementValues
+          });
+
+          console.log(`Adaptive increment tuning applied (${adjustmentType}): ${this.currentExercise} increment changed from ${currentIncrement} to ${newIncrement}`);
+          this.ui.showMessage(
+            `Increment auto-adjusted for ${this.currentExercise}: ${currentIncrement} → ${newIncrement} lbs (${adjustmentType})`,
+            'info'
+          );
+        } else {
+          console.log(`Adaptive increment tuning calculated but no change needed (already at ${adjustmentType} limit)`);
+        }
+      } else {
+        console.log('No adaptive increment adjustment needed based on recent performance');
+      }
+
+    } catch (error) {
+      console.error('Error in adaptive increment tuning:', error);
+      throw error;
+    }
   }
 
   async handleDeloadWeek(records) {
