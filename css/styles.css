@@ -664,6 +664,7 @@ form#converter-form {
   justify-content: center;
   margin-top: 10px;
   width: 100%;
+  align-items: baseline;
 }
 
 .button-row-horizontal button {
@@ -671,6 +672,9 @@ form#converter-form {
   max-width: 150px;
   padding: 12px 16px;
   font-size: 0.9rem;
+  line-height: 24px;
+  height: 48px;
+  box-sizing: border-box;
 }
 
 /* Special styling for history button icon */
@@ -678,8 +682,17 @@ form#converter-form {
   flex: 0 0 auto;
   max-width: 50px;
   min-width: 50px;
-  padding: 12px 8px;
-  font-size: 1.1rem;
+  padding: 12px 16px;
+  font-size: 0.9rem;
+  line-height: 24px;
+  height: 48px;
+  box-sizing: border-box;
+}
+
+.button-row-horizontal #view-history::before {
+  content: "🕘";
+  font-size: 0.9rem;
+  line-height: 24px;
 }
 
 .modal button {

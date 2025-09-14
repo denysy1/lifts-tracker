@@ -15,8 +15,8 @@ export const defaultConfig = {
   alternatives: {
     "Overhead Press": [{ name: "Dumbbell Overhead Press", scale: 0.8 }],
     "Bench Press": [
-      { name: "Incline Bench Press", scale: 0.9 },
-      { name: "Decline Bench Press", scale: 1.0 },
+      { name: "Incline Bench Press", scale: 0.8 },
+      { name: "Decline Bench Press", scale: 1.1 },
       { name: "Dumbbell Press", scale: 0.75 },
       { name: "Incline Dumbbell Press", scale: 0.7 }
     ],
@@ -38,10 +38,10 @@ export const defaultConfig = {
     "1rm_formula_k": 30,
     "toBenchFactors": {
       "bench_press": 1.0,
-      "incline_bench": 0.75,
+      "incline_bench": 0.8,
       "decline_bench": 1.05,
       "dumbbell_bench_press": 0.85,
-      "incline_dumbbell_bench_press": 0.80,
+      "incline_dumbbell_bench_press": 0.70,
       "dumbbell_fly": 0.50,
       "overhead_press": 0.65,
       "dumbbell_overhead_press": 0.60,
