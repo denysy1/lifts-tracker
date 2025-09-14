@@ -561,12 +561,8 @@ class LiftTracker {
 
   renderWorkoutDisplay(weights, reps, targetReps, cycle, week, isDeloadWeek) {
 
-    // Update deload notice
-    if (isDeloadWeek) {
-      this.ui.updateText("deloadNotice", "Deload Week: Reduced volume for recovery");
-    } else {
-      this.ui.updateText("deloadNotice", "");
-    }
+    // Clear the deload notice (we'll show it in the week display instead)
+    this.ui.updateText("deloadNotice", "");
 
     // Store original values for reset functionality
     this.originalPrescription = {
@@ -612,7 +608,14 @@ class LiftTracker {
 
     // Update display info
     this.ui.updateText("cycleNumber", cycle || "N/A");
-    this.ui.updateText("weekNumber", week || "N/A");
+
+    // Update week display with deload indicator
+    if (isDeloadWeek) {
+      this.ui.updateText("weekNumber", `4 - deload week`);
+    } else {
+      this.ui.updateText("weekNumber", week || "N/A");
+    }
+
     this.ui.updateText("blockType", this.blockType ?
       this.blockType.charAt(0).toUpperCase() + this.blockType.slice(1) : "N/A");
 
