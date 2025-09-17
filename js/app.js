@@ -408,15 +408,31 @@ class LiftTracker {
   }
 
   effectiveReps(actualReps, actualWeight, prescribedWeight) {
+
     if (actualWeight <= 0) return 0;
 
+    if (actualWeight === prescribedWeight) return actualReps;
+
+    let oneRM_actual;
+    let reps;
+
     const config = this.configManager.getAll();
-    const oneRM_actual = actualWeight / (config.oneRM_correction_factor * (1.0278 - 0.0278 * actualReps));
-    return (1.0278 - (prescribedWeight / oneRM_actual)) / 0.0278;
+
+    if (actualReps === 1) {
+      oneRM_actual = actualWeight;
+    } else if (actualReps <= 10) {
+      oneRM_actual = config.oneRM_correction_factor * actualWeight *(1 + actualReps/30);
+    } else {
+      oneRM_actual = config.oneRM_correction_factor * actualWeight * (actualReps ** 0.10);
+    }
+
+    reps =  30 * (1 / config.oneRM_correction_factor * oneRM_actual/prescribedWeight - 1);
+    return Math.max(0, reps);
   }
 
   convertToOriginalEquivalent(actualReps, actualWeight) {
     if (this.selectedAlternativeExercise && this.currentScaleFactor !== 1.0) {
+
       const originalEquivalentWeight = actualWeight / this.currentScaleFactor;
       const originalPrescribedWeight = this.getOriginalPrescribedWeight();
       const effectiveRepsValue = this.effectiveReps(actualReps, originalEquivalentWeight, originalPrescribedWeight);
@@ -651,6 +667,7 @@ class LiftTracker {
   async saveProgress() {
     const actualReps = parseInt(document.getElementById("amrap").value);
     const actualWeight = parseInt(document.getElementById("actualWeight").value);
+    console.log('1. actualWeight:', actualWeight, 'and actualReps:', actualReps);
 
     try {
       const records = await this.dbManager.getExerciseRecords(this.currentExercise);

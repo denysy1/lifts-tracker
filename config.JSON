@@ -22,7 +22,7 @@
     "2": 8,
     "3": 6
   },
-  "oneRM_correction_factor": 0.9,
+  "oneRM_correction_factor": 0.968,
   "deloadPercentage": 0.7,
   "disableLeaderBlock": true,
   "cyclesPerBlockType": {

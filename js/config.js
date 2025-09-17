@@ -38,7 +38,7 @@ export const defaultConfig = {
       { name: "Hex Bar Deadlift", scale: 1.09 }
     ]
   },
-  oneRM_correction_factor: 0.9,
+  oneRM_correction_factor: 0.968,
   deloadPercentage: 0.7,
   amrapProgressionThresholds: [10, 15, 20],
   amrapProgressionIncrementMultipliers: [1, 1, 1],
