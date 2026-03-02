@@ -865,13 +865,15 @@ form#converter-form {
   background-color: #218838;
 }
 
-/* Converter Button Styling */
-#converter-btn {
+/* Tool Section Button Styling */
+#converter-btn,
+#routine-btn {
   background-color: #17a2b8;
   margin-top: 10px;
 }
 
-#converter-btn:hover {
+#converter-btn:hover,
+#routine-btn:hover {
   background-color: #138496;
 }
 
@@ -1317,4 +1319,116 @@ form#converter-form {
     max-width: 120px;
     min-width: 90px;
   }
+}
+
+/* ============================================
+   ROUTINE MODAL STYLES
+   ============================================ */
+
+.routine-week-selector {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.routine-week-btn {
+  padding: 10px 24px;
+  font-size: 1rem;
+  font-weight: 600;
+  border: 2px solid #4da6ff;
+  background: transparent;
+  color: #4da6ff;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.routine-week-btn.active {
+  background: #4da6ff;
+  color: #1a1a1a;
+}
+
+.routine-week-btn:hover:not(.active) {
+  background: rgba(77, 166, 255, 0.15);
+}
+
+.routine-day-selector {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.routine-day-btn {
+  padding: 8px 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  border: 1px solid #555;
+  background: #2a2a2a;
+  color: #e0e0e0;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.routine-day-btn.active {
+  background: #3a3a3a;
+  border-color: #4da6ff;
+  color: #4da6ff;
+}
+
+.routine-day-btn:hover:not(.active) {
+  background: #333;
+}
+
+.routine-focus {
+  font-size: 0.85rem;
+  color: #888;
+  margin-bottom: 16px;
+  font-style: italic;
+}
+
+.routine-exercises {
+  text-align: left;
+  width: 100%;
+  max-width: 320px;
+  margin: 0 auto;
+}
+
+.routine-exercise-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  margin-bottom: 6px;
+  background: #2a2a2a;
+  border-radius: 6px;
+  border-left: 3px solid transparent;
+}
+
+.routine-exercise-item.main-lift {
+  background: linear-gradient(135deg, #2a3a4a 0%, #2a2a2a 100%);
+  border-left: 3px solid #4da6ff;
+}
+
+.routine-exercise-name {
+  font-weight: 500;
+  color: #e0e0e0;
+}
+
+.routine-exercise-item.main-lift .routine-exercise-name {
+  color: #4da6ff;
+  font-weight: 600;
+}
+
+.routine-exercise-sets {
+  font-size: 0.85rem;
+  color: #888;
+  font-family: 'SF Mono', 'Consolas', monospace;
+}
+
+.routine-exercise-item.main-lift .routine-exercise-sets {
+  color: #4da6ff;
+  font-weight: 600;
 }

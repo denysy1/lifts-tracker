@@ -82,12 +82,20 @@ class LiftTracker {
     document.getElementById("converter-btn").onclick = () => this.ui.openModal("converter-modal");
     document.querySelector(".close").onclick = () => this.ui.closeModal("converter-modal");
     document.getElementById("history-close").onclick = () => this.ui.closeModal("history-modal");
+
+    // Routine modal functionality
+    document.getElementById("routine-btn").onclick = () => this.openRoutineModal();
+    document.getElementById("routine-close").onclick = () => this.ui.closeModal("routine-modal");
+
     window.onclick = (event) => {
       if (event.target === document.getElementById("converter-modal")) {
         this.ui.closeModal("converter-modal");
       }
       if (event.target === document.getElementById("history-modal")) {
         this.ui.closeModal("history-modal");
+      }
+      if (event.target === document.getElementById("routine-modal")) {
+        this.ui.closeModal("routine-modal");
       }
     };
   }
@@ -260,6 +268,79 @@ class LiftTracker {
   clearConverterMessages() {
     this.ui.updateHTML('converter-result', '');
     this.ui.updateHTML('converter-error-message', '');
+  }
+
+  // ============================================
+  // ROUTINE MODAL METHODS
+  // ============================================
+
+  openRoutineModal() {
+    this.currentRoutineWeek = 'weekA';
+    this.currentRoutineDay = 'Monday';
+    this.setupRoutineModalListeners();
+    this.renderRoutine();
+    this.ui.openModal('routine-modal');
+  }
+
+  setupRoutineModalListeners() {
+    // Week selector buttons
+    document.querySelectorAll('.routine-week-btn').forEach(btn => {
+      btn.onclick = () => {
+        document.querySelectorAll('.routine-week-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        this.currentRoutineWeek = btn.dataset.week;
+        this.renderRoutine();
+      };
+    });
+
+    // Day selector buttons
+    document.querySelectorAll('.routine-day-btn').forEach(btn => {
+      btn.onclick = () => {
+        document.querySelectorAll('.routine-day-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        this.currentRoutineDay = btn.dataset.day;
+        this.renderRoutine();
+      };
+    });
+  }
+
+  renderRoutine() {
+    const routine = this.configManager.get('routine');
+    if (!routine) {
+      this.ui.updateHTML('routine-focus', 'No routine configured');
+      this.ui.updateHTML('routine-exercises', '');
+      return;
+    }
+
+    const weekData = routine[this.currentRoutineWeek];
+    if (!weekData) {
+      this.ui.updateHTML('routine-focus', 'Week not found');
+      this.ui.updateHTML('routine-exercises', '');
+      return;
+    }
+
+    const dayData = weekData[this.currentRoutineDay];
+    if (!dayData) {
+      this.ui.updateHTML('routine-focus', 'Day not found');
+      this.ui.updateHTML('routine-exercises', '');
+      return;
+    }
+
+    // Render focus header
+    this.ui.updateHTML('routine-focus', dayData.focus || '');
+
+    // Render exercise list
+    const exercisesHTML = dayData.exercises.map(exercise => {
+      const mainLiftClass = exercise.isMainLift ? 'main-lift' : '';
+      return `
+        <div class="routine-exercise-item ${mainLiftClass}">
+          <span class="routine-exercise-name">${exercise.name}</span>
+          <span class="routine-exercise-sets">${exercise.sets}</span>
+        </div>
+      `;
+    }).join('');
+
+    this.ui.updateHTML('routine-exercises', exercisesHTML);
   }
 
   toggleExerciseOptions() {
