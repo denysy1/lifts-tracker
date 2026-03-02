@@ -38,7 +38,78 @@ export const defaultConfig = {
       { name: "Hex Bar Deadlift", scale: 1.09 }
     ]
   },
-  routine: null,
+  routine: {
+    weekA: {
+      Monday: {
+        focus: "Upper - Bench Focus",
+        exercises: [
+          { name: "Bench Press", sets: "5/3/1", isMainLift: true },
+          { name: "Incline DB Press", sets: "4×8–12" },
+          { name: "Chest-supported Row", sets: "4×8–12" },
+          { name: "Chins", sets: "3×6–10" },
+          { name: "Cable Fly", sets: "3×12–15" },
+          { name: "Triceps", sets: "3×10–15" }
+        ]
+      },
+      Wednesday: {
+        focus: "Lower + Shoulders",
+        exercises: [
+          { name: "Deadlift", sets: "5/3/1", isMainLift: true },
+          { name: "RDL", sets: "3×8–10" },
+          { name: "Overhead Press", sets: "5/3/1", isMainLift: true },
+          { name: "Lateral Raise", sets: "4×12–20" },
+          { name: "Pulldown", sets: "4×8–12" },
+          { name: "Leg Curl", sets: "3×10–15" }
+        ]
+      },
+      Friday: {
+        focus: "Lower + Upper Volume",
+        exercises: [
+          { name: "Squat", sets: "5/3/1", isMainLift: true },
+          { name: "Leg Press", sets: "4×10–15" },
+          { name: "DB Bench", sets: "4×8–12" },
+          { name: "Machine Chest Press", sets: "3×10–15" },
+          { name: "Row", sets: "4×8–12" },
+          { name: "Curls", sets: "3×10–15" }
+        ]
+      }
+    },
+    weekB: {
+      Monday: {
+        focus: "Upper - Bench Focus",
+        exercises: [
+          { name: "Bench Press", sets: "5/3/1", isMainLift: true },
+          { name: "Flat DB Press", sets: "4×8–12" },
+          { name: "Weighted Dips", sets: "3×6–10" },
+          { name: "Barbell Row", sets: "4×8–12" },
+          { name: "Face Pull", sets: "3×15–20" },
+          { name: "Triceps Overhead Extension", sets: "3×10–15" }
+        ]
+      },
+      Wednesday: {
+        focus: "Lower + Shoulders",
+        exercises: [
+          { name: "Deadlift", sets: "5/3/1", isMainLift: true },
+          { name: "Hip Thrust", sets: "3×8–12" },
+          { name: "Overhead Press", sets: "5/3/1", isMainLift: true },
+          { name: "Cable Lateral Raise", sets: "4×12–20" },
+          { name: "Neutral Grip Pulldown", sets: "4×8–12" },
+          { name: "Seated Curl", sets: "3×10–15" }
+        ]
+      },
+      Friday: {
+        focus: "Lower + Upper Volume",
+        exercises: [
+          { name: "Squat", sets: "5/3/1", isMainLift: true },
+          { name: "Hack Squat", sets: "4×8–12" },
+          { name: "Incline Machine Press", sets: "4×8–12" },
+          { name: "Cable Fly (low-to-high)", sets: "3×12–15" },
+          { name: "Chest-supported Row", sets: "4×8–12" },
+          { name: "Curls", sets: "3×10–15" }
+        ]
+      }
+    }
+  },
   oneRM_correction_factor: 0.968,
   deloadPercentage: 0.7,
   amrapProgressionThresholds: [10, 15, 20],
