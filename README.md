@@ -8,6 +8,7 @@ Lifts Tracker is a Progressive Web App (PWA) designed to give you a flexible way
 - **Deload Scheduling**: Deload weeks are automatically triggered when performance metrics indicate a need for recovery.
 - **Leader and Anchor Blocks**: Implements the 5/3/1 Forever block programming for structured progression (this is turned off by default).
 - **Adaptive increment tuning**: each cycle the app looks back at your last N AMRAP results and can shrink or grow your base increment automatically
+- **Routine Viewer**: View your complete workout routine organized by week (A/B) and day, with main lifts highlighted.
 - **Data Backup & Restore**: Export your complete training history to a JSON file for safekeeping, and restore from backup when needed.
 - **Offline Functionality**: Works offline after installation and behaves like a native app.
 
@@ -53,3 +54,35 @@ Lifts Tracker allows users to fine-tune their training preferences by importing 
 1. Click the **Import Config** button in the app interface.
 2. Select a modified config.JSON file.
 3. The configuration will be saved and applied immediately in the current session.
+
+### Routine Viewer
+
+The app includes a **My Routine** feature to help you quickly reference your full workout routine during training sessions. Access it from the Tools page (swipe up from the main screen).
+
+#### Features:
+- **Week Selector**: Toggle between Week A and Week B for A/B style programming
+- **Day Selector**: Switch between Monday, Wednesday, and Friday workouts
+- **Main Lift Highlighting**: 5/3/1 lifts are visually distinguished from accessory work
+- **At-a-Glance View**: See all exercises and prescribed sets for each training day
+
+#### Customizing Your Routine
+The routine is stored in the `routine` section of the config.JSON file. You can customize it by modifying the structure:
+
+```json
+"routine": {
+  "weekA": {
+    "Monday": {
+      "focus": "Upper - Bench Focus",
+      "exercises": [
+        { "name": "Bench Press", "sets": "5/3/1", "isMainLift": true },
+        { "name": "Incline DB Press", "sets": "4×8–12" },
+        ...
+      ]
+    },
+    ...
+  },
+  "weekB": { ... }
+}
+```
+
+Set `isMainLift: true` on any exercise to highlight it as a primary lift.
